@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MaV Design System</title>
+<meta name="description" content="MaV — a token-driven, multi-theme design system. Foundations, components, and organisms for building e-banking apps.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/shared.css">
+<style>
+body { margin: 0; background: var(--mav-bg); color: var(--mav-fg); font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+/* top bar */
+.top { display: flex; align-items: center; gap: 12px; height: 64px; border-bottom: 1px solid var(--mav-border); position: sticky; top: 0; background: color-mix(in srgb, var(--mav-bg) 88%, transparent); backdrop-filter: blur(8px); z-index: 10; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; letter-spacing: -.01em; }
+.brand-mark { width: 30px; height: 30px; border-radius: 8px; background: var(--mav-primary); display: grid; place-items: center; }
+.brand-mark svg { fill: #fff; }
+[data-theme="dark"] .brand-mark svg { fill: #171717; }
+.top-spacer { flex: 1; }
+.theme-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; padding: 8px 12px; border-radius: 9px; border: 1px solid var(--mav-border); background: var(--mav-bg); color: var(--mav-fg); cursor: pointer; }
+
+/* hero */
+.hero { padding: 72px 0 48px; border-bottom: 1px solid var(--mav-border); }
+.eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: var(--mav-primary); background: var(--mav-primary-soft, #352eff1a); padding: 6px 12px; border-radius: 999px; margin-bottom: 20px; }
+.hero h1 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: clamp(34px, 6vw, 56px); font-weight: 800; letter-spacing: -.03em; line-height: 1.04; margin: 0 0 18px; max-width: 14ch; }
+.hero p { font-size: 17px; line-height: 1.6; color: var(--mav-muted); max-width: 56ch; margin: 0 0 28px; }
+.hero-cta { display: flex; flex-wrap: wrap; gap: 12px; }
+.btn { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; padding: 12px 20px; border-radius: 10px; text-decoration: none; }
+.btn-primary { background: var(--mav-primary); color: var(--mav-on-primary, #fff); }
+[data-theme="dark"] .btn-primary { color: #171717; }
+.btn-ghost { border: 1px solid var(--mav-border); color: var(--mav-fg); }
+.hero-stats { display: flex; gap: 32px; margin-top: 40px; flex-wrap: wrap; }
+.stat b { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 30px; font-weight: 800; display: block; letter-spacing: -.02em; }
+.stat span { font-size: 13px; color: var(--mav-muted); }
+
+/* sections */
+section { padding: 48px 0; border-bottom: 1px solid var(--mav-border); }
+.sec-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 24px; gap: 16px; flex-wrap: wrap; }
+.sec-head h2 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 24px; font-weight: 700; margin: 0; letter-spacing: -.02em; }
+.sec-head .count { font-size: 13px; color: var(--mav-muted); }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+.card { display: flex; align-items: center; gap: 12px; padding: 16px; border: 1px solid var(--mav-border); border-radius: 14px; text-decoration: none; color: var(--mav-fg); background: var(--mav-bg); transition: border-color .15s, transform .15s, box-shadow .15s; }
+.card:hover { border-color: var(--mav-primary); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.06); }
+.card-ic { width: 38px; height: 38px; border-radius: 10px; background: var(--mav-primary-soft, #352eff1a); color: var(--mav-primary); display: grid; place-items: center; flex-shrink: 0; }
+.card-ic svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.card-t { font-size: 14px; font-weight: 600; display: block; }
+.card-s { font-size: 12px; color: var(--mav-muted); display: block; margin-top: 2px; }
+.card.feature { background: var(--mav-primary); border-color: var(--mav-primary); color: var(--mav-on-primary, #fff); }
+[data-theme="dark"] .card.feature { color: #171717; }
+.card.feature .card-ic { background: rgba(255,255,255,.2); color: inherit; }
+[data-theme="dark"] .card.feature .card-ic { background: rgba(0,0,0,.15); }
+.card.feature .card-s { color: inherit; opacity: .8; }
+
+footer { padding: 40px 0 64px; color: var(--mav-muted); font-size: 13px; }
+footer a { color: var(--mav-primary); text-decoration: none; }
+</style>
+</head>
+<body>
+  <div class="top">
+    <div class="wrap" style="display:flex;align-items:center;width:100%">
+      <a class="brand" href="index.html" style="text-decoration:none;color:inherit">
+        <span class="brand-mark"><svg width="16" height="16" viewBox="0 0 14 14"><rect x="1" y="1" width="5" height="5" rx="1"/><rect x="8" y="1" width="5" height="5" rx="1"/><rect x="1" y="8" width="5" height="5" rx="1"/><rect x="8" y="8" width="5" height="5" rx="1" opacity=".4"/></svg></span>
+        MaV Design System
+      </a>
+      <span class="top-spacer"></span>
+      <button class="theme-btn" data-theme-toggle><span data-theme-icon>☾</span> <span data-theme-label>Dark mode</span></button>
+    </div>
+  </div>
+
+  <header class="hero"><div class="wrap">
+    <span class="eyebrow">✦ Token-driven · Multi-theme</span>
+    <h1>The MaV design system.</h1>
+    <p>A token-driven, multi-theme foundation for building e-banking apps — every color, font, and radius routes through swappable role tokens, so the whole system re-themes (blue → lime in dark) from one source of truth.</p>
+    <div class="hero-cta">
+      <a class="btn btn-primary" href="components/buttons.html">Explore components →</a>
+      <a class="btn btn-ghost" href="customiser.html">✦ Live Customiser</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><b>6</b><span>Foundations</span></div>
+      <div class="stat"><b>23</b><span>Components</span></div>
+      <div class="stat"><b>4</b><span>Organisms</span></div>
+      <div class="stat"><b>820+</b><span>Design tokens</span></div>
+    </div>
+  </div></header>
+
+  <div class="wrap" id="sections"></div>
+
+  <div class="wrap"><footer>
+    MaV Design System — built from Figma “Modular App Visualizer”. Open the <a href="customiser.html">Live Customiser</a> to retheme everything in real time.
+  </footer></div>
+
+  <script src="js/theme.js"></script>
+  <script>
+  /* Build the category grids from a small manifest (icons are Lucide-style). */
+  var IC = {
+    palette:'<path d="M12 3s6 6 6 10a6 6 0 0 1-12 0c0-4 6-10 6-10z"/>', type:'<path d="M5 6h14"/><path d="M12 6v13"/>',
+    ruler:'<rect x="3" y="8" width="18" height="8" rx="1"/><path d="M7 8v3M11 8v3M15 8v3"/>', sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.4 1.4M17.6 17.6 19 19M19 5l-1.4 1.4M6.4 17.6 5 19"/>',
+    moon:'<path d="M20 14a8 8 0 0 1-10-10 8 8 0 1 0 10 10z"/>', layers:'<path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/>',
+    login:'<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/>', shield:'<path d="M12 3l7 3v6c0 5-3.5 8-7 9-3.5-1-7-4-7-9V6z"/><path d="M9 12l2 2 4-4"/>',
+    users:'<circle cx="9" cy="9" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M16 6.5a3 3 0 0 1 0 6"/>', dollar:'<circle cx="12" cy="12" r="9"/><path d="M12 7v10"/><path d="M14.5 9.3C14 8.5 13 8 12 8c-1.4 0-2.5.8-2.5 1.9 0 2.4 5 1.2 5 3.7 0 1.1-1.1 1.9-2.5 1.9"/>',
+    square:'<rect x="4" y="7" width="16" height="10" rx="2"/>', input:'<rect x="3" y="8" width="18" height="8" rx="2"/><path d="M7 11v2"/>', otp:'<rect x="3" y="9" width="4" height="6" rx="1"/><rect x="10" y="9" width="4" height="6" rx="1"/><rect x="17" y="9" width="4" height="6" rx="1"/>',
+    check:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 12l3 3 5-6"/>', bell:'<path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M10.5 21a2 2 0 0 0 3 0"/>', message:'<path d="M4 5h16v11H8l-4 3z"/>',
+    tag:'<path d="M3 12V4h8l9 9-8 8z"/><circle cx="8" cy="8" r="1.2"/>', avatar:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="10" r="3"/><path d="M6.3 18.5a6 6 0 0 1 11.4 0"/>', card:'<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/>',
+    list:'<path d="M8 6h12M8 12h12M8 18h12"/><path d="M4 6h.01M4 12h.01M4 18h.01"/>', compass:'<circle cx="12" cy="12" r="9"/><path d="M15 9l-2 5-4 1 2-5z"/>', paneltop:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18"/>',
+    panelbot:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 15h18"/>', tabs:'<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/><path d="M9 6v4M15 6v4"/>', chat:'<path d="M21 11.5a8 8 0 0 1-11.8 7L3 21l2.5-6.2A8 8 0 1 1 21 11.5z"/>',
+    messages:'<path d="M4 6h11v7H8l-4 3z"/><path d="M9 6V4h11v8h-3"/>', chart:'<path d="M5 20V12M10 20V6M15 20v-8M20 20V9"/><path d="M3 20h18"/>', wallet:'<path d="M3 7a2 2 0 0 1 2-2h11v3"/><rect x="3" y="7" width="18" height="12" rx="2"/><circle cx="17" cy="13" r="1.3"/>',
+    minus:'<path d="M4 12h16"/>', progress:'<rect x="3" y="10" width="18" height="4" rx="2"/><path d="M3 12h9"/>', loader:'<path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/>',
+    help:'<circle cx="12" cy="12" r="9"/><path d="M9.6 9.5a2.5 2.5 0 0 1 4.6 1.4c0 1.6-2.2 2-2.2 3.1"/><path d="M12 17h.01"/>', grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+    code:'<path d="M9 8l-4 4 4 4"/><path d="M15 8l4 4-4 4"/>', book:'<path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2z"/><path d="M5 16h13"/>'
+  };
+  var SECTIONS = [
+    { title: 'Organisms', feature: true, items: [
+      ['components/auth.html','Sign In / Sign Up','Full auth screens','login'],
+      ['components/auth-otp.html','OTP Verification','6-digit verify flow','shield'],
+      ['components/select-account.html','Select Account','Source-of-funds list','users'],
+      ['components/input-amount.html','Input Amount','Enter & confirm amount','dollar'] ] },
+    { title: 'Components', items: [
+      ['components/buttons.html','Buttons','square'],['components/inputs.html','Input Fields','input'],['components/otp.html','OTP Input','otp'],
+      ['components/forms.html','Forms & Controls','check'],['components/feedback.html','Alerts & Toasts','bell'],['components/toast.html','Toast','message'],
+      ['components/badges.html','Badges & Chips','tag'],['components/avatars.html','Avatars','avatar'],['components/cards.html','Payment Cards','card'],
+      ['components/list.html','List','list'],['components/navigation.html','Navigation','compass'],['components/app-bar.html','Header / App Bar','paneltop'],
+      ['components/button-dock.html','Button Dock','panelbot'],['components/tabs.html','Tabs','tabs'],['components/chat.html','Chat Bubbles','chat'],
+      ['components/message-chat.html','Message Chat','messages'],['components/finance.html','Finance Modules','chart'],['components/balance.html','Balance & Number','wallet'],
+      ['components/divider.html','Divider','minus'],['components/progress.html','Progress Bar','progress'],['components/loader.html','Loader','loader'],
+      ['components/coachmark.html','Coachmark','help'],['components/all.html','Kitchen Sink','grid'] ] },
+    { title: 'Foundations', items: [
+      ['foundations/colors.html','Color System','palette'],['foundations/typography.html','Typography','type'],['foundations/spacing.html','Spacing & Layout','ruler'],
+      ['foundations/effects.html','Shadows & Effects','sun'],['foundations/dark-mode.html','Dark Mode','moon'],['foundations/tokens.html','Token Architecture','layers'] ] },
+    { title: 'Developer Reference', items: [
+      ['dev/css-variables.html','CSS Variables','code'],['dev/token-architecture.html','Token Deep-Dive','layers'],['dev/otp-spec.html','OTP Spec','otp'],
+      ['dev/accessibility.html','Accessibility','book'],['dev/grid-breakpoints.html','Grid & Breakpoints','ruler'] ] }
+  ];
+  function icon(k){ return '<svg viewBox="0 0 24 24">'+(IC[k]||IC.grid)+'</svg>'; }
+  var html = '';
+  SECTIONS.forEach(function(sec){
+    html += '<section><div class="sec-head"><h2>'+sec.title+'</h2><span class="count">'+sec.items.length+' items</span></div><div class="grid">';
+    sec.items.forEach(function(it){
+      var href=it[0], title=it[1];
+      if (sec.feature){ var sub=it[2], ic=it[3];
+        html += '<a class="card feature" href="'+href+'"><span class="card-ic">'+icon(ic)+'</span><span><span class="card-t">'+title+'</span><span class="card-s">'+sub+'</span></span></a>';
+      } else { var ic2=it[2];
+        html += '<a class="card" href="'+href+'"><span class="card-ic">'+icon(ic2)+'</span><span class="card-t">'+title+'</span></a>';
+      }
+    });
+    html += '</div></section>';
+  });
+  document.getElementById('sections').innerHTML = html;
+  </script>
+</body>
+</html>
