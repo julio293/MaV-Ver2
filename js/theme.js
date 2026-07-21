@@ -185,7 +185,15 @@
     });
   }
 
+  var _themeAnimT;
   function toggleTheme() {
+    /* cross-fade the whole page on manual toggle (not on initial load) */
+    var root = document.documentElement;
+    if (!window.matchMedia || !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      root.classList.add('theme-anim');
+      clearTimeout(_themeAnimT);
+      _themeAnimT = setTimeout(function () { root.classList.remove('theme-anim'); }, 420);
+    }
     applyTheme(getTheme() === 'dark' ? 'light' : 'dark');
   }
 

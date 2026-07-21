@@ -433,3 +433,64 @@ body {
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--mav-border); border-radius: 9999px; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MOTION LAYER — global microanimations, applied to every page.
+   Smooth + clean: responsive interactive feedback, a soft content reveal,
+   and a whole-page cross-fade when switching light/dark.
+   All gated behind prefers-reduced-motion.
+   ═══════════════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: no-preference) {
+
+  /* interactive feedback on primitives that don't already define their own */
+  button, a, summary, [role="button"],
+  input, select, textarea,
+  .swatch, .token-swatch, .token-swatch-sm,
+  .sidebar-link, .theme-btn {
+    transition: background-color .18s ease, border-color .18s ease,
+                color .18s ease, box-shadow .2s ease, transform .12s ease, opacity .18s ease;
+  }
+
+  /* universal, subtle press — component-specific rules (bigger scales) still win */
+  button:not(:disabled):active,
+  [role="button"]:active { transform: scale(.97); }
+
+  /* the docs theme toggle + back link get a gentle lift */
+  .theme-btn:hover, .topbar-back:hover { transform: translateY(-1px); }
+
+  /* demo cards: soft reveal on load + hover elevation */
+  .preview-card {
+    animation: mav-rise .5s cubic-bezier(.22, .9, .3, 1) both;
+    transition: box-shadow .25s ease, border-color .2s ease;
+  }
+  .preview-card:hover { box-shadow: 0 10px 34px rgba(0, 0, 0, .07); }
+  .section:nth-of-type(2) .preview-card { animation-delay: .04s; }
+  .section:nth-of-type(3) .preview-card { animation-delay: .08s; }
+  .section:nth-of-type(4) .preview-card { animation-delay: .12s; }
+
+  /* token table rows wake up on hover */
+  .token-table tbody tr { transition: background-color .15s ease; }
+  .token-table tbody tr:hover { background: var(--mav-bg-secondary); }
+
+  @keyframes mav-rise {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: none; }
+  }
+}
+
+/* Whole-page cross-fade when toggling light/dark (added briefly by theme.js) */
+html.theme-anim,
+html.theme-anim *:not(svg):not(path):not(.dp-ind):not(.pg-ind) {
+  transition: background-color .38s ease, color .38s ease,
+              border-color .38s ease, fill .38s ease, stroke .38s ease, box-shadow .38s ease !important;
+}
+
+/* Respect users who prefer less motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
