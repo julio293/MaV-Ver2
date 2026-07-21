@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chart — MaV Design System</title>
+<link rel="stylesheet" href="../css/tokens.css">
+<link rel="stylesheet" href="../css/shared.css">
+<style>
+/* ══ Chart — Figma "• Chart" (240:2719) ═════════════════════════════════════
+   A transaction line chart card: a bold "Transaction" title, a type dropdown,
+   a smooth spline over Sun–Thu with a gradient area fill, dashed value guides,
+   haloed data points and value labels. Four transaction types —
+   Loss (Expenses · red), Earn (Earnings · green), Flat (level · brand) and
+   None (empty). The line colour routes through the --Line-Chart/* tokens, so
+   the brand variant re-themes blue → lime in dark.
+
+   Motion: on reveal the spline draws itself in (dash-offset), the area lifts &
+   fades up, points pop in and value labels rise — all staggered and eased. The
+   interactive card morphs smoothly between types: the spline tweens point by
+   point, the numbers count, and the colour cross-fades. Points lift on hover.
+   Everything is gated behind prefers-reduced-motion. */
+
+.chart{font-family:'Plus Jakarta Sans',sans-serif}
+
+/* card */
+.chart-card{position:relative;width:100%;max-width:362px;box-sizing:border-box;
+  background:var(--background\/bg-default,#fff);border:1px solid var(--border\/subtle,#efefef);
+  border-radius:24px;padding:24px 0 8px;overflow:hidden;color:var(--Line-Chart\/line-gain,#629c28);
+  transition:color .55s ease,border-color .3s ease,box-shadow .3s ease}
+[data-theme=dark] .chart-card{background:var(--mav-bg,#171717);border-color:var(--mav-border,#2a2a2a)}
+.chart--loss {color:var(--Line-Chart\/line-loss,#ff0000)}
+.chart--gain {color:var(--Line-Chart\/line-gain,#629c28)}
+.chart--brand{color:var(--Line-Chart\/line-brand,#352eff)}
+
+/* head */
+.chart-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 16px;margin-bottom:22px}
+.chart-title{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em;color:var(--main-text\/default,#171717)}
+[data-theme=dark] .chart-title{color:var(--mav-fg,#f2f2f2)}
+.chart-drop{display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 12px;box-sizing:border-box;
+  border:1px solid var(--btn\/secondary\/default-outline,#efefef);border-radius:var(--border\/border-radius\/sm,6px);
+  background:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:500;font-size:14px;
+  color:var(--main-text\/default,#171717);white-space:nowrap;transition:border-color .2s ease,transform .12s ease,background-color .2s ease}
+[data-theme=dark] .chart-drop{color:var(--mav-fg,#f2f2f2);border-color:var(--mav-border,#333)}
+.chart-drop svg{width:18px;height:18px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;transition:transform .3s cubic-bezier(.34,1.1,.35,1)}
+.chart-card[data-interactive] .chart-drop:hover{border-color:var(--Line-Chart\/line-brand,#352eff)}
+.chart-card[data-interactive] .chart-drop:hover svg{transform:translateY(2px)}
+.chart-drop:active{transform:scale(.96)}
+
+/* plot */
+.chart-plot{position:relative;padding:0 16px}
+.chart-svg{display:block;width:100%;height:auto;overflow:visible}
+
+.chart-line{fill:none;stroke:currentColor;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round;
+  filter:drop-shadow(0 4px 6px color-mix(in srgb,currentColor 26%,transparent))}
+.chart-area{stroke:none}
+.chart-guide{stroke:var(--Line-Chart\/Natural,#d9d9d9);stroke-width:1.4;stroke-dasharray:2 4;stroke-linecap:round}
+[data-theme=dark] .chart-guide{stroke:#4a4a4a}
+.chart-base{stroke:var(--Line-Chart\/Natural,#d9d9d9);stroke-width:1.4;opacity:.35}
+[data-theme=dark] .chart-base{stroke:#3a3a3a}
+.chart-halo{fill:var(--background\/bg-default,#fff)}
+[data-theme=dark] .chart-halo{fill:var(--mav-bg,#171717)}
+.chart-dot{fill:currentColor}
+.chart-val{font-family:'Plus Jakarta Sans',sans-serif;font-weight:500;font-size:10px;text-anchor:middle;
+  fill:var(--main-text\/default,#171717)}
+[data-theme=dark] .chart-val{fill:var(--mav-fg,#f2f2f2)}
+.chart-day{font-family:'Inter',sans-serif;font-weight:400;font-size:11px;text-anchor:middle;
+  fill:var(--main-text\/default,#171717);opacity:.4}
+[data-theme=dark] .chart-day{fill:var(--mav-fg,#f2f2f2);opacity:.45}
+
+/* per-point group — hover lift (interactive) */
+.chart-pt{transform-box:fill-box}
+.chart-card[data-interactive] .chart-pt{cursor:pointer}
+.chart-card[data-interactive] .chart-pt .chart-dot,
+.chart-card[data-interactive] .chart-pt .chart-halo{transition:r .22s cubic-bezier(.34,1.4,.4,1)}
+.chart-card[data-interactive] .chart-pt:hover .chart-dot{r:5.4}
+.chart-card[data-interactive] .chart-pt:hover .chart-halo{r:8.6}
+.chart-card[data-interactive] .chart-pt:hover .chart-guide{opacity:.9;stroke-dasharray:none}
+.chart-card[data-interactive] .chart-pt:hover .chart-val{font-weight:700}
+
+/* empty state */
+.chart-svg .chart-data{transition:opacity .4s ease}
+.chart-svg.is-empty .chart-data{opacity:0;pointer-events:none}
+.chart-empty{font-family:'Inter',sans-serif;font-size:12px;text-anchor:middle;fill:var(--main-text\/default,#171717);
+  opacity:0;transition:opacity .4s ease .1s}
+.chart-svg.is-empty .chart-empty{opacity:.35}
+
+/* ── reveal animation (draw-in) — gated behind reduced-motion ─────────────── */
+@media (prefers-reduced-motion: no-preference){
+  .chart-line{stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1.15s cubic-bezier(.45,.05,.15,1)}
+  .chart-svg.in .chart-line{stroke-dashoffset:0}
+  .chart-area{opacity:0;transform:translateY(10px);transition:opacity .8s ease .12s,transform .85s cubic-bezier(.34,1.05,.35,1) .12s}
+  .chart-svg.in .chart-area{opacity:1;transform:none}
+  .chart-guide{opacity:0;transition:opacity .55s ease}
+  .chart-svg.in .chart-guide{opacity:.6}
+  .chart-dot-g{opacity:0;transform:scale(0);transform-box:fill-box;transform-origin:center;
+    transition:transform .5s cubic-bezier(.34,1.5,.45,1),opacity .3s ease}
+  .chart-svg.in .chart-dot-g{opacity:1;transform:scale(1)}
+  .chart-val{opacity:0;transform:translateY(9px);transition:opacity .45s ease,transform .55s cubic-bezier(.34,1.25,.4,1)}
+  .chart-svg.in .chart-val{opacity:1;transform:none}
+}
+
+/* stage */
+.chart-stage{background:var(--mav-surface,#f5f5f5);border-radius:16px;padding:36px 28px;display:flex;flex-wrap:wrap;gap:24px;justify-content:center}
+.chart-cell{display:flex;flex-direction:column;gap:12px;align-items:center}
+.chart-tag{font-size:11px;color:var(--mav-muted);font-family:'Inter',sans-serif}
+.chart-solo{display:flex;justify-content:center}
+.chart-hint{margin-top:16px;font-size:12px;color:var(--mav-muted);font-family:'Inter',sans-serif;text-align:center}
+.chart-replay{display:inline-flex;align-items:center;gap:7px;margin-left:6px;padding:5px 12px;border-radius:999px;
+  border:1px solid var(--mav-border,#e5e5e5);background:var(--mav-bg,#fff);color:var(--main-text\/default,#171717);
+  font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:border-color .2s,transform .12s}
+[data-theme=dark] .chart-replay{color:var(--mav-fg);background:transparent}
+.chart-replay:hover{border-color:var(--Line-Chart\/line-brand,#352eff)}
+.chart-replay:active{transform:scale(.95)}
+.chart-replay svg{width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.canvas-dark{background:var(--main\/white,#171717);border-radius:16px;padding:36px 28px;display:flex;flex-wrap:wrap;gap:24px;justify-content:center}
+.canvas-dark .chart-tag{color:#9a9a9a}
+</style>
+</head>
+<body>
+<div class="doc-layout">
+<nav class="doc-sidebar"></nav>
+<main class="doc-main">
+  <div class="topbar">
+    <a href="../index.html" class="topbar-back">← MaV</a>
+    <span>/</span>
+    <span class="topbar-title">Chart</span>
+    <div class="topbar-spacer"></div>
+    <button class="theme-btn" data-theme-toggle><span data-theme-icon>☾</span> <span data-theme-label>Dark mode</span></button>
+  </div>
+
+  <div class="page-header">
+    <div class="page-breadcrumb"><a href="../index.html">MaV</a> / Components</div>
+    <h1 class="page-title">Chart</h1>
+    <p class="page-desc">A transaction line chart — a bold title, a type dropdown, and a smooth spline over Sun–Thu with a gradient area fill, dashed value guides, haloed data points and value labels. Four types: <strong>Loss</strong> (Expenses · red), <strong>Earn</strong> (Earnings · green), <strong>Flat</strong> (a level line · brand) and <strong>None</strong> (empty). The line colour routes through the <code>--Line-Chart/*</code> tokens, so the brand variant re-themes blue → lime in dark.</p>
+  </div>
+
+  <!-- Interactive -->
+  <div class="section">
+    <h2 class="section-title">Interactive <span class="section-badge">try it</span></h2>
+    <p class="section-desc">Tap the dropdown to cycle the type — <strong>Expenses → Earnings → Flat → None</strong>. The spline morphs point by point, the values count to their new figures, and the colour cross-fades; the flat line settles level. Hover a point to lift it.</p>
+    <div class="preview-card">
+      <div class="preview-canvas">
+        <div class="chart-solo" style="flex-direction:column;align-items:center">
+          <div class="chart"><div class="chart-card" data-type="expenses" data-interactive></div></div>
+          <div class="chart-hint">
+            Tap <strong>Expenses ▾</strong> to cycle types
+            <button class="chart-replay" data-replay><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg> Replay</button>
+          </div>
+        </div>
+      </div>
+      <div class="preview-meta"><span class="preview-label">Cycling type · morphing spline · counting values · hover-to-lift points</span><span class="preview-sublabel">--Line-Chart/line-* · --Line-Chart/gradient-* · morph .75s ease</span></div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- Variations -->
+  <div class="section">
+    <h2 class="section-title">Types</h2>
+    <p class="section-desc">Loss, Earn, Flat and None. Each draws itself in on reveal — the spline traces, the area lifts, points pop and labels rise.</p>
+    <div class="preview-card">
+      <div class="preview-canvas">
+        <div class="chart-stage">
+          <div class="chart-cell"><span class="chart-tag">Loss · Expenses</span><div class="chart"><div class="chart-card" data-type="expenses"></div></div></div>
+          <div class="chart-cell"><span class="chart-tag">Earn · Earnings</span><div class="chart"><div class="chart-card" data-type="earnings"></div></div></div>
+          <div class="chart-cell"><span class="chart-tag">Flat</span><div class="chart"><div class="chart-card" data-type="flat"></div></div></div>
+          <div class="chart-cell"><span class="chart-tag">None</span><div class="chart"><div class="chart-card" data-type="none"></div></div></div>
+        </div>
+      </div>
+      <div class="preview-meta"><span class="preview-label">transaction = Loss · Earn · Flat · None</span></div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- Dark -->
+  <div class="section">
+    <h2 class="section-title">In dark</h2>
+    <p class="section-desc">Loss and Earn keep their red/green semantics; the brand-toned Flat line re-themes to lime. The area gradient follows the line colour, and the point halos sit on the dark surface.</p>
+    <div class="preview-card">
+      <div class="preview-canvas">
+        <div class="canvas-dark" data-theme="dark">
+          <div class="chart-cell"><span class="chart-tag">Earn</span><div class="chart"><div class="chart-card" data-type="earnings"></div></div></div>
+          <div class="chart-cell"><span class="chart-tag">Flat → lime</span><div class="chart"><div class="chart-card" data-type="flat"></div></div></div>
+        </div>
+      </div>
+      <div class="preview-meta"><span class="preview-label">Dark — brand line → lime, halos on dark surface</span></div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- Token reference -->
+  <div class="section">
+    <h2 class="section-title">Token Reference</h2>
+    <table class="token-table">
+      <thead><tr><th>Token</th><th>Value</th><th>Usage</th></tr></thead>
+      <tbody>
+        <tr><td class="token-name">--Line-Chart/line-loss</td><td><span class="token-swatch-sm" style="background:#ff0000"></span><span class="token-value">#ff0000</span></td><td class="token-value">Loss (Expenses) spline &amp; points</td></tr>
+        <tr><td class="token-name">--Line-Chart/line-gain</td><td><span class="token-swatch-sm" style="background:#629c28"></span><span class="token-value">#629c28</span></td><td class="token-value">Earn (Earnings) spline &amp; points</td></tr>
+        <tr><td class="token-name">--Line-Chart/line-brand</td><td><span class="token-swatch-sm" style="background:#352eff"></span><span class="token-value">#352eff → #a1ff5b</span></td><td class="token-value">Flat spline (→ lime in dark)</td></tr>
+        <tr><td class="token-name">--Line-Chart/gradient-*</td><td><span class="token-value">colour · 10%</span></td><td class="token-value">Area fill under the spline</td></tr>
+        <tr><td class="token-name">--Line-Chart/Natural</td><td><span class="token-swatch-sm" style="background:#d9d9d9;border:1px solid #cfcfcf"></span><span class="token-value">#d9d9d9</span></td><td class="token-value">Dashed value guides · baseline</td></tr>
+        <tr><td class="token-name">--main-text/default</td><td><span class="token-swatch-sm" style="background:#171717"></span><span class="token-value">#171717</span></td><td class="token-value">Title · value &amp; day labels</td></tr>
+        <tr><td class="token-name">--border/subtle</td><td><span class="token-swatch-sm" style="background:#efefef;border:1px solid #d0d0d0"></span><span class="token-value">#efefef</span></td><td class="token-value">Card border · dropdown outline</td></tr>
+        <tr><td class="token-name">Motion</td><td><span class="token-value">1.15s draw · .75s morph</span></td><td class="token-value">cubic-bezier draw-in &amp; type morph</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</main>
+</div>
+
+<script>
+(function () {
+  var DAYS = ['Sun','Mon','Tue','Wed','Thu'];
+  var XS   = [16, 93, 170, 247, 324];
+  var Y_TOP = 44, Y_BOT = 150, DOMAIN = 70, BASE = 178, DAY_Y = 195;
+
+  var DATA = {
+    expenses: { label:'Expenses', kind:'loss',  vals:[57.89, 26.01, 45.90, 37.00, 20.67] },
+    earnings: { label:'Earnings', kind:'gain',  vals:[20.67, 37.00, 45.90, 26.01, 57.89] },
+    flat:     { label:'Earnings', kind:'brand', vals:[20.67, 20.67, 20.67, 20.67, 20.67] },
+    none:     { label:'Earnings', kind:'brand', vals:[] }
+  };
+  var CYCLE = ['expenses','earnings','flat','none'];
+
+  var SVGNS = 'http://www.w3.org/2000/svg';
+  var uid = 0;
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function el(tag, attrs) {
+    var n = document.createElementNS(SVGNS, tag);
+    for (var k in attrs) n.setAttribute(k, attrs[k]);
+    return n;
+  }
+  function yOf(v) { return Y_BOT - (v / DOMAIN) * (Y_BOT - Y_TOP); }
+  function fmt(v) { return '$' + v.toFixed(2); }
+  function easeInOut(t) { return t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2; }
+
+  /* Catmull-Rom → cubic bézier smooth spline */
+  function spline(pts) {
+    if (!pts.length) return '';
+    var d = 'M ' + pts[0].x + ' ' + pts[0].y;
+    for (var i = 0; i < pts.length - 1; i++) {
+      var p0 = pts[i-1] || pts[i], p1 = pts[i], p2 = pts[i+1], p3 = pts[i+2] || pts[i+1];
+      var c1x = p1.x + (p2.x - p0.x) / 6, c1y = p1.y + (p2.y - p0.y) / 6;
+      var c2x = p2.x - (p3.x - p1.x) / 6, c2y = p2.y - (p3.y - p1.y) / 6;
+      d += ' C ' + c1x + ' ' + c1y + ', ' + c2x + ' ' + c2y + ', ' + p2.x + ' ' + p2.y;
+    }
+    return d;
+  }
+  function ptsOf(vals) { return vals.map(function (v, i) { return { x: XS[i], y: yOf(v) }; }); }
+  function areaD(pts) { return spline(pts) + ' L ' + pts[pts.length-1].x + ' ' + BASE + ' L ' + pts[0].x + ' ' + BASE + ' Z'; }
+
+  var chevron = '<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>';
+
+  function build(card) {
+    var startKey = card.dataset.type || 'expenses';
+    var interactive = card.hasAttribute('data-interactive');
+    var gid = 'chartGrad' + (++uid);
+
+    /* head */
+    var head = document.createElement('div'); head.className = 'chart-head';
+    var h = document.createElement('h3'); h.className = 'chart-title'; h.textContent = 'Transaction';
+    var drop = document.createElement('button'); drop.className = 'chart-drop'; drop.type = 'button';
+    var dlabel = document.createElement('span'); dlabel.textContent = DATA[startKey].label;
+    drop.appendChild(dlabel); drop.insertAdjacentHTML('beforeend', chevron);
+    head.appendChild(h); head.appendChild(drop);
+
+    /* svg */
+    var plot = document.createElement('div'); plot.className = 'chart-plot';
+    var svg = el('svg', { class:'chart-svg', viewBox:'0 0 340 208' });
+
+    // gradient
+    var defs = el('defs');
+    var grad = el('linearGradient', { id:gid, x1:'0', y1:'0', x2:'0', y2:'1' });
+    grad.appendChild(el('stop', { offset:'0',  'stop-color':'currentColor', 'stop-opacity':'0.30' }));
+    grad.appendChild(el('stop', { offset:'0.55','stop-color':'currentColor', 'stop-opacity':'0.10' }));
+    grad.appendChild(el('stop', { offset:'1',  'stop-color':'currentColor', 'stop-opacity':'0' }));
+    defs.appendChild(grad); svg.appendChild(defs);
+
+    // baseline axis
+    svg.appendChild(el('line', { class:'chart-base', x1:XS[0]-2, y1:BASE, x2:XS[4]+2, y2:BASE }));
+
+    // data layer (guides, area, line, points) — everything that hides in "None"
+    var dataG = el('g', { class:'chart-data' });
+
+    var guides = [];
+    for (var i = 0; i < 5; i++) {
+      var g = el('line', { class:'chart-guide', x1:XS[i], x2:XS[i], y1:0, y2:BASE });
+      dataG.appendChild(g); guides.push(g);
+    }
+    var area = el('path', { class:'chart-area', fill:'url(#' + gid + ')' });
+    var line = el('path', { class:'chart-line', pathLength:'1' });
+    dataG.appendChild(area); dataG.appendChild(line);
+
+    var dots = [], halos = [], vals = [], groups = [];
+    for (i = 0; i < 5; i++) {
+      var pt = el('g', { class:'chart-pt' });
+      var gg = el('g', { class:'chart-dot-g' });
+      var halo = el('circle', { class:'chart-halo', r:'6' });
+      var dot  = el('circle', { class:'chart-dot',  r:'3.6' });
+      gg.appendChild(halo); gg.appendChild(dot);
+      var vt = el('text', { class:'chart-val' });
+      pt.appendChild(gg); pt.appendChild(vt);
+      dataG.appendChild(pt);
+      halos.push(halo); dots.push(dot); vals.push(vt); groups.push(gg);
+    }
+    svg.appendChild(dataG);
+
+    // day labels + empty caption
+    for (i = 0; i < 5; i++) {
+      var day = el('text', { class:'chart-day', x:XS[i], y:DAY_Y }); day.textContent = DAYS[i];
+      svg.appendChild(day);
+    }
+    var empty = el('text', { class:'chart-empty', x:170, y:yOf(30) }); empty.textContent = 'No transactions yet';
+    svg.appendChild(empty);
+
+    plot.appendChild(svg);
+    card.appendChild(head); card.appendChild(plot);
+
+    var refs = { card:card, svg:svg, line:line, area:area, guides:guides, dots:dots, halos:halos,
+                 vals:vals, groups:groups, dlabel:dlabel, type:startKey };
+
+    // stagger the draw-in of points + labels
+    for (i = 0; i < 5; i++) {
+      var delay = (0.42 + i * 0.11) + 's';
+      groups[i].style.transitionDelay = delay;
+      vals[i].style.transitionDelay = (0.5 + i * 0.11) + 's';
+    }
+
+    draw(refs, DATA[startKey].vals, startKey);
+    apply(refs, startKey);
+
+    // interactivity
+    if (interactive) {
+      drop.addEventListener('click', function () {
+        var idx = (CYCLE.indexOf(refs.type) + 1) % CYCLE.length;
+        setType(refs, CYCLE[idx]);
+      });
+    }
+
+    return refs;
+  }
+
+  /* paint the geometry for a given values array (used for static + each morph frame) */
+  function draw(r, vArr, key) {
+    if (!vArr.length) return; // none — keep last geometry, just hidden
+    var pts = ptsOf(vArr);
+    r.line.setAttribute('d', spline(pts));
+    r.area.setAttribute('d', areaD(pts));
+    for (var i = 0; i < 5; i++) {
+      var x = pts[i].x, y = pts[i].y;
+      r.halos[i].setAttribute('cx', x); r.halos[i].setAttribute('cy', y);
+      r.dots[i].setAttribute('cx', x);  r.dots[i].setAttribute('cy', y);
+      r.guides[i].setAttribute('y1', y);
+      r.vals[i].setAttribute('x', x);   r.vals[i].setAttribute('y', y - 13);
+      r.vals[i].textContent = fmt(vArr[i]);
+    }
+  }
+
+  /* apply colour class + label + empty state (no geometry) */
+  function apply(r, key) {
+    var d = DATA[key];
+    r.card.classList.remove('chart--loss','chart--gain','chart--brand');
+    r.card.classList.add('chart--' + d.kind);
+    r.dlabel.textContent = d.label;
+    r.svg.classList.toggle('is-empty', key === 'none');
+    r.type = key;
+  }
+
+  function playIn(r) { r.svg.classList.add('in'); }
+  function replay(r) {
+    r.svg.classList.remove('in');
+    // force reflow so the transition restarts
+    void r.svg.getBoundingClientRect();
+    requestAnimationFrame(function () { r.svg.classList.add('in'); });
+  }
+
+  /* smooth morph between two same-length value sets */
+  function morph(r, from, to, done) {
+    if (reduce) { draw(r, to); if (done) done(); return; }
+    var t0 = null, dur = 750;
+    function frame(ts) {
+      if (t0 === null) t0 = ts;
+      var k = Math.min(1, (ts - t0) / dur), e = easeInOut(k);
+      var cur = from.map(function (f, i) { return f + (to[i] - f) * e; });
+      draw(r, cur);
+      if (k < 1) requestAnimationFrame(frame);
+      else if (done) done();
+    }
+    requestAnimationFrame(frame);
+  }
+
+  function setType(r, key) {
+    var prev = r.type, d = DATA[key];
+    apply(r, key); // colour + label + empty toggle animate via CSS
+
+    if (key === 'none') return;                    // fade data out, geometry frozen
+    var prevVals = DATA[prev].vals;
+
+    if (!prevVals.length) {                         // leaving None → redraw + replay
+      draw(r, d.vals, key);
+      replay(r);
+      return;
+    }
+    morph(r, prevVals.slice(), d.vals.slice());     // type → type: tween the spline
+  }
+
+  /* build all cards */
+  var cards = [].slice.call(document.querySelectorAll('.chart-card'));
+  var refs = cards.map(build);
+
+  // replay button (interactive card)
+  var replayBtn = document.querySelector('[data-replay]');
+  if (replayBtn) replayBtn.addEventListener('click', function () {
+    var r = refs[0];
+    r.svg.classList.remove('in');
+    void r.svg.getBoundingClientRect();
+    requestAnimationFrame(function () { r.svg.classList.add('in'); });
+  });
+
+  // reveal draw-in when scrolled into view
+  if (reduce || !('IntersectionObserver' in window)) {
+    refs.forEach(playIn);
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) {
+          var r = refs[cards.indexOf(en.target)];
+          if (r) playIn(r);
+          io.unobserve(en.target);
+        }
+      });
+    }, { threshold: 0.35 });
+    cards.forEach(function (c) { io.observe(c); });
+  }
+})();
+</script>
+<script src="../js/theme.js"></script>
+</body>
+</html>
