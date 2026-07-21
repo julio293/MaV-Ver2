@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blog — MaV Design System</title>
+<link rel="stylesheet" href="../css/tokens.css">
+<link rel="stylesheet" href="../css/shared.css">
+<style>
+/* ══ Blog — Figma "• Blog" (139:2095) ═══════════════════════════════════════
+   The Insights module: two content components over the tinted brand surface.
+   • Blog Card (260×292): a full-bleed hero image, a "Course" badge, a date, a
+     two-line title and a "Read more ›" affordance.
+   • Blog List (335×120): a "Blog" badge, a title + "4 min read • MyWallSt" meta,
+     and a square thumbnail.
+   Both carry an Active (full colour) and a Read state (desaturated / muted).
+   The surface is --background/bg-tertiary and the badge is the primary token,
+   so both re-theme blue → lime in dark.
+
+   Interactive: an Insights panel with Blogs/Courses tabs (gliding underline)
+   that cross-fade between the list and a snap-scrolling card carousel. Tap any
+   card or row to toggle Read (image desaturates, text mutes) — everything eases;
+   cards lift and the hero zooms on hover, the chevron nudges. Gated behind
+   prefers-reduced-motion. */
+
+.blog{font-family:'Plus Jakarta Sans',sans-serif}
+
+/* ── shared bits ──────────────────────────────────────────────────────────*/
+.blog-badge{display:inline-flex;align-items:center;justify-content:center;padding:6px 8px;border-radius:var(--border\/border-radius\/sm,4px);
+  background:var(--badge\ \&\ chip\/primary\/bg-box,#352eff);border:1px solid var(--badge\ \&\ chip\/primary\/outline,#7c9dff);
+  color:var(--badge\ \&\ chip\/primary\/text,#fff);font-family:'Inter',sans-serif;font-weight:500;font-size:14px;line-height:1;white-space:nowrap;
+  transition:background-color .45s ease,border-color .45s ease,color .45s ease}
+/* card/row surface (--background/bg-tertiary) is a pale tint in BOTH themes,
+   so on-surface text stays dark regardless of theme. */
+.blog-title{font-weight:700;font-size:14px;line-height:1.25;color:#171717;margin:0;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;transition:color .45s ease}
+.blog-date,.blog-meta{font-weight:500;font-size:12px;line-height:1.3;color:var(--main-text\/description,#7f7f7f);margin:0;transition:color .45s ease}
+.blog-more{display:inline-flex;align-items:center;gap:4px;font-weight:600;font-size:12px;color:var(--main-text\/description,#7f7f7f);transition:color .45s ease}
+.blog-more svg{width:12px;height:12px;stroke:currentColor;stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round;transition:transform .28s cubic-bezier(.34,1.1,.35,1)}
+
+/* ── Blog Card ──────────────────────────────────────────────────────────── */
+.blog-card{--surf:var(--background\/bg-tertiary,#e6edff);position:relative;width:260px;box-sizing:border-box;
+  background:var(--surf);border-radius:16px;overflow:hidden;cursor:pointer;text-align:left;border:0;padding:0;font:inherit;
+  transition:background-color .45s ease,transform .28s cubic-bezier(.34,1.1,.35,1),box-shadow .28s ease}
+.blog-card .thumb{position:relative;height:173px;overflow:hidden;background:#1b1b2b}
+.blog-card .thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s cubic-bezier(.22,.9,.3,1),filter .45s ease,opacity .45s ease}
+.blog-card .blog-badge{position:absolute;top:15px;left:16px;z-index:2}
+.blog-card .body{padding:15px 16px 16px;display:flex;flex-direction:column;gap:10px}
+.blog-card .body .sh{display:flex;flex-direction:column;gap:4px}
+.blog-card:hover{box-shadow:0 14px 34px rgba(0,0,0,.12);transform:translateY(-4px)}
+.blog-card:hover .thumb img{transform:scale(1.06)}
+.blog-card:hover .blog-more svg{transform:translateX(3px)}
+.blog-card:active{transform:translateY(-1px) scale(.99)}
+
+/* ── Blog List row ──────────────────────────────────────────────────────── */
+.blog-list{--surf:var(--background\/bg-tertiary,#e6edff);position:relative;width:335px;max-width:100%;height:120px;box-sizing:border-box;
+  background:var(--surf);border-radius:16px;overflow:hidden;cursor:pointer;text-align:left;border:0;padding:16px;font:inherit;
+  display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;
+  transition:background-color .45s ease,transform .24s cubic-bezier(.34,1.1,.35,1),box-shadow .24s ease}
+.blog-list .sh{display:flex;flex-direction:column;gap:4px;max-width:170px;position:relative;z-index:1}
+.blog-list .thumb{position:absolute;top:0;right:0;width:119px;height:120px;overflow:hidden;background:#1b1b2b}
+.blog-list .thumb::before{content:"";position:absolute;inset:0;z-index:1;
+  background:linear-gradient(90deg,var(--surf) 0%,transparent 42%);transition:background .45s ease}
+.blog-list .thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s cubic-bezier(.22,.9,.3,1),filter .45s ease,opacity .45s ease}
+.blog-list:hover{box-shadow:0 10px 26px rgba(0,0,0,.10);transform:translateY(-2px)}
+.blog-list:hover .thumb img{transform:scale(1.06)}
+.blog-list .blog-badge{position:relative;z-index:1}
+
+/* ── Read (desaturated / muted) state, shared ───────────────────────────── */
+.blog-card.read,.blog-list.read{--surf:#f1f1f3}
+.read .thumb img{filter:grayscale(1);opacity:.7}
+.read .blog-title,.read .blog-date,.read .blog-meta,.read .blog-more{color:var(--main-text\/disabled,#cccccc)}
+.read .blog-badge{background:transparent;border-color:#e2e2e2;color:var(--main-text\/disabled,#cccccc)}
+
+/* a tiny "Read" tick that fades in on the read state */
+.blog-check{position:absolute;top:12px;right:12px;z-index:3;width:22px;height:22px;border-radius:999px;display:grid;place-items:center;
+  background:var(--badge\ \&\ chip\/primary\/bg-box,#352eff);color:#fff;opacity:0;transform:scale(.4);
+  transition:opacity .3s ease,transform .35s cubic-bezier(.34,1.5,.45,1)}
+[data-theme=dark] .blog-check{color:#171717}
+.blog-list .blog-check{top:50%;right:14px;margin-top:-11px}
+.read .blog-check{opacity:1;transform:scale(1)}
+.blog-check svg{width:13px;height:13px;stroke:currentColor;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── Insights interactive panel ─────────────────────────────────────────── */
+.insights{width:360px;max-width:100%;background:var(--mav-bg,#fff);border:1px solid var(--mav-border,#efefef);border-radius:26px;
+  overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.08)}
+.ins-head{display:flex;align-items:center;gap:12px;padding:18px 20px 0}
+.ins-back{width:28px;height:28px;display:grid;place-items:center;border:0;background:none;color:var(--main-text\/default,#171717);cursor:pointer;border-radius:8px}
+[data-theme=dark] .ins-back{color:var(--mav-fg)}
+.ins-back svg{width:20px;height:20px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
+.ins-back:hover svg{transform:translateX(-3px)}
+.ins-title{font-weight:700;font-size:16px;color:var(--main-text\/default,#171717);margin:0 auto 0 -28px;padding-left:28px}
+[data-theme=dark] .ins-title{color:var(--mav-fg)}
+.ins-tabs{position:relative;display:flex;margin:16px 20px 0;border-bottom:1px solid var(--mav-border,#efefef)}
+.ins-tab{flex:1;padding:12px 0;border:0;background:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;font-size:14px;
+  color:var(--main-text\/description,#7f7f7f);transition:color .25s ease}
+.ins-tab.on{color:var(--main-text\/default,#171717)}
+[data-theme=dark] .ins-tab.on{color:var(--mav-fg)}
+.ins-ink{position:absolute;bottom:-1px;height:2px;background:var(--badge\ \&\ chip\/primary\/bg-box,#352eff);border-radius:2px;
+  transition:transform .4s cubic-bezier(.34,1.1,.35,1),width .4s cubic-bezier(.34,1.1,.35,1)}
+.ins-body{position:relative;padding:16px 20px 22px}
+.ins-panel{display:none;animation:ins-fade .4s cubic-bezier(.22,.9,.3,1) both}
+.ins-panel.on{display:block}
+@keyframes ins-fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.ins-carousel{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -20px;padding:2px 20px 10px;scrollbar-width:none}
+.ins-carousel::-webkit-scrollbar{display:none}
+.ins-carousel .blog-card{scroll-snap-align:start;flex:0 0 auto}
+.ins-rows{display:flex;flex-direction:column;gap:12px}
+.ins-rows .blog-list{width:100%}
+
+/* stages */
+.blog-stage{background:var(--mav-surface,#f5f5f5);border-radius:16px;padding:34px 28px;display:flex;flex-wrap:wrap;gap:26px;justify-content:center;align-items:flex-start}
+.blog-cell{display:flex;flex-direction:column;gap:12px;align-items:center}
+.blog-tag{font-size:11px;color:var(--mav-muted);font-family:'Inter',sans-serif}
+.blog-hint{margin-top:14px;font-size:12px;color:var(--mav-muted);font-family:'Inter',sans-serif;text-align:center}
+.canvas-dark{background:var(--main\/white,#171717);border-radius:16px;padding:34px 28px;display:flex;flex-wrap:wrap;gap:26px;justify-content:center;align-items:flex-start}
+.canvas-dark .blog-tag{color:#9a9a9a}
+
+/* reveal on scroll */
+@media (prefers-reduced-motion: no-preference){
+  .blog-reveal{opacity:0;transform:translateY(14px);transition:opacity .55s ease,transform .6s cubic-bezier(.22,.9,.3,1)}
+  .blog-reveal.in{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+<div class="doc-layout">
+<nav class="doc-sidebar"></nav>
+<main class="doc-main">
+  <div class="topbar">
+    <a href="../index.html" class="topbar-back">← MaV</a>
+    <span>/</span>
+    <span class="topbar-title">Blog</span>
+    <div class="topbar-spacer"></div>
+    <button class="theme-btn" data-theme-toggle><span data-theme-icon>☾</span> <span data-theme-label>Dark mode</span></button>
+  </div>
+
+  <div class="page-header">
+    <div class="page-breadcrumb"><a href="../index.html">MaV</a> / Components</div>
+    <h1 class="page-title">Blog</h1>
+    <p class="page-desc">The Insights module — two content components over the tinted brand surface. A <strong>Blog Card</strong> (hero image, <code>Course</code> badge, date, title, “Read more ›”) and a <strong>Blog List</strong> row (badge, title, “4 min read · MyWallSt”, thumbnail). Each has an <strong>Active</strong> and a <strong>Read</strong> state. Surface is <code>--background/bg-tertiary</code> and the badge is the primary token, so both re-theme blue → lime in dark.</p>
+  </div>
+
+  <!-- Interactive -->
+  <div class="section">
+    <h2 class="section-title">Interactive <span class="section-badge">try it</span></h2>
+    <p class="section-desc">Switch <strong>Blogs / Courses</strong> — the underline glides and the panels cross-fade between the list and a snap-scrolling card carousel. <strong>Tap any card or row</strong> to toggle Read: the image desaturates, text mutes and a tick pops in. Cards lift and the hero zooms on hover.</p>
+    <div class="preview-card">
+      <div class="preview-canvas">
+        <div class="blog">
+          <div class="insights" id="insights">
+            <div class="ins-head">
+              <button class="ins-back" aria-label="Back"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button>
+              <h3 class="ins-title">Insights</h3>
+            </div>
+            <div class="ins-tabs">
+              <button class="ins-tab on" data-tab="blogs">Blogs</button>
+              <button class="ins-tab" data-tab="courses">Courses</button>
+              <span class="ins-ink"></span>
+            </div>
+            <div class="ins-body">
+              <div class="ins-panel on" data-panel="blogs"><div class="ins-carousel" id="carousel"></div></div>
+              <div class="ins-panel" data-panel="courses"><div class="ins-rows" id="rows"></div></div>
+            </div>
+          </div>
+          <div class="blog-hint">Tap a card or row to mark it read · switch tabs above</div>
+        </div>
+      </div>
+      <div class="preview-meta"><span class="preview-label">Tabs (gliding underline) · snap carousel · tap-to-read toggle · hover lift + zoom</span><span class="preview-sublabel">--background/bg-tertiary · --badge &amp; chip/primary/* · --main-text/*</span></div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- Blog Card -->
+  <div class="section">
+    <h2 class="section-title">Blog Card</h2>
+    <p class="section-desc">260 × 292 — full-bleed hero, <code>Course</code> badge, date, two-line title and “Read more ›”. Active is full colour; Read desaturates the image and mutes the text. Tap to toggle.</p>
+    <div class="preview-card">
+      <div class="preview-canvas">
+        <div class="blog"><div class="blog-stage" id="card-stage"></div></div>
+      </div>
+      <div class="preview-meta"><span class="preview-label">Property 1 = Active · Read</span></div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- Blog List -->
+  <div class="section">
+    <h2 class="section-title">Blog List</h2>
+    <p class="section-desc">335 × 120 — badge, title + meta, and a thumbnail faded into the surface. Same Active / Read states. Tap to toggle.</p>
+    <div class="preview-card">
+      <div class="preview-canvas">
+        <div class="blog"><div class="blog-stage" id="list-stage" style="flex-direction:column;align-items:center"></div></div>
+      </div>
+      <div class="preview-meta"><span class="preview-label">Type = Active · Read</span></div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- Dark -->
+  <div class="section">
+    <h2 class="section-title">In dark</h2>
+    <p class="section-desc">The tinted surface re-themes to a soft lime and the badge follows the primary token → lime. Hero halos and thumbnails sit on the dark surface; the Read state desaturates just the same.</p>
+    <div class="preview-card">
+      <div class="preview-canvas">
+        <div class="blog"><div class="canvas-dark" data-theme="dark" id="dark-stage"></div></div>
+      </div>
+      <div class="preview-meta"><span class="preview-label">Dark — surface → lime tint, badge → lime</span></div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- Token reference -->
+  <div class="section">
+    <h2 class="section-title">Token Reference</h2>
+    <table class="token-table">
+      <thead><tr><th>Token</th><th>Value</th><th>Usage</th></tr></thead>
+      <tbody>
+        <tr><td class="token-name">--background/bg-tertiary</td><td><span class="token-swatch-sm" style="background:#e6edff"></span><span class="token-value">#e6edff → #f6fff1</span></td><td class="token-value">Card &amp; row surface (→ lime tint in dark)</td></tr>
+        <tr><td class="token-name">--badge &amp; chip/primary/bg-box</td><td><span class="token-swatch-sm" style="background:#352eff"></span><span class="token-value">#352eff → #a1ff5b</span></td><td class="token-value">Badge fill · tab underline (→ lime)</td></tr>
+        <tr><td class="token-name">--badge &amp; chip/primary/outline</td><td><span class="token-swatch-sm" style="background:#7c9dff"></span><span class="token-value">#7c9dff</span></td><td class="token-value">Badge border</td></tr>
+        <tr><td class="token-name">--main-text/default</td><td><span class="token-swatch-sm" style="background:#171717"></span><span class="token-value">#171717</span></td><td class="token-value">Title text</td></tr>
+        <tr><td class="token-name">--main-text/description</td><td><span class="token-swatch-sm" style="background:#7f7f7f"></span><span class="token-value">#7f7f7f</span></td><td class="token-value">Date · meta · “Read more”</td></tr>
+        <tr><td class="token-name">--main-text/disabled</td><td><span class="token-swatch-sm" style="background:#cccccc"></span><span class="token-value">#cccccc</span></td><td class="token-value">Read-state muted text &amp; badge</td></tr>
+        <tr><td class="token-name">--border/border-radius/sm</td><td><span class="token-value">4px</span></td><td class="token-value">Badge radius (card / row = 16px)</td></tr>
+        <tr><td class="token-name">Motion</td><td><span class="token-value">.45s read · .4s tabs</span></td><td class="token-value">Desaturate / mute &amp; gliding underline</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</main>
+</div>
+
+<script>
+(function () {
+  var A = '../app/assets/blog/';
+  var chevR = '<svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>';
+  var tick  = '<svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-11"/></svg>';
+
+  var POSTS = [
+    { badge:'Course', date:'May 14, 2026', title:'AI-Driven Fraud Detection: Balancing Speed and False Positives in Real-Time Payments', img:'blob.png',    read:false },
+    { badge:'Course', date:'May 12, 2026', title:'Open Banking APIs: A Practical Security Checklist for Fintech Teams',                    img:'plane.png',   read:false },
+    { badge:'Course', date:'May 09, 2026', title:'Instant Settlement Rails and What They Mean for Transaction Fees',                       img:'refresh.png', read:true  }
+  ];
+  var ROWS = [
+    { badge:'Blog', title:'AI-Driven Fraud Detection', meta:'4 min read • MyWallSt', img:'plane.png',   read:false },
+    { badge:'Blog', title:'Open Banking, Explained',   meta:'6 min read • MyWallSt', img:'refresh.png', read:false },
+    { badge:'Blog', title:'The Cost of Instant Payments', meta:'3 min read • MyWallSt', img:'blob.png',  read:true  }
+  ];
+
+  function cardHTML(p) {
+    return '<button class="blog-card' + (p.read ? ' read' : '') + '" type="button">' +
+        '<div class="thumb"><img src="' + A + p.img + '" alt=""></div>' +
+        '<span class="blog-badge">' + p.badge + '</span>' +
+        '<span class="blog-check">' + tick + '</span>' +
+        '<div class="body">' +
+          '<p class="blog-date">' + p.date + ' ・</p>' +
+          '<div class="sh"><h4 class="blog-title">' + p.title + '</h4></div>' +
+          '<span class="blog-more">Read more' + chevR + '</span>' +
+        '</div>' +
+      '</button>';
+  }
+  function rowHTML(p) {
+    return '<button class="blog-list' + (p.read ? ' read' : '') + '" type="button">' +
+        '<span class="blog-badge">' + p.badge + '</span>' +
+        '<div class="sh"><h4 class="blog-title">' + p.title + '</h4><p class="blog-meta">' + p.meta + '</p></div>' +
+        '<div class="thumb"><img src="' + A + p.img + '" alt=""></div>' +
+        '<span class="blog-check">' + tick + '</span>' +
+      '</button>';
+  }
+  function fill(id, html) { var e = document.getElementById(id); if (e) e.innerHTML = html; return e; }
+
+  // tap-to-read toggle (delegated)
+  function wireToggle(root) {
+    root.addEventListener('click', function (ev) {
+      var el = ev.target.closest('.blog-card, .blog-list');
+      if (el && root.contains(el)) el.classList.toggle('read');
+    });
+  }
+
+  // build interactive panel
+  var carousel = fill('carousel', POSTS.map(cardHTML).join(''));
+  var rows = fill('rows', ROWS.map(rowHTML).join(''));
+  var insights = document.getElementById('insights');
+  if (insights) wireToggle(insights);
+
+  // build state showcases (Active + Read pairs)
+  fill('card-stage',
+    '<div class="blog-cell"><span class="blog-tag">Active</span>' + cardHTML(POSTS[0]) + '</div>' +
+    '<div class="blog-cell"><span class="blog-tag">Read</span>' + cardHTML({ badge:'Course', date:'May 09, 2026', title:'Instant Settlement Rails and What They Mean for Transaction Fees', img:'refresh.png', read:true }) + '</div>');
+  fill('list-stage',
+    '<div class="blog-cell"><span class="blog-tag">Active</span>' + rowHTML(ROWS[0]) + '</div>' +
+    '<div class="blog-cell"><span class="blog-tag">Read</span>' + rowHTML({ badge:'Blog', title:'The Cost of Instant Payments', meta:'3 min read • MyWallSt', img:'blob.png', read:true }) + '</div>');
+  fill('dark-stage',
+    '<div class="blog-cell"><span class="blog-tag">Card</span>' + cardHTML(POSTS[1]) + '</div>' +
+    '<div class="blog-cell"><span class="blog-tag">List</span>' + rowHTML(ROWS[0]) + rowHTML(ROWS[2]) + '</div>');
+  ['card-stage','list-stage','dark-stage'].forEach(function (id) { var e = document.getElementById(id); if (e) wireToggle(e); });
+
+  // tabs — gliding underline + panel cross-fade
+  (function () {
+    if (!insights) return;
+    var tabs = [].slice.call(insights.querySelectorAll('.ins-tab'));
+    var ink = insights.querySelector('.ins-ink');
+    var panels = [].slice.call(insights.querySelectorAll('.ins-panel'));
+    function moveInk(tab) { ink.style.width = tab.offsetWidth + 'px'; ink.style.transform = 'translateX(' + tab.offsetLeft + 'px)'; }
+    function select(tab) {
+      tabs.forEach(function (t) { t.classList.toggle('on', t === tab); });
+      var key = tab.dataset.tab;
+      panels.forEach(function (p) { p.classList.toggle('on', p.dataset.panel === key); });
+      moveInk(tab);
+    }
+    tabs.forEach(function (t) { t.addEventListener('click', function () { select(t); }); });
+    requestAnimationFrame(function () { moveInk(tabs[0]); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { moveInk(insights.querySelector('.ins-tab.on')); });
+  })();
+
+  // reveal-on-scroll for the state showcase cards
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var revealables = [].slice.call(document.querySelectorAll('#card-stage .blog-cell, #list-stage .blog-cell'));
+  revealables.forEach(function (e) { e.classList.add('blog-reveal'); });
+  if (reduce || !('IntersectionObserver' in window)) {
+    revealables.forEach(function (e) { e.classList.add('in'); });
+  } else {
+    var io = new IntersectionObserver(function (ents) {
+      ents.forEach(function (en, i) { if (en.isIntersecting) { en.target.style.transitionDelay = (i * 0.06) + 's'; en.target.classList.add('in'); io.unobserve(en.target); } });
+    }, { threshold: 0.3 });
+    revealables.forEach(function (e) { io.observe(e); });
+  }
+})();
+</script>
+<script src="../js/theme.js"></script>
+</body>
+</html>
