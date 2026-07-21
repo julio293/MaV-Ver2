@@ -44,6 +44,7 @@
     monitor:   '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
     book:      '<path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2z"/><path d="M5 16h13"/>',
     section:   '<path d="M4 6h16M4 12h10M4 18h16"/>',
+    calendar:  '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/>',
     dot:       '<circle cx="12" cy="12" r="3"/>'
   };
   function icon(key) {
@@ -69,6 +70,7 @@
     { href: 'components/inputs.html',        label: 'Input Fields',      ic: 'input' },
     { href: 'components/otp.html',           label: 'OTP Input',         ic: 'otp' },
     { href: 'components/forms.html',         label: 'Forms & Controls',  ic: 'check' },
+    { href: 'components/datepicker.html',    label: 'Datepicker',        ic: 'calendar' },
     { href: 'components/feedback.html',      label: 'Alerts & Toasts',   ic: 'bell' },
     { href: 'components/toast.html',         label: 'Toast',             ic: 'message' },
     { href: 'components/badges.html',        label: 'Badges & Chips',    ic: 'tag' },

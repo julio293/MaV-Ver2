@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Datepicker — MaV Design System</title>
+<link rel="stylesheet" href="../css/tokens.css">
+<link rel="stylesheet" href="../css/shared.css">
+<style>
+/* ══ Datepicker — Figma "• Datepicker" (203:2602) ════════════════════════════
+   A calendar card: month pager header, weekday labels, and a day grid whose
+   cells carry states (default / hover / selected / focus / in-range / disabled
+   / outside-month). Three types: Day (single), Range (start→end band), Year.
+   Selected fill uses the primary token, re-theming blue → lime in dark. */
+.dp{width:344px;max-width:100%;box-sizing:border-box;background:var(--mav-bg,#fff);
+  border:1px solid var(--mav-border,#ececec);border-radius:16px;padding:24px;
+  box-shadow:0 6px 12px -6px rgba(0,0,0,.1),0 12px 24px -12px rgba(0,0,0,.08);
+  font-family:'Plus Jakarta Sans',sans-serif;--dp-accent:var(--btn\/primary\/default,#352eff);--dp-on:#fff}
+[data-theme=dark] .dp{--dp-accent:var(--mav-primary-dark,#a1ff5b);--dp-on:#171717}
+
+.dp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.dp-nav{width:32px;height:32px;flex-shrink:0;display:grid;place-items:center;border:1px solid var(--mav-border,#dbdbdb);
+  border-radius:8px;background:var(--mav-bg,#fff);cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.dp-nav svg{width:18px;height:18px;stroke:var(--main-text\/default,#171717);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+[data-theme=dark] .dp-nav svg{stroke:var(--mav-fg)}
+.dp-nav.hidden{visibility:hidden}
+.dp-month{display:flex;align-items:center;gap:6px;font-weight:500;font-size:14px;color:var(--main-text\/description,#7f7f7f);cursor:pointer}
+.dp-month svg{width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+.dp-grid{display:grid;grid-template-columns:repeat(7,1fr);row-gap:4px}
+.dp-cell{height:40px;display:flex;align-items:center;justify-content:center;position:relative}
+.dp-wd{font-weight:700;font-size:14px;color:var(--main-text\/placeholder,#b2b2b2);height:32px;display:flex;align-items:center}
+.dp-day{width:32px;height:32px;border:0;background:none;padding:0;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:14px;color:var(--main-text\/default,#171717);cursor:pointer;position:relative;z-index:1;transition:background .12s}
+[data-theme=dark] .dp-day{color:var(--mav-fg)}
+.dp-day:hover{background:var(--mav-bg-secondary,#e5e5e5)}
+.dp-day.out{color:var(--main-text\/placeholder,#b2b2b2)}
+.dp-day.hov{background:var(--mav-bg-secondary,#e5e5e5)}
+.dp-day.sel{background:var(--dp-accent);color:var(--dp-on)}
+.dp-day.sel:hover{background:var(--dp-accent)}
+.dp-day.foc{box-shadow:0 0 0 2px var(--dp-accent)}
+.dp-day.dis{color:var(--main-text\/placeholder,#b2b2b2);opacity:.55;cursor:not-allowed}
+.dp-day.dis:hover{background:transparent}
+
+/* range band */
+.dp-cell.r::before{content:'';position:absolute;top:4px;bottom:4px;left:0;right:0;
+  background:color-mix(in srgb, var(--dp-accent) 13%, transparent);z-index:0}
+.dp-cell.r.rs::before{left:50%}
+.dp-cell.r.re::before{right:50%}
+.dp-cell.r.edge-l::before{border-top-left-radius:10px;border-bottom-left-radius:10px}
+.dp-cell.r.edge-r::before{border-top-right-radius:10px;border-bottom-right-radius:10px}
+.dp-cell.r .dp-day:not(.sel){color:var(--dp-accent)}
+.dp-cell.r .dp-day:not(.sel):hover{background:transparent}
+
+/* year grid */
+.dp-years{display:grid;grid-template-columns:repeat(4,1fr);row-gap:8px;column-gap:6px}
+.dp-year{border:0;background:none;padding:9px 0;border-radius:10px;text-align:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:14px;
+  color:var(--main-text\/default,#171717);cursor:pointer;transition:background .12s}
+[data-theme=dark] .dp-year{color:var(--mav-fg)}
+.dp-year:hover{background:var(--mav-bg-secondary,#e5e5e5)}
+.dp-year.sel{background:var(--dp-accent);color:var(--dp-on)}
+.dp-year.sel:hover{background:var(--dp-accent)}
+
+/* stage */
+.dp-stage{background:var(--mav-surface,#f5f5f5);border-radius:16px;padding:32px;display:flex;flex-wrap:wrap;gap:32px;justify-content:center;align-items:flex-start}
+.dp-cell-lbl{display:flex;flex-direction:column;gap:12px;align-items:center}
+.dp-tag{font-size:11px;color:var(--mav-muted);font-family:'Inter',sans-serif}
+.canvas-dark{background:var(--main\/white,#171717);border-radius:16px;padding:32px;display:flex;justify-content:center}
+
+/* state legend */
+.dp-legend{display:flex;flex-wrap:wrap;gap:26px}
+.dp-leg{display:flex;flex-direction:column;align-items:center;gap:8px;font-size:12px;color:var(--mav-muted);font-family:'Inter',sans-serif}
+.dp-leg .dp-day{cursor:default}
+</style>
+</head>
+<body>
+<div class="doc-layout">
+<nav class="doc-sidebar"></nav>
+<main class="doc-main">
+  <div class="topbar">
+    <a href="../index.html" class="topbar-back">← MaV</a>
+    <span>/</span>
+    <span class="topbar-title">Datepicker</span>
+    <div class="topbar-spacer"></div>
+    <button class="theme-btn" data-theme-toggle><span data-theme-icon>☾</span> <span data-theme-label>Dark mode</span></button>
+  </div>
+
+  <div class="page-header">
+    <div class="page-breadcrumb"><a href="../index.html">MaV</a> / Components</div>
+    <h1 class="page-title">Datepicker</h1>
+    <p class="page-desc">A calendar card for picking a date, a range, or a year. A month pager header sits above weekday labels and a day grid; each day cell carries a state — default, hover, selected, focus, in-range, disabled, or outside-month. The selected fill is the primary token, so it re-themes blue&nbsp;→&nbsp;lime in dark.</p>
+  </div>
+
+  <!-- Anatomy -->
+  <div class="section">
+    <h2 class="section-title">Anatomy</h2>
+    <p class="section-desc">Header (prev · month ▾ · next) + weekday row + 7-column day grid. Card is 344px, radius 16, layered shadow. Selected day = <code>--btn/primary/default</code>, hover = <code>--mav-bg-secondary</code>.</p>
+    <div class="preview-card">
+      <div class="preview-canvas">
+        <div class="dp-stage" style="justify-content:flex-start">
+          <div class="dp" data-cal="day"></div>
+        </div>
+      </div>
+      <div class="preview-meta"><span class="preview-label">Day calendar · February 2022 · 11 selected · 9 hover</span><span class="preview-sublabel">--btn/primary/default · --main-text/default · --main-text/placeholder</span></div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- Cell states -->
+  <div class="section">
+    <h2 class="section-title">Day cell states</h2>
+    <p class="section-desc">The single cell across its states.</p>
+    <div class="preview-card">
+      <div class="preview-canvas">
+        <div class="dp-stage">
+          <div class="dp-legend" id="dp-legend"></div>
+        </div>
+      </div>
+      <div class="preview-meta"><span class="preview-label">Default · Hover · Selected · Focus · In-range · Disabled · Weekday</span></div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- Types -->
+  <div class="section">
+    <h2 class="section-title">Types</h2>
+    <p class="section-desc"><strong>Day</strong> (single date), <strong>Range</strong> (start→end with an in-range band), and <strong>Year</strong> (year grid).</p>
+    <div class="preview-card">
+      <div class="preview-canvas">
+        <div class="dp-stage">
+          <div class="dp-cell-lbl"><span class="dp-tag">Day</span><div class="dp" data-cal="day"></div></div>
+          <div class="dp-cell-lbl"><span class="dp-tag">Range</span><div class="dp" data-cal="range"></div></div>
+          <div class="dp-cell-lbl"><span class="dp-tag">Year</span><div class="dp" data-cal="year"></div></div>
+        </div>
+      </div>
+      <div class="preview-meta"><span class="preview-label">Day · Range · Year</span></div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- Dark -->
+  <div class="section">
+    <h2 class="section-title">In dark</h2>
+    <p class="section-desc">On a dark surface the card inverts and the selected day / in-range band re-theme to lime.</p>
+    <div class="preview-card">
+      <div class="preview-canvas">
+        <div class="canvas-dark" data-theme="dark"><div class="dp" data-cal="range"></div></div>
+      </div>
+      <div class="preview-meta"><span class="preview-label">Dark — selected + range → lime</span></div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- Token reference -->
+  <div class="section">
+    <h2 class="section-title">Token Reference</h2>
+    <table class="token-table">
+      <thead><tr><th>Token</th><th>Value</th><th>Usage</th></tr></thead>
+      <tbody>
+        <tr><td class="token-name">--btn/primary/default</td><td><span class="token-swatch-sm" style="background:#352eff"></span><span class="token-value">#352eff</span></td><td class="token-value">Selected day / range ends (→ lime in dark)</td></tr>
+        <tr><td class="token-name">--main-text/default</td><td><span class="token-swatch-sm" style="background:#171717"></span><span class="token-value">#171717</span></td><td class="token-value">Day number</td></tr>
+        <tr><td class="token-name">--main-text/placeholder</td><td><span class="token-swatch-sm" style="background:#b2b2b2"></span><span class="token-value">#b2b2b2</span></td><td class="token-value">Weekday labels · outside-month · disabled</td></tr>
+        <tr><td class="token-name">--main-text/description</td><td><span class="token-swatch-sm" style="background:#7f7f7f"></span><span class="token-value">#7f7f7f</span></td><td class="token-value">Month label</td></tr>
+        <tr><td class="token-name">--mav-bg-secondary</td><td><span class="token-swatch-sm" style="background:#e5e5e5"></span><span class="token-value">#e5e5e5</span></td><td class="token-value">Hover cell (dark: #242424)</td></tr>
+        <tr><td class="token-name">Card</td><td><span class="token-value">344px · radius 16 · shadow</span></td><td class="token-value">Calendar surface</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</main>
+</div>
+<script>
+(function () {
+  var chL = '<svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>';
+  var chR = '<svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>';
+  var chD = '<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>';
+  var chU = '<svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg>';
+  var WD = ['Mo','Tu','We','Th','Fr','Sa','Su'];
+  // February 2022 grid, exactly as in the Figma reference
+  var GRID = [
+    [{n:30,out:1},{n:1},{n:2},{n:3},{n:4},{n:5},{n:6}],
+    [{n:7},{n:8},{n:9},{n:10},{n:11},{n:12},{n:13}],
+    [{n:14},{n:15},{n:16},{n:17},{n:18},{n:19},{n:20}],
+    [{n:21},{n:22},{n:23},{n:24},{n:25},{n:26},{n:27}],
+    [{n:28},{n:29},{n:30},{n:31},{n:1,out:1},{n:2,out:1},{n:3,out:1}]
+  ];
+
+  function header(type) {
+    var arrows = type === 'year';
+    return '<div class="dp-head">' +
+      '<button class="dp-nav' + (arrows ? ' hidden' : '') + '" aria-label="Previous">' + chL + '</button>' +
+      '<span class="dp-month">February 2022 ' + (type === 'year' ? chU : chD) + '</span>' +
+      '<button class="dp-nav' + (arrows ? ' hidden' : '') + '" aria-label="Next">' + chR + '</button></div>';
+  }
+
+  function dayCell(c, cls) {
+    return '<div class="dp-cell ' + (c.cell || '') + '"><button class="dp-day ' + (c.out ? 'out ' : '') + (cls || '') + '">' + c.n + '</button></div>';
+  }
+
+  function buildGrid(mods) {
+    // mods: function(rowIdx, colIdx, cell) -> {cls, cell}
+    var html = '<div class="dp-grid">';
+    WD.forEach(function (w) { html += '<div class="dp-cell"><span class="dp-wd">' + w + '</span></div>'; });
+    GRID.forEach(function (row, ri) {
+      row.forEach(function (c, ci) {
+        var m = mods ? mods(ri, ci, c) : {};
+        html += '<div class="dp-cell ' + (m.cell || '') + '"><button class="dp-day ' + (c.out ? 'out ' : '') + (m.cls || '') + '">' + c.n + '</button></div>';
+      });
+    });
+    return html + '</div>';
+  }
+
+  function calDay() {
+    return header('day') + buildGrid(function (ri, ci, c) {
+      if (ri === 1 && c.n === 11) return { cls: 'sel' };
+      if (ri === 1 && c.n === 9) return { cls: 'hov' };
+      return {};
+    });
+  }
+
+  function calRange() {
+    // 11 (r1,c4) start → 16 (r2,c2) end; 12,13,14,15 in range
+    return header('range') + buildGrid(function (ri, ci, c) {
+      if (ri === 1 && c.n === 11) return { cls: 'sel', cell: 'r rs' };
+      if (ri === 1 && (c.n === 12)) return { cell: 'r' };
+      if (ri === 1 && (c.n === 13)) return { cell: 'r edge-r' };
+      if (ri === 2 && (c.n === 14)) return { cell: 'r edge-l' };
+      if (ri === 2 && (c.n === 15)) return { cell: 'r' };
+      if (ri === 2 && c.n === 16) return { cls: 'sel', cell: 'r re' };
+      return {};
+    });
+  }
+
+  function calYear() {
+    var html = header('year') + '<div class="dp-years">';
+    for (var y = 2022; y <= 2049; y++) html += '<button class="dp-year' + (y === 2022 ? ' sel' : '') + '">' + y + '</button>';
+    return html + '</div>';
+  }
+
+  document.querySelectorAll('.dp[data-cal]').forEach(function (el) {
+    el.innerHTML = el.dataset.cal === 'range' ? calRange() : el.dataset.cal === 'year' ? calYear() : calDay();
+  });
+
+  // cell-state legend
+  var legend = [
+    ['Default', '9'], ['Hover', '9 hov'], ['Selected', '11 sel'],
+    ['Focus', '11 foc'], ['In-range', '12'], ['Disabled', '3 dis'], ['Weekday', 'wd']
+  ];
+  var lg = document.getElementById('dp-legend');
+  if (lg) lg.innerHTML = legend.map(function (p) {
+    var parts = p[1].split(' '); var num = parts[0];
+    if (num === 'wd') return '<div class="dp-leg"><span class="dp-day" style="color:var(--main-text\\/placeholder,#b2b2b2)">Mo</span><span>' + p[0] + '</span></div>';
+    var cls = parts.slice(1).join(' ');
+    var wrap = cls.indexOf('range') !== -1;
+    var inner = '<span class="dp-day ' + cls + '">' + num + '</span>';
+    if (p[0] === 'In-range') inner = '<span class="dp-cell r edge-l edge-r" style="width:40px;height:40px"><span class="dp-day">' + num + '</span></span>';
+    return '<div class="dp-leg">' + inner + '<span>' + p[0] + '</span></div>';
+  }).join('');
+})();
+</script>
+<script src="../js/theme.js"></script>
+</body>
+</html>
