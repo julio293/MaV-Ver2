@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Section Header — MaV Design System</title>
+<link rel="stylesheet" href="../css/tokens.css">
+<link rel="stylesheet" href="../css/shared.css">
+<style>
+/* ══ Section Header — Figma "❖ Section Header" (270:8099) ═════════════════════
+   A titled row that opens a section: a title (+ optional description) on the
+   left, with an optional trailing element — a "See all" text button or an icon
+   button. Sizes S/M/L, left/center alignment, default/subtle/inverted
+   appearance, and a skeleton loading state. All type is Plus Jakarta Sans. */
+.sh{display:flex;gap:16px;align-items:baseline;width:343px;max-width:100%;box-sizing:border-box}
+.sh-main{flex:1 0 0;min-width:0;display:flex;flex-direction:column;gap:4px}
+.sh-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;line-height:1.2;color:var(--main-text\/default,#171717);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:0}
+.sh-desc{font-family:'Plus Jakarta Sans',sans-serif;font-weight:500;line-height:1.35;color:var(--main-text\/description,#7f7f7f);margin:0}
+
+/* trailing: text button */
+.sh-link{flex-shrink:0;font-family:'Plus Jakarta Sans',sans-serif;font-weight:500;font-size:14px;
+  color:var(--main-text\/brand,#352eff);text-decoration:underline;cursor:pointer;background:none;border:0;white-space:nowrap}
+[data-theme=dark] .sh-link{color:var(--main-text\/brand,#a1ff5b)}
+/* trailing: icon button */
+.sh-ico{flex-shrink:0;width:32px;height:32px;border-radius:999px;display:grid;place-items:center;cursor:pointer;
+  background:transparent;border:1px solid var(--btn\/secondary\/default-outline,#efefef)}
+.sh-ico svg{width:18px;height:18px;stroke:var(--icon\/default,#171717);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+[data-theme=dark] .sh-ico{border-color:var(--mav-border)}
+[data-theme=dark] .sh-ico svg{stroke:var(--mav-fg)}
+
+/* sizes */
+.sh.lg .sh-title{font-size:24px}
+.sh.lg .sh-desc{font-size:16px}
+.sh.md .sh-title{font-size:20px}
+.sh.md .sh-desc{font-size:16px}
+.sh.sm .sh-title{font-size:14px}
+.sh.sm .sh-desc{font-size:14px}
+
+/* alignment */
+.sh.center{justify-content:center}
+.sh.center .sh-main{flex:0 1 auto;text-align:center}
+
+/* appearance */
+.sh.subtle .sh-title{color:var(--main-text\/title-subtle,#565656)}
+.sh.subtle .sh-desc{color:var(--main-text\/title-subtle,#565656)}
+.sh.inverted .sh-title{color:#ffffff}
+.sh.inverted .sh-desc{color:#c7c7c7}
+.sh.inverted .sh-link{color:var(--mav-primary-dark,#a1ff5b)}
+.sh.inverted .sh-ico{border-color:#484848}
+.sh.inverted .sh-ico svg{stroke:#ffffff}
+
+/* skeleton */
+.sh.skeleton .sh-title,.sh.skeleton .sh-desc{color:transparent;border-radius:4px;background:var(--skeleton,#e3e3e380)}
+.sh.skeleton .sh-title{width:60%;height:1em}
+.sh.skeleton .sh-desc{width:85%;height:.9em}
+.sh.skeleton .sh-link{color:transparent;background:var(--skeleton,#e3e3e380);border-radius:4px;text-decoration:none}
+.sh.skeleton .sh-ico{border-color:transparent;background:var(--skeleton,#e3e3e380)}
+.sh.skeleton .sh-ico svg{visibility:hidden}
+[data-theme=dark]{--skeleton:#ffffff14}
+
+/* demo stage */
+.sh-stage{background:var(--mav-surface,#f5f5f5);border-radius:16px;padding:28px;display:flex;flex-direction:column;gap:22px;align-items:stretch}
+.sh-row{display:flex;flex-wrap:wrap;gap:40px}
+.sh-cell{display:flex;flex-direction:column;gap:10px}
+.sh-tag{font-size:11px;color:var(--mav-muted);font-family:'Inter',sans-serif}
+.sh-card{background:var(--mav-bg,#fff);border:1px solid var(--mav-border);border-radius:12px;padding:18px}
+.canvas-dark{background:var(--main\/white,#171717);border-radius:16px;padding:28px;display:flex;flex-direction:column;gap:22px}
+.canvas-dark .sh-tag{color:#9a9a9a}
+</style>
+</head>
+<body>
+<div class="doc-layout">
+<nav class="doc-sidebar"></nav>
+<main class="doc-main">
+  <div class="topbar">
+    <a href="../index.html" class="topbar-back">← MaV</a>
+    <span>/</span>
+    <span class="topbar-title">Section Header</span>
+    <div class="topbar-spacer"></div>
+    <button class="theme-btn" data-theme-toggle><span data-theme-icon>☾</span> <span data-theme-label>Dark mode</span></button>
+  </div>
+
+  <div class="page-header">
+    <div class="page-breadcrumb"><a href="../index.html">MaV</a> / Components</div>
+    <h1 class="page-title">Section Header</h1>
+    <p class="page-desc">The titled row that opens a section of content. A title with an optional description on the left, and an optional trailing action — a “See all” text link or an icon button. Three sizes, left / center alignment, default / subtle / inverted appearance, and a skeleton loading state. Type is Plus&nbsp;Jakarta&nbsp;Sans throughout.</p>
+  </div>
+
+  <!-- Anatomy -->
+  <div class="section">
+    <h2 class="section-title">Anatomy</h2>
+    <p class="section-desc">Title + description (<code>--main-text/default</code> · <code>--main-text/description</code>) with a trailing “See all” link (<code>--main-text/brand</code>, re-themes to lime in dark). Gap 16px, title→description 4px.</p>
+    <div class="preview-card">
+      <div class="preview-canvas">
+        <div class="sh-stage" style="align-items:flex-start">
+          <div class="sh-card" style="width:375px;max-width:100%">
+            <div class="sh md">
+              <div class="sh-main"><p class="sh-title">Section title</p><p class="sh-desc">Lorem ipsum dolor sit amet.</p></div>
+              <button class="sh-link">See all</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="preview-meta"><span class="preview-label">Title + description + trailing text button · medium · left</span><span class="preview-sublabel">--main-text/default · --main-text/description · --main-text/brand</span></div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- Sizes -->
+  <div class="section">
+    <h2 class="section-title">Sizes</h2>
+    <p class="section-desc">Large (24px), Medium (20px), Small (14px) titles.</p>
+    <div class="preview-card">
+      <div class="preview-canvas">
+        <div class="sh-stage">
+          <div class="sh-cell"><span class="sh-tag">Large</span>
+            <div class="sh lg"><div class="sh-main"><p class="sh-title">Section title</p><p class="sh-desc">Lorem ipsum dolor sit amet.</p></div><button class="sh-link">See all</button></div></div>
+          <div class="sh-cell"><span class="sh-tag">Medium</span>
+            <div class="sh md"><div class="sh-main"><p class="sh-title">Section title</p><p class="sh-desc">Lorem ipsum dolor sit amet.</p></div><button class="sh-link">See all</button></div></div>
+          <div class="sh-cell"><span class="sh-tag">Small</span>
+            <div class="sh sm"><div class="sh-main"><p class="sh-title">Section title</p><p class="sh-desc">Lorem ipsum dolor sit amet.</p></div><button class="sh-link">See all</button></div></div>
+        </div>
+      </div>
+      <div class="preview-meta"><span class="preview-label">Large · Medium · Small</span></div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- Trailing element -->
+  <div class="section">
+    <h2 class="section-title">Trailing element <span class="section-badge">elemAfter</span></h2>
+    <p class="section-desc">None, a “See all” text button, or an icon button (32px, ghost).</p>
+    <div class="preview-card">
+      <div class="preview-canvas">
+        <div class="sh-stage">
+          <div class="sh-cell"><span class="sh-tag">None</span>
+            <div class="sh md"><div class="sh-main"><p class="sh-title">Section title</p><p class="sh-desc">Lorem ipsum dolor sit amet.</p></div></div></div>
+          <div class="sh-cell"><span class="sh-tag">Text button</span>
+            <div class="sh md"><div class="sh-main"><p class="sh-title">Section title</p><p class="sh-desc">Lorem ipsum dolor sit amet.</p></div><button class="sh-link">See all</button></div></div>
+          <div class="sh-cell"><span class="sh-tag">Icon button</span>
+            <div class="sh md"><div class="sh-main"><p class="sh-title">Section title</p><p class="sh-desc">Lorem ipsum dolor sit amet.</p></div><button class="sh-ico" aria-label="Add"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div></div>
+        </div>
+      </div>
+      <div class="preview-meta"><span class="preview-label">none · text button · icon button</span></div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- Alignment & appearance -->
+  <div class="section">
+    <h2 class="section-title">Alignment &amp; appearance</h2>
+    <p class="section-desc">Left or centered; <strong>default</strong>, <strong>subtle</strong> (muted title), and <strong>inverted</strong> (on dark surfaces).</p>
+    <div class="preview-card">
+      <div class="preview-canvas" style="flex-direction:column;gap:20px">
+        <div class="sh-stage">
+          <div class="sh-cell"><span class="sh-tag">Left · default</span>
+            <div class="sh md"><div class="sh-main"><p class="sh-title">Section title</p><p class="sh-desc">Lorem ipsum dolor sit amet.</p></div><button class="sh-link">See all</button></div></div>
+          <div class="sh-cell"><span class="sh-tag">Center · default</span>
+            <div class="sh md center"><div class="sh-main"><p class="sh-title">Section title</p><p class="sh-desc">Lorem ipsum dolor sit amet.</p></div></div></div>
+          <div class="sh-cell"><span class="sh-tag">Left · subtle</span>
+            <div class="sh md subtle"><div class="sh-main"><p class="sh-title">Section title</p><p class="sh-desc">Lorem ipsum dolor sit amet.</p></div><button class="sh-link">See all</button></div></div>
+        </div>
+        <div class="canvas-dark" data-theme="dark">
+          <div class="sh-cell"><span class="sh-tag">Inverted</span>
+            <div class="sh md inverted"><div class="sh-main"><p class="sh-title">Section title</p><p class="sh-desc">Lorem ipsum dolor sit amet.</p></div><button class="sh-link">See all</button></div></div>
+          <div class="sh-cell"><span class="sh-tag">Inverted · icon</span>
+            <div class="sh md inverted"><div class="sh-main"><p class="sh-title">Section title</p><p class="sh-desc">Lorem ipsum dolor sit amet.</p></div><button class="sh-ico" aria-label="Add"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div></div>
+        </div>
+      </div>
+      <div class="preview-meta"><span class="preview-label">Left / center · default / subtle / inverted</span></div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- Skeleton -->
+  <div class="section">
+    <h2 class="section-title">Skeleton</h2>
+    <p class="section-desc">Loading placeholder — title, description, and trailing action render as skeleton blocks (<code>--skeleton</code>).</p>
+    <div class="preview-card">
+      <div class="preview-canvas">
+        <div class="sh-stage">
+          <div class="sh-cell"><span class="sh-tag">Large</span>
+            <div class="sh lg skeleton"><div class="sh-main"><p class="sh-title">Section title</p><p class="sh-desc">Lorem ipsum dolor sit amet.</p></div><button class="sh-link">See all</button></div></div>
+          <div class="sh-cell"><span class="sh-tag">Medium</span>
+            <div class="sh md skeleton"><div class="sh-main"><p class="sh-title">Section title</p><p class="sh-desc">Lorem ipsum dolor sit amet.</p></div><button class="sh-ico"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div></div>
+          <div class="sh-cell"><span class="sh-tag">Small</span>
+            <div class="sh sm skeleton"><div class="sh-main"><p class="sh-title">Section title</p><p class="sh-desc">Lorem ipsum dolor sit amet.</p></div></div></div>
+        </div>
+      </div>
+      <div class="preview-meta"><span class="preview-label">Skeleton loading — large · medium · small</span></div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- Token reference -->
+  <div class="section">
+    <h2 class="section-title">Token Reference</h2>
+    <table class="token-table">
+      <thead><tr><th>Token</th><th>Value</th><th>Usage</th></tr></thead>
+      <tbody>
+        <tr><td class="token-name">--main-text/default</td><td><span class="token-swatch-sm" style="background:#171717"></span><span class="token-value">#171717</span></td><td class="token-value">Title (dark: #ffffff)</td></tr>
+        <tr><td class="token-name">--main-text/description</td><td><span class="token-swatch-sm" style="background:#7f7f7f"></span><span class="token-value">#7f7f7f</span></td><td class="token-value">Description</td></tr>
+        <tr><td class="token-name">--main-text/brand</td><td><span class="token-swatch-sm" style="background:#352eff"></span><span class="token-value">#352eff</span></td><td class="token-value">“See all” link (→ lime in dark)</td></tr>
+        <tr><td class="token-name">Title sizes</td><td><span class="token-value">24 · 20 · 14 px</span></td><td class="token-value">Large / Medium / Small</td></tr>
+        <tr><td class="token-name">Gap · Title→desc</td><td><span class="token-value">16px · 4px</span></td><td class="token-value">Row layout</td></tr>
+        <tr><td class="token-name">--skeleton</td><td><span class="token-swatch-sm" style="background:#e3e3e3"></span><span class="token-value">#e3e3e380</span></td><td class="token-value">Loading blocks</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</main>
+</div>
+<script src="../js/theme.js"></script>
+</body>
+</html>

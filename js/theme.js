@@ -43,6 +43,7 @@
     phone:     '<rect x="6" y="3" width="12" height="18" rx="2"/><path d="M11 18h2"/>',
     monitor:   '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
     book:      '<path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2z"/><path d="M5 16h13"/>',
+    section:   '<path d="M4 6h16M4 12h10M4 18h16"/>',
     dot:       '<circle cx="12" cy="12" r="3"/>'
   };
   function icon(key) {
@@ -74,6 +75,7 @@
     { href: 'components/avatars.html',       label: 'Avatars',           ic: 'avatar' },
     { href: 'components/cards.html',         label: 'Payment Cards',     ic: 'card' },
     { href: 'components/list.html',          label: 'List',              ic: 'list' },
+    { href: 'components/section-header.html', label: 'Section Header',    ic: 'section' },
     { href: 'components/navigation.html',    label: 'Navigation',        ic: 'compass' },
     { href: 'components/app-bar.html',       label: 'Header / App Bar',  ic: 'paneltop' },
     { href: 'components/button-dock.html',   label: 'Button Dock',       ic: 'panelbot' },
