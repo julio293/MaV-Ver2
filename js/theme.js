@@ -45,6 +45,7 @@
     book:      '<path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2z"/><path d="M5 16h13"/>',
     section:   '<path d="M4 6h16M4 12h10M4 18h16"/>',
     calendar:  '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/>',
+    pages:     '<rect x="2" y="9" width="20" height="6" rx="2"/><path d="M8.5 9v6M15.5 9v6"/>',
     dot:       '<circle cx="12" cy="12" r="3"/>'
   };
   function icon(key) {
@@ -79,6 +80,7 @@
     { href: 'components/list.html',          label: 'List',              ic: 'list' },
     { href: 'components/section-header.html', label: 'Section Header',    ic: 'section' },
     { href: 'components/navigation.html',    label: 'Navigation',        ic: 'compass' },
+    { href: 'components/pagination.html',    label: 'Pagination',        ic: 'pages' },
     { href: 'components/app-bar.html',       label: 'Header / App Bar',  ic: 'paneltop' },
     { href: 'components/button-dock.html',   label: 'Button Dock',       ic: 'panelbot' },
     { href: 'components/tabs.html',          label: 'Tabs',              ic: 'tabs' },

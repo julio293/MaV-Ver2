@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pagination — MaV Design System</title>
+<link rel="stylesheet" href="../css/tokens.css">
+<link rel="stylesheet" href="../css/shared.css">
+<style>
+/* ══ Pagination — Figma "• Pagination" (203:3134) ════════════════════════════
+   Break a large set across pages. Types: Button group (connected), Clear button
+   (spaced), Page count (Page X of Y), and Dots. A single active indicator glides
+   between pages; dots stretch into a pill; prev/next nudge on hover. The active
+   fill is the primary token, re-theming blue → lime in dark. */
+.pg{--pg-accent:var(--btn\/primary\/default,#352eff);--pg-on:#fff;font-family:'Plus Jakarta Sans',sans-serif}
+[data-theme=dark] .pg{--pg-accent:var(--mav-primary-dark,#a1ff5b);--pg-on:#171717}
+
+.pg-ind{position:absolute;top:4px;bottom:4px;left:0;width:0;background:var(--pg-accent);z-index:0;
+  border-radius:6px;transition:transform .4s cubic-bezier(.34,1.1,.35,1),width .4s cubic-bezier(.34,1.1,.35,1),opacity .2s;pointer-events:none}
+
+/* items shared */
+.pg-item{position:relative;z-index:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  height:40px;padding:0 16px;min-width:40px;box-sizing:border-box;border:0;background:none;cursor:pointer;
+  font-family:'Plus Jakarta Sans',sans-serif;font-weight:500;font-size:14px;color:var(--main-text\/default,#171717);
+  transition:color .2s,background .16s,transform .12s;white-space:nowrap}
+[data-theme=dark] .pg-item{color:var(--mav-fg)}
+.pg-item svg{width:18px;height:18px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
+.pg-item.gap{cursor:default;color:var(--main-text\/placeholder,#b2b2b2)}
+.pg-item.active{color:var(--pg-on)}
+.pg-item:disabled{color:var(--main-text\/placeholder,#b2b2b2);opacity:.55;cursor:not-allowed}
+.pg-item.nav:hover:not(:disabled) .ic-prev{transform:translateX(-3px)}
+.pg-item.nav:hover:not(:disabled) .ic-next{transform:translateX(3px)}
+.pg-item:active:not(:disabled){transform:scale(.94)}
+
+/* Button group — connected bar */
+.pg-group{position:relative;display:inline-flex;align-items:stretch;background:var(--mav-bg,#fff);
+  border:1px solid var(--mav-border,#efefef);border-radius:8px;overflow:hidden;
+  box-shadow:0 1px 2px -1px rgba(0,0,0,.06),0 3px 6px -3px rgba(0,0,0,.06)}
+.pg-group .pg-item + .pg-item{border-left:1px solid var(--mav-border,#dbdbdb)}
+.pg-group .pg-num:hover:not(.active){background:var(--mav-bg-secondary,#e5e5e5)}
+
+/* Clear button — spaced pills */
+.pg-clear{position:relative;display:inline-flex;align-items:center;gap:2px}
+.pg-clear .pg-ind{border-radius:10px}
+.pg-clear .pg-num{border-radius:10px}
+.pg-clear .pg-num:hover:not(.active){background:var(--mav-bg-secondary,#e5e5e5)}
+
+/* Page count */
+.pg-count{display:inline-flex;align-items:center;gap:20px}
+.pg-count .pg-btn{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 14px;border-radius:8px;
+  border:1px solid var(--mav-border,#dbdbdb);background:var(--mav-bg,#fff);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;
+  font-weight:500;font-size:14px;color:var(--main-text\/default,#171717);box-shadow:0 1px 2px -1px rgba(0,0,0,.06);transition:transform .12s,border-color .15s,opacity .15s}
+[data-theme=dark] .pg-count .pg-btn{color:var(--mav-fg)}
+.pg-count .pg-btn svg{width:18px;height:18px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
+.pg-count .pg-btn:hover:not(:disabled){border-color:var(--pg-accent)}
+.pg-count .pg-btn:hover:not(:disabled) .ic-prev{transform:translateX(-3px)}
+.pg-count .pg-btn:hover:not(:disabled) .ic-next{transform:translateX(3px)}
+.pg-count .pg-btn:active:not(:disabled){transform:scale(.95)}
+.pg-count .pg-btn:disabled{opacity:.5;cursor:not-allowed}
+.pg-count .pg-label{font-weight:700;font-size:14px;color:var(--main-text\/default,#171717);min-width:96px;text-align:center}
+[data-theme=dark] .pg-count .pg-label{color:var(--mav-fg)}
+.pg-count .pg-num-anim{display:inline-block;animation:pg-pop .32s cubic-bezier(.34,1.3,.4,1)}
+@keyframes pg-pop{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+
+/* Dots */
+.pg-dots{display:inline-flex;align-items:center;gap:8px}
+.pg-dot{width:8px;height:8px;border-radius:999px;background:var(--mav-border,#e5e5e5);border:0;padding:0;cursor:pointer;
+  transition:width .4s cubic-bezier(.34,1.2,.35,1),background .28s}
+.pg-dot:hover:not(.on){background:var(--main-text\/placeholder,#b2b2b2)}
+.pg-dot.on{width:24px;background:var(--pg-accent)}
+
+/* stage */
+.pg-stage{background:var(--mav-surface,#f5f5f5);border-radius:16px;padding:36px 28px;display:flex;flex-direction:column;gap:30px;align-items:center}
+.pg-cell{display:flex;flex-direction:column;gap:12px;align-items:center}
+.pg-tag{font-size:11px;color:var(--mav-muted);font-family:'Inter',sans-serif}
+.canvas-dark{background:var(--main\/white,#171717);border-radius:16px;padding:36px;display:flex;flex-direction:column;gap:28px;align-items:center}
+.canvas-dark .pg-tag{color:#9a9a9a}
+</style>
+</head>
+<body>
+<div class="doc-layout">
+<nav class="doc-sidebar"></nav>
+<main class="doc-main">
+  <div class="topbar">
+    <a href="../index.html" class="topbar-back">← MaV</a>
+    <span>/</span>
+    <span class="topbar-title">Pagination</span>
+    <div class="topbar-spacer"></div>
+    <button class="theme-btn" data-theme-toggle><span data-theme-icon>☾</span> <span data-theme-label>Dark mode</span></button>
+  </div>
+
+  <div class="page-header">
+    <div class="page-breadcrumb"><a href="../index.html">MaV</a> / Components</div>
+    <h1 class="page-title">Pagination</h1>
+    <p class="page-desc">Breaks a large set of results across pages. Four types — a connected <strong>button group</strong>, spaced <strong>clear buttons</strong>, a <strong>page count</strong> (Page X of Y), and <strong>dots</strong> — each with optional prev/next label and icon. Click through them: a single active indicator glides between pages, dots stretch into a pill, and prev/next nudge on hover.</p>
+  </div>
+
+  <!-- Anatomy -->
+  <div class="section">
+    <h2 class="section-title">Anatomy <span class="section-badge">try it</span></h2>
+    <p class="section-desc">Button group — prev · numbered pages · next, connected by hairline dividers. The active page fill (<code>--btn/primary/default</code>) slides smoothly as you click.</p>
+    <div class="preview-card">
+      <div class="preview-canvas">
+        <div class="pg-stage" style="align-items:flex-start">
+          <div class="pg" data-pg="group" data-pages="7" data-nav="both"></div>
+        </div>
+      </div>
+      <div class="preview-meta"><span class="preview-label">Button group · prev/next label + icon · gliding active pill</span><span class="preview-sublabel">--btn/primary/default · --mav-border · --main-text/default</span></div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- Types -->
+  <div class="section">
+    <h2 class="section-title">Types</h2>
+    <p class="section-desc">Clear buttons (spaced), page count, and dots — all interactive.</p>
+    <div class="preview-card">
+      <div class="preview-canvas">
+        <div class="pg-stage">
+          <div class="pg-cell"><span class="pg-tag">Clear button</span><div class="pg" data-pg="clear" data-pages="7" data-nav="both"></div></div>
+          <div class="pg-cell"><span class="pg-tag">Button group · with ellipsis</span><div class="pg" data-pg="group" data-pages="ellipsis" data-nav="icon"></div></div>
+          <div class="pg-cell"><span class="pg-tag">Page count</span><div class="pg" data-pg="count" data-pages="8" data-nav="both"></div></div>
+          <div class="pg-cell"><span class="pg-tag">Dots</span><div class="pg" data-pg="dots" data-pages="5"></div></div>
+        </div>
+      </div>
+      <div class="preview-meta"><span class="preview-label">Clear · ellipsis · page count · dots</span></div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- Nav options -->
+  <div class="section">
+    <h2 class="section-title">Nav options</h2>
+    <p class="section-desc">Prev/next can show a label, an icon, both, or neither.</p>
+    <div class="preview-card">
+      <div class="preview-canvas">
+        <div class="pg-stage">
+          <div class="pg-cell"><span class="pg-tag">Label + icon</span><div class="pg" data-pg="clear" data-pages="5" data-nav="both"></div></div>
+          <div class="pg-cell"><span class="pg-tag">Icon only</span><div class="pg" data-pg="clear" data-pages="5" data-nav="icon"></div></div>
+          <div class="pg-cell"><span class="pg-tag">Label only</span><div class="pg" data-pg="clear" data-pages="5" data-nav="label"></div></div>
+          <div class="pg-cell"><span class="pg-tag">No buttons</span><div class="pg" data-pg="clear" data-pages="5" data-nav="none"></div></div>
+        </div>
+      </div>
+      <div class="preview-meta"><span class="preview-label">both · icon · label · none</span></div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- Dark -->
+  <div class="section">
+    <h2 class="section-title">In dark</h2>
+    <p class="section-desc">Active fill and dots re-theme to lime; everything animates the same.</p>
+    <div class="preview-card">
+      <div class="preview-canvas">
+        <div class="canvas-dark" data-theme="dark">
+          <div class="pg" data-pg="group" data-pages="7" data-nav="both"></div>
+          <div class="pg" data-pg="clear" data-pages="7" data-nav="icon"></div>
+          <div class="pg" data-pg="dots" data-pages="5"></div>
+        </div>
+      </div>
+      <div class="preview-meta"><span class="preview-label">Dark — active + dots → lime</span></div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- Token reference -->
+  <div class="section">
+    <h2 class="section-title">Token Reference</h2>
+    <table class="token-table">
+      <thead><tr><th>Token</th><th>Value</th><th>Usage</th></tr></thead>
+      <tbody>
+        <tr><td class="token-name">--btn/primary/default</td><td><span class="token-swatch-sm" style="background:#352eff"></span><span class="token-value">#352eff</span></td><td class="token-value">Active page / dot (→ lime in dark)</td></tr>
+        <tr><td class="token-name">--main-text/default</td><td><span class="token-swatch-sm" style="background:#171717"></span><span class="token-value">#171717</span></td><td class="token-value">Page numbers · labels</td></tr>
+        <tr><td class="token-name">--main-text/placeholder</td><td><span class="token-swatch-sm" style="background:#b2b2b2"></span><span class="token-value">#b2b2b2</span></td><td class="token-value">Ellipsis · disabled</td></tr>
+        <tr><td class="token-name">--mav-border</td><td><span class="token-swatch-sm" style="background:#efefef;border:1px solid #d0d0d0"></span><span class="token-value">#efefef</span></td><td class="token-value">Bar border · dividers · dot rest</td></tr>
+        <tr><td class="token-name">Motion</td><td><span class="token-value">.4s · cubic-bezier(.34,1.1,.35,1)</span></td><td class="token-value">Gliding indicator &amp; dot stretch</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</main>
+</div>
+<script>
+(function () {
+  var prevIco = '<svg class="ic-prev" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>';
+  var nextIco = '<svg class="ic-next" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>';
+
+  function navHTML(dir, mode) {
+    var ico = dir === 'prev' ? prevIco : nextIco;
+    var lbl = dir === 'prev' ? 'Previous' : 'Next';
+    if (mode === 'none') return '';
+    if (mode === 'icon') return dir === 'prev' ? ico : ico;
+    if (mode === 'label') return lbl;
+    return dir === 'prev' ? ico + '<span>' + lbl + '</span>' : '<span>' + lbl + '</span>' + ico;
+  }
+
+  function build(el) {
+    var type = el.dataset.pg, nav = el.dataset.nav || 'both';
+    var pagesSpec = el.dataset.pages;
+
+    if (type === 'dots') {
+      var n = parseInt(pagesSpec, 10) || 5, h = '<div class="pg-dots">';
+      for (var d = 0; d < n; d++) h += '<button class="pg-dot' + (d === 0 ? ' on' : '') + '" data-i="' + d + '" aria-label="Page ' + (d + 1) + '"></button>';
+      el.innerHTML = h + '</div>';
+      el.querySelectorAll('.pg-dot').forEach(function (dot) {
+        dot.addEventListener('click', function () {
+          el.querySelectorAll('.pg-dot').forEach(function (x) { x.classList.remove('on'); });
+          dot.classList.add('on');
+        });
+      });
+      return;
+    }
+
+    if (type === 'count') {
+      var total = parseInt(pagesSpec, 10) || 8, cur = 1;
+      el.innerHTML = '<div class="pg-count">' +
+        '<button class="pg-btn nav" data-nav="prev" disabled>' + (nav === 'label' ? 'Previous' : nav === 'icon' ? prevIco : prevIco + '<span>Previous</span>') + '</button>' +
+        '<span class="pg-label">Page <span class="pg-cur">1</span> of ' + total + '</span>' +
+        '<button class="pg-btn nav" data-nav="next">' + (nav === 'label' ? 'Next' : nav === 'icon' ? nextIco : '<span>Next</span>' + nextIco) + '</button></div>';
+      var lbl = el.querySelector('.pg-label'), prevB = el.querySelector('[data-nav=prev]'), nextB = el.querySelector('[data-nav=next]');
+      function set(c) {
+        cur = Math.max(1, Math.min(total, c));
+        lbl.innerHTML = 'Page <span class="pg-cur pg-num-anim">' + cur + '</span> of ' + total;
+        prevB.disabled = cur === 1; nextB.disabled = cur === total;
+      }
+      prevB.addEventListener('click', function () { set(cur - 1); });
+      nextB.addEventListener('click', function () { set(cur + 1); });
+      return;
+    }
+
+    // button group / clear — numbered items with a gliding indicator
+    var pages, ellipsis = pagesSpec === 'ellipsis';
+    if (ellipsis) pages = [1, 2, 3, '…', 7, 8, 9];
+    else { pages = []; for (var i = 1; i <= (parseInt(pagesSpec, 10) || 7); i++) pages.push(i); }
+
+    var wrapCls = type === 'group' ? 'pg-group' : 'pg-clear';
+    var h2 = '<div class="' + wrapCls + '"><span class="pg-ind"></span>';
+    if (nav !== 'none') h2 += '<button class="pg-item nav" data-nav="prev" disabled>' + navHTML('prev', nav) + '</button>';
+    pages.forEach(function (p) {
+      if (p === '…') h2 += '<span class="pg-item gap">…</span>';
+      else h2 += '<button class="pg-item pg-num" data-p="' + p + '">' + p + '</button>';
+    });
+    if (nav !== 'none') h2 += '<button class="pg-item nav" data-nav="next">' + navHTML('next', nav) + '</button>';
+    el.innerHTML = h2 + '</div>';
+
+    var wrap = el.firstChild, ind = wrap.querySelector('.pg-ind');
+    var nums = Array.prototype.slice.call(wrap.querySelectorAll('.pg-num'));
+    var prevB2 = wrap.querySelector('[data-nav=prev]'), nextB2 = wrap.querySelector('[data-nav=next]');
+    var idx = 0;
+    function moveTo(el2, animate) {
+      ind.style.transition = animate ? '' : 'none';
+      ind.style.opacity = '1';
+      ind.style.transform = 'translateX(' + el2.offsetLeft + 'px)';
+      ind.style.width = el2.offsetWidth + 'px';
+      if (!animate) requestAnimationFrame(function () { ind.style.transition = ''; });
+    }
+    function setActive(i, animate) {
+      idx = i;
+      nums.forEach(function (nEl, k) { nEl.classList.toggle('active', k === i); });
+      moveTo(nums[i], animate);
+      if (prevB2) prevB2.disabled = i === 0;
+      if (nextB2) nextB2.disabled = i === nums.length - 1;
+    }
+    nums.forEach(function (nEl, i) { nEl.addEventListener('click', function () { setActive(i, true); }); });
+    if (prevB2) prevB2.addEventListener('click', function () { if (idx > 0) setActive(idx - 1, true); });
+    if (nextB2) nextB2.addEventListener('click', function () { if (idx < nums.length - 1) setActive(idx + 1, true); });
+    // initial placement without animation (after layout/fonts settle)
+    requestAnimationFrame(function () { setActive(0, false); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { moveTo(nums[idx], false); });
+  }
+
+  document.querySelectorAll('.pg[data-pg]').forEach(build);
+})();
+</script>
+<script src="../js/theme.js"></script>
+</body>
+</html>
