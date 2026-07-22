@@ -59,8 +59,6 @@
 .pg-count .pg-btn:disabled{opacity:.5;cursor:not-allowed}
 .pg-count .pg-label{font-weight:700;font-size:14px;color:var(--main-text\/default,#171717);min-width:96px;text-align:center}
 [data-theme=dark] .pg-count .pg-label{color:var(--mav-fg)}
-.pg-count .pg-num-anim{display:inline-block;animation:pg-pop .32s cubic-bezier(.34,1.3,.4,1)}
-@keyframes pg-pop{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
 
 /* Dots */
 .pg-dots{display:inline-flex;align-items:center;gap:8px}
@@ -219,12 +217,13 @@
       var total = parseInt(pagesSpec, 10) || 8, cur = 1;
       el.innerHTML = '<div class="pg-count">' +
         '<button class="pg-btn nav" data-nav="prev" disabled>' + (nav === 'label' ? 'Previous' : nav === 'icon' ? prevIco : prevIco + '<span>Previous</span>') + '</button>' +
-        '<span class="pg-label">Page <span class="pg-cur">1</span> of ' + total + '</span>' +
+        '<span class="pg-label">Page <span class="pg-cur mav-num">1</span> of ' + total + '</span>' +
         '<button class="pg-btn nav" data-nav="next">' + (nav === 'label' ? 'Next' : nav === 'icon' ? nextIco : '<span>Next</span>' + nextIco) + '</button></div>';
-      var lbl = el.querySelector('.pg-label'), prevB = el.querySelector('[data-nav=prev]'), nextB = el.querySelector('[data-nav=next]');
+      var curEl = el.querySelector('.pg-cur'), prevB = el.querySelector('[data-nav=prev]'), nextB = el.querySelector('[data-nav=next]');
+      if (window.mavAnimateNumbers) window.mavAnimateNumbers(el);   // watch the freshly-built number
       function set(c) {
         cur = Math.max(1, Math.min(total, c));
-        lbl.innerHTML = 'Page <span class="pg-cur pg-num-anim">' + cur + '</span> of ' + total;
+        curEl.textContent = cur;   // textContent change → directional slide (up/down) via the shared utility
         prevB.disabled = cur === 1; nextB.disabled = cur === total;
       }
       prevB.addEventListener('click', function () { set(cur - 1); });

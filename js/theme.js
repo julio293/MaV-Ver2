@@ -242,3 +242,39 @@
     applySync(e.data);
   });
 })();
+
+/* ── Animated numbers ──────────────────────────────────────────────────────
+   Any element with class "mav-num" plays a directional slide when its numeric
+   text changes: up when the value increases, down when it decreases — the same
+   feel as the pagination page count. Opt in by adding the class; existing code
+   that sets .textContent triggers it automatically (a MutationObserver watches
+   the element). Intended for DISCRETE steps (steppers, page count), not for
+   continuously-updating values (slider drag, live tweens). */
+(function () {
+  var last = new WeakMap();
+  function valueOf(el) {
+    var m = (el.textContent || '').replace(/[^0-9.\-]/g, '');
+    return m === '' || m === '-' || m === '.' ? NaN : parseFloat(m);
+  }
+  function play(el) {
+    var v = valueOf(el), prev = last.get(el);
+    last.set(el, v);
+    if (prev === undefined || isNaN(v) || isNaN(prev) || v === prev) return;
+    el.classList.remove('mav-num-up', 'mav-num-down');
+    void el.offsetWidth; /* restart the animation */
+    el.classList.add(v > prev ? 'mav-num-up' : 'mav-num-down');
+  }
+  function watch(el) {
+    if (el.__mavNum) return;
+    el.__mavNum = true;
+    last.set(el, valueOf(el));
+    new MutationObserver(function () { play(el); })
+      .observe(el, { childList: true, characterData: true, subtree: true });
+  }
+  function scan(root) {
+    (root || document).querySelectorAll('.mav-num').forEach(watch);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { scan(); });
+  else scan();
+  window.mavAnimateNumbers = scan; /* re-scan after inserting new .mav-num nodes */
+})();
