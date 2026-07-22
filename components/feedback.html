@@ -62,12 +62,30 @@
 .toast-light .toast-action{color:var(--mav-primary)}
 .toast-light .toast-success .toast-icon{background:var(--mav-success);color:var(--bc-white)}
 
-/* Inline feedback */
-.inline-feedback{display:flex;align-items:center;gap:6px;font-size:12px;margin-top:4px}
-.fb-error{color:var(--mav-danger)}
-.fb-success{color:var(--mav-success)}
-.fb-hint{color:var(--mav-muted)}
-.fb-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+/* Inline field feedback — mirrors the Input Field component (--input-field/* tokens) */
+.fb-demo{display:flex;flex-direction:column;gap:18px;width:100%;max-width:380px;font-family:'Plus Jakarta Sans',sans-serif}
+.fb-group{display:flex;flex-direction:column;gap:8px}
+.fb-label{font-weight:700;font-size:14px;color:var(--main-text\/default,#171717)}
+[data-theme=dark] .fb-label{color:var(--mav-fg)}
+.fb-input{display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:4px;
+  border:1px solid var(--input-field\/default\/outline-box,#cccccc);background:var(--input-field\/default\/bg-box,#fff);
+  box-shadow:0 1px 2px rgba(0,0,0,.04);transition:border-color .15s,background .15s,box-shadow .15s}
+.fb-input input{flex:1;min-width:0;border:0;background:none;outline:none;font-family:'Plus Jakarta Sans',sans-serif;
+  font-weight:700;font-size:14px;color:var(--main-text\/default,#171717)}
+[data-theme=dark] .fb-input input{color:var(--mav-fg)}
+.fb-input input::placeholder{color:var(--input-field\/default\/text-placeholder,#b2b2b2);font-weight:700}
+.fb-input .tail{width:20px;height:20px;flex-shrink:0}
+.fb-msg{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;line-height:1.3}
+.fb-input .tail svg,.fb-msg svg{width:20px;height:20px;flex-shrink:0;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+/* states */
+.fb-group.err .fb-input{border-color:var(--input-field\/error\/outline-box,#ff0000);background:var(--input-field\/error\/bg-box,#ff00001a)}
+.fb-group.err .fb-msg{color:var(--input-field\/error\/label-error,#ff0000)}
+.fb-group.err .fb-msg svg,.fb-group.err .tail svg{stroke:var(--input-field\/error\/icon-error,#ff0000)}
+.fb-group.ok .fb-input{border-color:var(--System\/Success,#629c28);background:var(--System\/Success-soft,#629c281a)}
+.fb-group.ok .fb-msg{color:var(--System\/Success,#629c28)}
+.fb-group.ok .fb-msg svg,.fb-group.ok .tail svg{stroke:var(--System\/Success,#629c28)}
+.fb-group.hint .fb-msg{color:var(--main-text\/description,#7f7f7f);font-weight:500}
+.fb-group.hint .fb-msg svg{stroke:var(--main-text\/description,#7f7f7f)}
 </style>
 </head>
 <body>
@@ -335,26 +353,28 @@
   <!-- Inline feedback -->
   <div class="section">
     <h2 class="section-title">Inline Field Feedback</h2>
-    <p class="section-desc">Sub-label messages attached to form inputs.</p>
+    <p class="section-desc">Validation messages attached to a form field — the field and its message share one state color, using the <code>--input-field/*</code> namespace (error → red tint, success → green) with a matching leading icon. Hints are neutral.</p>
     <div class="preview-card">
       <div class="preview-canvas">
-        <div>
-          <div>Email address</div>
-          <input value="not-an-email" readonly>
-          <div class="inline-feedback fb-error"><div class="fb-dot"></div>Invalid email address</div>
-        </div>
-        <div>
-          <div>Password</div>
-          <input type="password" value="strongpass" readonly>
-          <div class="inline-feedback fb-success"><div class="fb-dot"></div>Password strength: Strong</div>
-        </div>
-        <div>
-          <div>Phone number</div>
-          <input placeholder="+234 ..." readonly>
-          <div class="inline-feedback fb-hint"><div class="fb-dot"></div>Include country code</div>
+        <div class="fb-demo">
+          <div class="fb-group err">
+            <span class="fb-label">Email address</span>
+            <div class="fb-input"><input value="jane.doe@" readonly aria-invalid="true"><span class="tail"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16h.01"/></svg></span></div>
+            <div class="fb-msg"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16h.01"/></svg>Invalid email address</div>
+          </div>
+          <div class="fb-group ok">
+            <span class="fb-label">Password</span>
+            <div class="fb-input"><input type="password" value="strongpass1" readonly><span class="tail"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 12l2.4 2.4L15.5 9.5"/></svg></span></div>
+            <div class="fb-msg"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 12l2.4 2.4L15.5 9.5"/></svg>Password strength: Strong</div>
+          </div>
+          <div class="fb-group hint">
+            <span class="fb-label">Phone number</span>
+            <div class="fb-input"><input placeholder="+234 801 234 5678" readonly></div>
+            <div class="fb-msg"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 8h.01"/></svg>Include country code</div>
+          </div>
         </div>
       </div>
-      <div class="preview-meta"><span class="preview-label">Inline feedback — 12px · matches input state color</span></div>
+      <div class="preview-meta"><span class="preview-label">Field + message share one state color · error / success / hint</span><span class="preview-sublabel">--input-field/error/* · --System/Success · --main-text/description</span></div>
     </div>
   </div>
 
