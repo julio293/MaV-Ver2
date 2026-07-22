@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bottom Sheet — MaV Design System</title>
+<link rel="stylesheet" href="../css/tokens.css">
+<link rel="stylesheet" href="../css/shared.css">
+<style>
+/* ══ Bottom Sheet — Figma "• Bottom Sheet" (271:7738) ════════════════════════
+   A drawer that rises from the bottom over a dimmed blanket. Rounded 32px top
+   (--radius/sheet/lg), --background/bg-default surface, soft elevation. Header
+   is either nav (back · Title · close) or a title + text-only action button.
+   A scrollable body (Section-Header title 18 + body 16/24). Optional Button
+   Dock (primary button) and an iOS keyboard. A home indicator sits at the base.
+   Scrim = --color/blanket/bold. Primary / text-only actions re-theme blue →
+   lime in dark; the sheet surface flips to near-black.
+
+   Motion: the sheet slides up on a soft ease while the blanket cross-fades;
+   drag the header down (or tap the blanket / ✕ / back) to dismiss — it tracks
+   the pointer and snaps. Focusing the field raises the keyboard and the sheet
+   resizes; keys type. All gated behind prefers-reduced-motion. */
+
+.bs{font-family:'Plus Jakarta Sans',sans-serif}
+
+/* phone frame */
+.phone{position:relative;width:330px;height:640px;border-radius:46px;background:#0b0b0d;padding:10px;box-sizing:border-box;
+  box-shadow:0 30px 60px -20px rgba(0,0,0,.35),0 0 0 1px rgba(0,0,0,.06);flex:0 0 auto}
+.phone-screen{position:relative;width:100%;height:100%;border-radius:37px;overflow:hidden;background:var(--mav-bg,#fff);isolation:isolate}
+[data-theme=dark] .phone-screen{background:#0e0e10}
+
+/* faux app behind the sheet */
+.bs-app{position:absolute;inset:0;display:flex;flex-direction:column;color:var(--main-text\/default,#171717)}
+[data-theme=dark] .bs-app{color:#f2f2f2}
+.bs-status{display:flex;align-items:center;justify-content:space-between;padding:14px 26px 0;font-size:13px;font-weight:700}
+.bs-status .dots{display:flex;gap:3px;align-items:center}
+.bs-status .dots i{width:15px;height:10px;border-radius:2px;background:currentColor;display:inline-block;opacity:.9}
+.bs-app h4{margin:22px 22px 4px;font-size:22px;font-weight:800;letter-spacing:-.02em}
+.bs-app .sub{margin:0 22px 16px;font-size:13px;color:var(--mav-muted)}
+.bs-rows{padding:0 16px;display:flex;flex-direction:column;gap:10px}
+.bs-rowi{display:flex;gap:12px;align-items:center;padding:12px;border-radius:14px;background:var(--mav-surface,#f5f5f5)}
+[data-theme=dark] .bs-rowi{background:#1b1b1e}
+.bs-rowi .ic{width:38px;height:38px;border-radius:10px;background:var(--background\/bg-tertiary,#e6edff);flex:0 0 38px}
+.bs-rowi .ln{flex:1;display:flex;flex-direction:column;gap:6px}
+.bs-rowi .ln b{height:9px;width:60%;border-radius:5px;background:currentColor;opacity:.82}
+.bs-rowi .ln s{height:8px;width:40%;border-radius:5px;background:currentColor;opacity:.32}
+
+/* blanket / scrim */
+.bs-blanket{position:absolute;inset:0;background:var(--color\/blanket\/bold,rgba(13,13,13,.5));opacity:0;pointer-events:none;z-index:2}
+
+/* sheet */
+.bs-sheet{position:absolute;left:0;right:0;bottom:0;z-index:3;display:flex;flex-direction:column;
+  background:var(--background\/bg-default,#fff);border-radius:var(--radius\/sheet\/lg,32px) var(--radius\/sheet\/lg,32px) 0 0;
+  box-shadow:0 -2px 12px rgba(0,0,0,.10);max-height:82%;transform:translateY(101%);will-change:transform;touch-action:none}
+[data-theme=dark] .bs-sheet{box-shadow:0 -2px 18px rgba(0,0,0,.5)}
+
+/* open state (motion added in the reduced-motion guard) */
+.phone.open .bs-blanket{opacity:1;pointer-events:auto}
+.phone.open .bs-sheet{transform:translateY(0)}
+
+/* header */
+.bs-head{display:flex;align-items:center;gap:8px;padding:16px 20px;cursor:grab;flex:0 0 auto}
+.bs-head:active{cursor:grabbing}
+.bs-head .ttl{flex:1;text-align:center;font-size:16px;font-weight:700;color:var(--main-text\/default,#171717)}
+[data-theme=dark] .bs-head .ttl{color:#f2f2f2}
+.bs-icon{width:24px;height:24px;flex:0 0 24px;display:flex;align-items:center;justify-content:center;background:none;border:0;padding:0;cursor:pointer;color:var(--icon\/default,#171717)}
+[data-theme=dark] .bs-icon{color:#e8e8e8}
+.bs-icon svg{width:24px;height:24px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.bs-icon.ghost{visibility:hidden}
+.bs-textbtn{border:0;background:none;padding:0;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:500;font-size:14px;
+  color:var(--btn\/textonly\/default,#352eff)}
+.bs-textbtn:active{opacity:.6}
+
+/* body */
+.bs-body{flex:1 1 auto;overflow-y:auto;padding:4px 16px 8px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.bs-body::-webkit-scrollbar{width:6px}
+.bs-body::-webkit-scrollbar-thumb{background:var(--radio\/radio-button-primary,#b2b2b2);border-radius:999px}
+.bs-body h5{margin:6px 0 4px;font-size:18px;font-weight:600;line-height:1.35;color:var(--main-text\/default,#171717)}
+[data-theme=dark] .bs-body h5{color:#f2f2f2}
+.bs-body p{margin:0 0 12px;font-size:15px;line-height:1.55;color:var(--main-text\/default,#171717)}
+[data-theme=dark] .bs-body p{color:#d9d9d9}
+.bs-field{width:100%;box-sizing:border-box;margin:2px 0 12px;padding:12px 14px;border-radius:12px;border:1.5px solid var(--mav-border,#e5e5e5);
+  background:var(--mav-bg,#fff);font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;color:var(--main-text\/default,#171717);
+  outline:none;transition:border-color .2s ease,box-shadow .2s ease}
+[data-theme=dark] .bs-field{background:#1b1b1e;color:#f2f2f2}
+.bs-field:focus{border-color:var(--btn\/primary\/default,#352eff);box-shadow:0 0 0 3px color-mix(in srgb,var(--btn\/primary\/default,#352eff) 18%,transparent)}
+
+/* button dock */
+.bs-dock{flex:0 0 auto;background:var(--background\/bg-default,#fff);padding:16px;border-radius:var(--radius\/sheet\/lg,32px) var(--radius\/sheet\/lg,32px) 0 0;
+  box-shadow:0 -2px 12px rgba(0,0,0,.06)}
+.bs-primary{width:100%;border:0;cursor:pointer;padding:16px;border-radius:8px;background:var(--btn\/primary\/default,#352eff);
+  color:var(--btn\/primary\/text-default,#fff);font-family:'Plus Jakarta Sans',sans-serif;font-weight:500;font-size:18px;
+  transition:transform .12s ease,filter .2s ease}
+[data-theme=dark] .bs-primary{color:#171717}
+.bs-primary:hover{filter:brightness(1.05)}
+.bs-primary:active{transform:scale(.98)}
+
+/* home indicator */
+.bs-home{flex:0 0 auto;height:26px;display:flex;align-items:center;justify-content:center}
+.bs-home span{width:130px;height:5px;border-radius:100px;background:var(--main-text\/default,#171717);opacity:.9}
+[data-theme=dark] .bs-home span{background:#f2f2f2}
+
+/* iOS keyboard */
+.bs-kbd{flex:0 0 auto;background:#d1d4db;padding-bottom:6px;user-select:none}
+[data-theme=dark] .bs-kbd{background:#2b2c30}
+.bs-kbd .accessory{display:flex;justify-content:flex-end;align-items:center;height:38px;padding:0 14px;background:#ebedf0;border-top:1px solid rgba(60,60,67,.18)}
+[data-theme=dark] .bs-kbd .accessory{background:#3a3b40;border-top-color:rgba(255,255,255,.12)}
+.bs-kbd .done{border:0;background:none;color:#007aff;font-family:'Inter',sans-serif;font-weight:600;font-size:16px;cursor:pointer}
+[data-theme=dark] .bs-kbd .done{color:#4c9dff}
+.bs-krow{display:flex;justify-content:center;gap:5px;padding:5px 4px}
+.bs-key{min-width:27px;height:40px;flex:1;display:flex;align-items:center;justify-content:center;border:0;cursor:pointer;
+  background:#fff;border-radius:5px;box-shadow:0 1px 0 rgba(0,0,0,.3);font-family:'Inter',sans-serif;font-size:17px;color:#111;
+  transition:background .08s ease,transform .08s ease}
+[data-theme=dark] .bs-key{background:#6a6c72;color:#fff;box-shadow:0 1px 0 rgba(0,0,0,.5)}
+.bs-key:active{background:#c7cbd3;transform:translateY(1px)}
+.bs-key.wide{flex:1.5}.bs-key.space{flex:5}.bs-key.fn{background:#adb3bd;box-shadow:0 1px 0 rgba(0,0,0,.25);font-size:13px;font-weight:600}
+[data-theme=dark] .bs-key.fn{background:#48494e}
+.bs-krow.pad{padding-left:12px;padding-right:12px}
+
+/* stages */
+.bs-stage{background:var(--mav-surface,#f5f5f5);border-radius:16px;padding:34px 24px;display:flex;flex-wrap:wrap;gap:32px;justify-content:center;align-items:flex-start}
+.bs-triggers{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:26px}
+.bs-trig{border:1px solid var(--mav-border,#e5e5e5);background:var(--mav-bg,#fff);color:var(--main-text\/default,#171717);
+  border-radius:999px;padding:9px 18px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;font-size:14px;cursor:pointer;
+  transition:border-color .18s ease,transform .12s ease,background .18s ease}
+[data-theme=dark] .bs-trig{color:var(--mav-fg);background:transparent}
+.bs-trig:hover{border-color:var(--btn\/primary\/default,#352eff)}
+.bs-trig:active{transform:scale(.96)}
+.bs-cell{display:flex;flex-direction:column;align-items:center;gap:12px}
+.bs-tag{font-size:11px;color:var(--mav-muted);font-family:'Inter',sans-serif}
+.bs-hint{margin-top:14px;font-size:12px;color:var(--mav-muted);font-family:'Inter',sans-serif;text-align:center}
+.canvas-dark{background:#000;border-radius:16px;padding:34px 24px;display:flex;flex-wrap:wrap;gap:32px;justify-content:center;align-items:flex-start}
+.canvas-dark .bs-tag{color:#9a9a9a}
+
+@media (prefers-reduced-motion: no-preference){
+  .bs-blanket{transition:opacity .38s ease}
+  .bs-sheet{transition:transform .44s cubic-bezier(.22,.9,.3,1)}
+  .bs-sheet.dragging{transition:none}
+}
+</style>
+</head>
+<body>
+<div class="doc-layout">
+<nav class="doc-sidebar"></nav>
+<main class="doc-main">
+  <div class="topbar">
+    <a href="../index.html" class="topbar-back">← MaV</a>
+    <span>/</span>
+    <span class="topbar-title">Bottom Sheet</span>
+    <div class="topbar-spacer"></div>
+    <button class="theme-btn" data-theme-toggle><span data-theme-icon>☾</span> <span data-theme-label>Dark mode</span></button>
+  </div>
+
+  <div class="page-header">
+    <div class="page-breadcrumb"><a href="../index.html">MaV</a> / Components</div>
+    <h1 class="page-title">Bottom Sheet</h1>
+    <p class="page-desc">A drawer that rises from the bottom over a dimmed blanket — rounded 32px top (<code>--radius/sheet/lg</code>), the <code>--background/bg-default</code> surface, soft elevation and a home indicator. The header is either <strong>nav</strong> (back · Title · close) or a title with a <strong>text-only action</strong>. Optional <strong>Button Dock</strong> and <strong>keyboard</strong>. Scrim is <code>--color/blanket/bold</code>; primary + text-only actions re-theme blue → lime in dark.</p>
+  </div>
+
+  <!-- Interactive -->
+  <div class="section">
+    <h2 class="section-title">Interactive <span class="section-badge">try it</span></h2>
+    <p class="section-desc">Pick a variant to open it — the sheet slides up while the blanket fades in. <strong>Drag the header down</strong>, tap the blanket, the <strong>✕</strong> or the back arrow to dismiss. In the keyboard variant, focus the field to raise the keyboard (the sheet resizes) and type on it.</p>
+    <div class="preview-card">
+      <div class="preview-canvas">
+        <div class="bs">
+          <div class="bs-triggers">
+            <button class="bs-trig" data-open="default">Default</button>
+            <button class="bs-trig" data-open="dock">Button dock</button>
+            <button class="bs-trig" data-open="keyboard">Keyboard</button>
+          </div>
+          <div class="phone" id="demoPhone" data-demo></div>
+          <div class="bs-hint">Tap a variant above · drag the header down to dismiss</div>
+        </div>
+      </div>
+      <div class="preview-meta"><span class="preview-label">Slide-up + blanket cross-fade · drag-to-dismiss · live keyboard</span><span class="preview-sublabel">--radius/sheet/lg · --color/blanket/bold · --background/bg-default</span></div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- Variants -->
+  <div class="section">
+    <h2 class="section-title">Variants</h2>
+    <p class="section-desc">The three Figma states: default nav header, a docked primary button (title + text action header), and the keyboard state. Each reveals on scroll.</p>
+    <div class="preview-card">
+      <div class="preview-canvas">
+        <div class="bs"><div class="bs-stage" id="variant-stage"></div></div>
+      </div>
+      <div class="preview-meta"><span class="preview-label">button dock = false / true · keyboard = false / true</span></div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- Dark -->
+  <div class="section">
+    <h2 class="section-title">In dark</h2>
+    <p class="section-desc">The sheet surface flips to near-black, the scrim deepens, and the primary + text-only actions re-theme to lime.</p>
+    <div class="preview-card">
+      <div class="preview-canvas">
+        <div class="bs"><div class="canvas-dark" data-theme="dark" id="dark-stage"></div></div>
+      </div>
+      <div class="preview-meta"><span class="preview-label">Dark — surface near-black · actions → lime</span></div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- Token reference -->
+  <div class="section">
+    <h2 class="section-title">Token Reference</h2>
+    <table class="token-table">
+      <thead><tr><th>Token</th><th>Value</th><th>Usage</th></tr></thead>
+      <tbody>
+        <tr><td class="token-name">--color/blanket/bold</td><td><span class="token-swatch-sm" style="background:#0d0d0d80"></span><span class="token-value">#0d0d0d80</span></td><td class="token-value">Dimmed scrim behind the sheet</td></tr>
+        <tr><td class="token-name">--radius/sheet/lg</td><td><span class="token-value">32px</span></td><td class="token-value">Sheet &amp; dock top corners</td></tr>
+        <tr><td class="token-name">--background/bg-default</td><td><span class="token-swatch-sm" style="background:#ffffff;border:1px solid #d0d0d0"></span><span class="token-value">#ffffff → #171717</span></td><td class="token-value">Sheet &amp; dock surface</td></tr>
+        <tr><td class="token-name">--btn/primary/default</td><td><span class="token-swatch-sm" style="background:#352eff"></span><span class="token-value">#352eff → #a1ff5b</span></td><td class="token-value">Docked primary button (→ lime)</td></tr>
+        <tr><td class="token-name">--btn/textonly/default</td><td><span class="token-swatch-sm" style="background:#352eff"></span><span class="token-value">#352eff → #a1ff5b</span></td><td class="token-value">Header text action (→ lime)</td></tr>
+        <tr><td class="token-name">--main-text/default</td><td><span class="token-swatch-sm" style="background:#171717"></span><span class="token-value">#171717</span></td><td class="token-value">Title · body · home indicator</td></tr>
+        <tr><td class="token-name">Motion</td><td><span class="token-value">.44s slide · .38s fade</span></td><td class="token-value">cubic-bezier slide-up &amp; drag-to-dismiss</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</main>
+</div>
+
+<script>
+(function () {
+  var arrowL = '<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>';
+  var xIco   = '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+  var BODY =
+    '<h5>Title</h5>' +
+    '<p>Lorem ipsum dolor sit amet consectetur. Aenean aenean mauris ultricies ullamcorper dui enim mauris pulvinar lacus. Donec convallis lorem non aliquam in quam semper vitae sed. Arcu non ultrices leo dictum massa quis id duis.</p>' +
+    '<p>Egestas ac in augue risus tincidunt mauris. Massa nunc integer facilisis nisi varius nulla. Fusce a convallis sit in purus quam rhoncus nibh mauris. Lectus lorem lorem bibendum dictumst.</p>' +
+    '<p>Euismod ut pellentesque lorem enim non viverra. Eget arcu ullamcorper curabitur commodo eu semper aliquam eu. Turpis varius commodo sed urna nullam id euismod. Quam non laoreet neque eget.</p>';
+
+  var KEYS = [['q','w','e','r','t','y','u','i','o','p'], ['a','s','d','f','g','h','j','k','l'], ['z','x','c','v','b','n','m']];
+  function kbd() {
+    var h = '<div class="bs-kbd"><div class="accessory"><button class="done" data-kbd="done">Done</button></div>';
+    h += '<div class="bs-krow">' + KEYS[0].map(function (k) { return '<button class="bs-key" data-k="' + k + '">' + k + '</button>'; }).join('') + '</div>';
+    h += '<div class="bs-krow pad">' + KEYS[1].map(function (k) { return '<button class="bs-key" data-k="' + k + '">' + k + '</button>'; }).join('') + '</div>';
+    h += '<div class="bs-krow"><button class="bs-key fn wide">⇧</button>' +
+         KEYS[2].map(function (k) { return '<button class="bs-key" data-k="' + k + '">' + k + '</button>'; }).join('') +
+         '<button class="bs-key fn wide" data-kbd="back">⌫</button></div>';
+    h += '<div class="bs-krow"><button class="bs-key fn wide">123</button><button class="bs-key fn">🌐</button>' +
+         '<button class="bs-key space" data-k=" ">space</button><button class="bs-key fn wide" data-kbd="done">return</button></div>';
+    return h + '</div>';
+  }
+
+  var CFG = {
+    default:  { header:'nav',    dock:false, keyboard:false, tag:'Default' },
+    dock:     { header:'button', dock:true,  keyboard:false, tag:'Button dock' },
+    keyboard: { header:'nav',    dock:false, keyboard:true,  tag:'Keyboard' }
+  };
+
+  function header(cfg) {
+    if (cfg.header === 'button')
+      return '<div class="bs-head"><span class="bs-icon ghost"></span><span class="ttl">Title</span>' +
+             '<button class="bs-textbtn" data-close>Button</button></div>';
+    return '<div class="bs-head"><button class="bs-icon" data-close aria-label="Back">' + arrowL + '</button>' +
+           '<span class="ttl">Title</span><button class="bs-icon" data-close aria-label="Close">' + xIco + '</button></div>';
+  }
+  function sheet(cfg) {
+    var body = cfg.keyboard
+      ? '<div class="bs-body"><h5>Title</h5><input class="bs-field" placeholder="Type a message…" data-field>' +
+        '<p>Lorem ipsum dolor sit amet consectetur. Aenean aenean mauris ultricies ullamcorper dui enim mauris pulvinar lacus.</p></div>'
+      : '<div class="bs-body">' + BODY + '</div>';
+    var tail = cfg.keyboard ? kbd()
+      : cfg.dock ? '<div class="bs-dock"><button class="bs-primary">Button</button></div><div class="bs-home"><span></span></div>'
+      : '<div class="bs-home"><span></span></div>';
+    return '<div class="bs-sheet">' + header(cfg) + body + tail + '</div>';
+  }
+  function app() {
+    var rows = '';
+    for (var i = 0; i < 4; i++) rows += '<div class="bs-rowi"><span class="ic"></span><span class="ln"><b></b><s></s></span></div>';
+    return '<div class="bs-app"><div class="bs-status"><span>9:41</span><span class="dots"><i></i></span></div>' +
+      '<h4>Documents</h4><p class="sub">Tap an item to preview</p><div class="bs-rows">' + rows + '</div></div>';
+  }
+  function phone(cfg) { return app() + '<div class="bs-blanket" data-close></div>' + sheet(cfg); }
+
+  /* ── keyboard typing + close wiring for a phone element ─────────────────── */
+  function wire(phoneEl) {
+    phoneEl.addEventListener('click', function (e) {
+      var k = e.target.closest('[data-k]'), fn = e.target.closest('[data-kbd]');
+      var field = phoneEl.querySelector('[data-field]');
+      if (k && field) { field.value += k.getAttribute('data-k'); field.focus(); return; }
+      if (fn && field) {
+        if (fn.getAttribute('data-kbd') === 'back') field.value = field.value.slice(0, -1);
+        return;
+      }
+      if (e.target.closest('[data-close]') && phoneEl.hasAttribute('data-demo')) close(phoneEl);
+    });
+    dragify(phoneEl);
+  }
+
+  /* ── drag-to-dismiss (demo phone only) ──────────────────────────────────── */
+  function dragify(phoneEl) {
+    var head = phoneEl.querySelector('.bs-head'), sh = phoneEl.querySelector('.bs-sheet');
+    if (!head || !phoneEl.hasAttribute('data-demo')) return;
+    var startY = 0, dy = 0, dragging = false;
+    head.addEventListener('pointerdown', function (e) {
+      if (e.target.closest('.bs-icon,.bs-textbtn')) return;
+      dragging = true; startY = e.clientY; dy = 0; sh.classList.add('dragging');
+      head.setPointerCapture(e.pointerId);
+    });
+    head.addEventListener('pointermove', function (e) {
+      if (!dragging) return;
+      dy = Math.max(0, e.clientY - startY);
+      sh.style.transform = 'translateY(' + dy + 'px)';
+    });
+    function end() {
+      if (!dragging) return; dragging = false; sh.classList.remove('dragging'); sh.style.transform = '';
+      if (dy > 120) close(phoneEl);
+    }
+    head.addEventListener('pointerup', end);
+    head.addEventListener('pointercancel', end);
+  }
+
+  function open(phoneEl, key) {
+    phoneEl.innerHTML = phone(CFG[key]);
+    wire(phoneEl);
+    // next frame so the freshly-inserted sheet transitions from translateY(101%)
+    requestAnimationFrame(function () { requestAnimationFrame(function () { phoneEl.classList.add('open'); }); });
+  }
+  function close(phoneEl) {
+    phoneEl.classList.remove('open');
+    var f = phoneEl.querySelector('[data-field]'); if (f) f.blur();
+  }
+
+  /* demo phone */
+  var demo = document.getElementById('demoPhone');
+  demo.innerHTML = phone(CFG.default);   // start closed (app visible, sheet tucked away)
+  wire(demo);
+  document.querySelectorAll('[data-open]').forEach(function (btn) {
+    btn.addEventListener('click', function () { open(demo, btn.getAttribute('data-open')); });
+  });
+
+  /* static variant phones (sheet already open) */
+  function staticPhone(key) {
+    var wrap = document.createElement('div'); wrap.className = 'bs-cell';
+    wrap.innerHTML = '<span class="bs-tag">' + CFG[key].tag + '</span><div class="phone open">' + phone(CFG[key]) + '</div>';
+    wire(wrap.querySelector('.phone'));
+    return wrap;
+  }
+  ['default', 'dock', 'keyboard'].forEach(function (k) { document.getElementById('variant-stage').appendChild(staticPhone(k)); });
+  ['default', 'dock'].forEach(function (k) { document.getElementById('dark-stage').appendChild(staticPhone(k)); });
+
+  /* reveal-on-scroll: nudge the static sheets up when they enter view */
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!reduce && 'IntersectionObserver' in window) {
+    document.querySelectorAll('#variant-stage .phone, #dark-stage .phone').forEach(function (p) {
+      p.classList.remove('open');
+      var io = new IntersectionObserver(function (ents) {
+        ents.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add('open'); io.unobserve(en.target); } });
+      }, { threshold: 0.3 });
+      io.observe(p);
+    });
+  }
+})();
+</script>
+<script src="../js/theme.js"></script>
+</body>
+</html>
