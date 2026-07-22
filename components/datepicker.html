@@ -24,7 +24,10 @@
 .dp-nav svg{width:18px;height:18px;stroke:var(--main-text\/default,#171717);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
 [data-theme=dark] .dp-nav svg{stroke:var(--mav-fg)}
 .dp-nav.hidden{visibility:hidden}
-.dp-month{display:flex;align-items:center;gap:6px;font-weight:500;font-size:14px;color:var(--main-text\/description,#7f7f7f);cursor:pointer}
+.dp-month{display:flex;align-items:center;gap:6px;background:none;border:0;padding:0;font-family:'Plus Jakarta Sans',sans-serif;font-weight:500;font-size:14px;color:var(--main-text\/description,#7f7f7f);cursor:pointer;transition:color .15s}
+.dp-month:hover{color:var(--main-text\/default,#171717)}
+[data-theme=dark] .dp-month:hover{color:var(--mav-fg)}
+.dp-month svg{transition:transform .3s cubic-bezier(.34,1.1,.35,1)}
 .dp-month svg{width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
 
 .dp-grid{display:grid;grid-template-columns:repeat(7,1fr);row-gap:4px}
@@ -68,7 +71,8 @@
 .canvas-dark{background:var(--main\/white,#171717);border-radius:16px;padding:32px;display:flex;justify-content:center}
 
 /* state legend */
-.dp-legend{display:flex;flex-wrap:wrap;gap:26px}
+.dp-legend{display:flex;flex-wrap:wrap;gap:26px;--dp-accent:var(--btn\/primary\/default,#352eff);--dp-on:#fff}
+[data-theme=dark] .dp-legend{--dp-accent:var(--mav-primary-dark,#a1ff5b);--dp-on:#171717}
 .dp-leg{display:flex;flex-direction:column;align-items:center;gap:8px;font-size:12px;color:var(--mav-muted);font-family:'Inter',sans-serif}
 .dp-leg .dp-day{cursor:default}
 </style>
@@ -180,70 +184,130 @@
   var chD = '<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>';
   var chU = '<svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg>';
   var WD = ['Mo','Tu','We','Th','Fr','Sa','Su'];
-  // February 2022 grid, exactly as in the Figma reference
-  var GRID = [
-    [{n:30,out:1},{n:1},{n:2},{n:3},{n:4},{n:5},{n:6}],
-    [{n:7},{n:8},{n:9},{n:10},{n:11},{n:12},{n:13}],
-    [{n:14},{n:15},{n:16},{n:17},{n:18},{n:19},{n:20}],
-    [{n:21},{n:22},{n:23},{n:24},{n:25},{n:26},{n:27}],
-    [{n:28},{n:29},{n:30},{n:31},{n:1,out:1},{n:2,out:1},{n:3,out:1}]
-  ];
+  var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
-  function header(type) {
-    var arrows = type === 'year';
-    return '<div class="dp-head">' +
-      '<button class="dp-nav' + (arrows ? ' hidden' : '') + '" aria-label="Previous">' + chL + '</button>' +
-      '<span class="dp-month">February 2022 ' + (type === 'year' ? chU : chD) + '</span>' +
-      '<button class="dp-nav' + (arrows ? ' hidden' : '') + '" aria-label="Next">' + chR + '</button></div>';
-  }
+  function daysIn(y, m) { return new Date(y, m + 1, 0).getDate(); }
+  function mondayOffset(y, m) { return (new Date(y, m, 1).getDay() + 6) % 7; } // 0 = Monday
+  function key(d) { return d ? d.getFullYear() * 10000 + d.getMonth() * 100 + d.getDate() : 0; }
+  function same(a, b) { return a && b && key(a) === key(b); }
 
-  function dayCell(c, cls) {
-    return '<div class="dp-cell ' + (c.cell || '') + '"><button class="dp-day ' + (c.out ? 'out ' : '') + (cls || '') + '">' + c.n + '</button></div>';
-  }
+  /* One interactive calendar per .dp element. */
+  function initCal(el, mode) {
+    var st = {
+      mode: mode,
+      viewY: 2022, viewM: 1,                                   // February 2022
+      sel:   mode === 'day'   ? new Date(2022, 1, 11) : null,  // single date
+      rs:    mode === 'range' ? new Date(2022, 1, 11) : null,  // range start
+      re:    mode === 'range' ? new Date(2022, 1, 16) : null,  // range end
+      hover: null,                                             // range hover-preview end
+      picking: mode === 'year',                                // showing the year grid
+      yearBase: 2022, selYear: 2022
+    };
 
-  function buildGrid(mods) {
-    // mods: function(rowIdx, colIdx, cell) -> {cls, cell}
-    var html = '<div class="dp-grid">';
-    WD.forEach(function (w) { html += '<div class="dp-cell"><span class="dp-wd">' + w + '</span></div>'; });
-    GRID.forEach(function (row, ri) {
-      row.forEach(function (c, ci) {
-        var m = mods ? mods(ri, ci, c) : {};
-        html += '<div class="dp-cell ' + (m.cell || '') + '"><button class="dp-day ' + (c.out ? 'out ' : '') + (m.cls || '') + '">' + c.n + '</button></div>';
-      });
+    function label() { return MONTHS[st.viewM] + ' ' + st.viewY; }
+    function head() {
+      var hide = st.mode === 'year';                            // standalone Year hides arrows (Figma)
+      var caret = (st.picking || st.mode === 'year') ? chU : chD;
+      return '<div class="dp-head">' +
+        '<button class="dp-nav' + (hide ? ' hidden' : '') + '" data-nav="-1" aria-label="Previous">' + chL + '</button>' +
+        '<button class="dp-month" data-month>' + label() + ' ' + caret + '</button>' +
+        '<button class="dp-nav' + (hide ? ' hidden' : '') + '" data-nav="1" aria-label="Next">' + chR + '</button></div>';
+    }
+
+    function yearView() {
+      var h = head() + '<div class="dp-years">';
+      for (var y = st.yearBase; y < st.yearBase + 28; y++) {
+        var on = st.mode === 'year' ? y === st.selYear : y === st.viewY;
+        h += '<button class="dp-year' + (on ? ' sel' : '') + '" data-year="' + y + '">' + y + '</button>';
+      }
+      return h + '</div>';
+    }
+
+    function dayView() {
+      var h = head() + '<div class="dp-grid">';
+      WD.forEach(function (w) { h += '<div class="dp-cell"><span class="dp-wd">' + w + '</span></div>'; });
+      var off = mondayOffset(st.viewY, st.viewM), dim = daysIn(st.viewY, st.viewM);
+      var rows = Math.ceil((off + dim) / 7);
+      // range end for banding: real end, or a hover-preview end while choosing
+      var end = st.re || (st.mode === 'range' && st.rs && !st.re && st.hover && key(st.hover) >= key(st.rs) ? st.hover : null);
+      for (var i = 0; i < rows * 7; i++) {
+        var date = new Date(st.viewY, st.viewM, i - off + 1);   // auto-normalises to adj. months
+        var col = i % 7, out = date.getMonth() !== st.viewM;
+        var cell = [], day = [];
+        if (out) day.push('out');
+        if (st.mode === 'day') {
+          if (same(date, st.sel)) day.push('sel');
+        } else { // range
+          var isS = same(date, st.rs), isE = same(date, end);
+          if (isS && isE) { day.push('sel'); }
+          else if (isS) { day.push('sel'); if (end) { cell.push('r','rs'); if (col === 6) cell.push('edge-r'); } }
+          else if (isE) { day.push('sel'); cell.push('r','re'); if (col === 0) cell.push('edge-l'); }
+          else if (st.rs && end && key(date) > key(st.rs) && key(date) < key(end)) {
+            cell.push('r'); if (col === 0) cell.push('edge-l'); if (col === 6) cell.push('edge-r');
+          }
+        }
+        h += '<div class="dp-cell ' + cell.join(' ') + '">' +
+             '<button class="dp-day ' + day.join(' ') + '" data-d="' + date.getFullYear() + '-' + date.getMonth() + '-' + date.getDate() + '">' +
+             date.getDate() + '</button></div>';
+      }
+      return h + '</div>';
+    }
+
+    function render() { el.innerHTML = st.picking ? yearView() : dayView(); }
+
+    function page(dir) {
+      if (st.picking || st.mode === 'year') { st.yearBase += dir * 28; }
+      else {
+        var d = new Date(st.viewY, st.viewM + dir, 1);
+        st.viewY = d.getFullYear(); st.viewM = d.getMonth();
+      }
+      render();
+    }
+
+    el.addEventListener('click', function (e) {
+      var nav = e.target.closest('.dp-nav'), mo = e.target.closest('[data-month]');
+      var dc = e.target.closest('.dp-day'), yc = e.target.closest('.dp-year');
+      if (nav && !nav.classList.contains('hidden')) { page(+nav.dataset.nav); return; }
+      if (mo && st.mode !== 'year') {                          // toggle the year picker
+        st.picking = !st.picking;
+        if (st.picking) st.yearBase = st.viewY - 13;
+        render(); return;
+      }
+      if (yc) {
+        var y = +yc.dataset.year;
+        if (st.mode === 'year') { st.selYear = y; }
+        else { st.viewY = y; st.picking = false; }
+        render(); return;
+      }
+      if (dc) {
+        var p = dc.dataset.d.split('-'), date = new Date(+p[0], +p[1], +p[2]);
+        if (date.getMonth() !== st.viewM) { st.viewY = date.getFullYear(); st.viewM = date.getMonth(); }
+        if (st.mode === 'day') { st.sel = date; }
+        else {                                                  // range
+          if (!st.rs || (st.rs && st.re)) { st.rs = date; st.re = null; }
+          else if (key(date) >= key(st.rs)) { st.re = date; }
+          else { st.rs = date; }
+          st.hover = null;
+        }
+        render();
+      }
     });
-    return html + '</div>';
-  }
 
-  function calDay() {
-    return header('day') + buildGrid(function (ri, ci, c) {
-      if (ri === 1 && c.n === 11) return { cls: 'sel' };
-      if (ri === 1 && c.n === 9) return { cls: 'hov' };
-      return {};
+    // live band preview while a range end is being chosen
+    el.addEventListener('mouseover', function (e) {
+      if (st.mode !== 'range' || !st.rs || st.re || st.picking) return;
+      var dc = e.target.closest('.dp-day'); if (!dc) return;
+      var p = dc.dataset.d.split('-'), date = new Date(+p[0], +p[1], +p[2]);
+      if (key(date) !== key(st.hover)) { st.hover = date; render(); }
     });
-  }
-
-  function calRange() {
-    // 11 (r1,c4) start → 16 (r2,c2) end; 12,13,14,15 in range
-    return header('range') + buildGrid(function (ri, ci, c) {
-      if (ri === 1 && c.n === 11) return { cls: 'sel', cell: 'r rs' };
-      if (ri === 1 && (c.n === 12)) return { cell: 'r' };
-      if (ri === 1 && (c.n === 13)) return { cell: 'r edge-r' };
-      if (ri === 2 && (c.n === 14)) return { cell: 'r edge-l' };
-      if (ri === 2 && (c.n === 15)) return { cell: 'r' };
-      if (ri === 2 && c.n === 16) return { cls: 'sel', cell: 'r re' };
-      return {};
+    el.addEventListener('mouseleave', function () {
+      if (st.mode === 'range' && st.rs && !st.re && st.hover) { st.hover = null; render(); }
     });
+
+    render();
   }
 
-  function calYear() {
-    var html = header('year') + '<div class="dp-years">';
-    for (var y = 2022; y <= 2049; y++) html += '<button class="dp-year' + (y === 2022 ? ' sel' : '') + '">' + y + '</button>';
-    return html + '</div>';
-  }
-
-  document.querySelectorAll('.dp[data-cal]').forEach(function (el) {
-    el.innerHTML = el.dataset.cal === 'range' ? calRange() : el.dataset.cal === 'year' ? calYear() : calDay();
-  });
+  document.querySelectorAll('.dp[data-cal]').forEach(function (el) { initCal(el, el.dataset.cal); });
 
   // cell-state legend
   var legend = [
