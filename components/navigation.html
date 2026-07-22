@@ -7,118 +7,113 @@
 <link rel="stylesheet" href="../css/tokens.css">
 <link rel="stylesheet" href="../css/shared.css">
 <style>
-/* Mobile nav bar */
-.mob-frame{
-  width:375px;border-radius:24px;overflow:hidden;
-  border:1px solid var(--mav-border);
-  background:var(--mav-bg);
-  box-shadow:var(--shadow-md);
-}
-.mob-screen{
-  height:220px;
-  background:linear-gradient(160deg,var(--Tint\/Primary\/100) 0%,var(--mav-bg-tertiary) 100%);
-  display:flex;align-items:center;justify-content:center;
-  font-size:13px;color:var(--mav-muted);
-}
-.mob-navbar{
-  display:flex;align-items:center;background:var(--mav-bg);
-  border-top:1px solid var(--mav-border);padding:10px 0 4px;
-}
-.nav-item{
-  flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;
-  cursor:pointer;padding:4px 0;
-}
-.nav-icon{width:24px;height:24px;display:flex;align-items:center;justify-content:center;opacity:.4}
-.nav-icon.active{opacity:1}
-.nav-label{font-size:10px;font-weight:600;color:var(--mav-muted)}
-.nav-label.active{color:var(--mav-primary)}
-.nav-dot{width:4px;height:4px;border-radius:50%;background:var(--mav-primary);margin-top:2px}
+/* ══ Navigation — Figma "• Menu/Navbar" (139:2093) ══════════════════════════
+   Bottom nav bar (Home · Statistic · Cards · Profile + floating Scan), tabs,
+   pill tabs, stepper, breadcrumb/header. Active = --btn/primary/default
+   (→ lime in dark). A gliding indicator slides between items on tap — the
+   same motion as the pagination page control: cubic-bezier(.34,1.1,.35,1).
+   Gated behind prefers-reduced-motion via a shared easing var. */
+.nav{--accent:var(--btn\/primary\/default,#352eff);--glide:transform .42s cubic-bezier(.34,1.1,.35,1),width .42s cubic-bezier(.34,1.1,.35,1);
+  font-family:'Plus Jakarta Sans',sans-serif}
+[data-theme=dark] .nav{--accent:var(--mav-primary-dark,#a1ff5b)}
+@media (prefers-reduced-motion:reduce){.nav{--glide:none}}
 
-/* Top header bar */
-.top-header{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:16px 20px;background:var(--mav-bg);
-  border-bottom:1px solid var(--mav-border);
-}
-.th-title{font-size:18px;font-weight:700;color:var(--mav-fg)}
-.th-actions{display:flex;align-items:center;gap:8px}
-.th-icon-btn{width:36px;height:36px;border-radius:9999px;background:var(--mav-border);display:flex;align-items:center;justify-content:center;cursor:pointer}
+/* phone frame */
+.nav-phone{width:100%;max-width:375px;box-sizing:border-box;border-radius:26px;overflow:hidden;
+  border:1px solid var(--mav-border,#efefef);background:var(--mav-bg,#fff);box-shadow:0 12px 30px -12px rgba(0,0,0,.2)}
+.nav-screen{height:150px;background:linear-gradient(160deg,var(--background\/bg-tertiary,#e6edff),var(--mav-bg,#fff));
+  display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--mav-muted);font-family:'Inter',sans-serif}
+[data-theme=dark] .nav-screen{background:linear-gradient(160deg,#1c2140,#141414)}
 
-/* Breadcrumb */
-.breadcrumb{display:flex;align-items:center;gap:8px;font-size:13px}
-.bc-link{color:var(--mav-primary);cursor:pointer;text-decoration:none}
-.bc-sep{color:var(--mav-muted);opacity:.5}
-.bc-current{color:var(--mav-fg);font-weight:500}
+/* ── bottom nav bar with gliding top-indicator ──────────────────────────── */
+.bnav{position:relative;display:flex;align-items:flex-end;background:var(--mav-bg,#fff);border-top:1px solid var(--mav-border,#efefef);
+  padding:8px 12px 6px}
+[data-theme=dark] .bnav{background:#141414;border-top-color:#2a2a2a}
+.bnav-ink{position:absolute;top:0;height:3px;width:26px;border-radius:0 0 3px 3px;background:var(--accent);left:0;transition:var(--glide);pointer-events:none}
+.bnav-item{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:0;padding:8px 4px;cursor:pointer;
+  color:var(--main-text\/default,#171717);transition:color .25s ease}
+[data-theme=dark] .bnav-item{color:#d0d0d0}
+.bnav-item svg{width:24px;height:24px;stroke:currentColor;stroke-width:1.9;fill:none;stroke-linecap:round;stroke-linejoin:round;transition:transform .3s cubic-bezier(.34,1.3,.4,1)}
+.bnav-item .lbl{font-size:12px;font-weight:400;transition:font-weight .1s}
+.bnav-item.on{color:var(--accent)}
+.bnav-item.on .lbl{font-weight:700}
+.bnav-item.on svg{transform:translateY(-1px)}
+.bnav-item:active svg{transform:scale(.88)}
+.bnav-item.spacer{pointer-events:none;visibility:hidden}
+/* floating scan button */
+.bnav-scan{position:absolute;left:50%;top:-22px;transform:translateX(-50%);width:52px;height:52px;border-radius:50%;
+  background:var(--accent);border:0;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 8px 18px -4px color-mix(in srgb,var(--accent) 55%,transparent);transition:transform .16s ease,box-shadow .2s ease}
+.bnav-scan svg{width:26px;height:26px;stroke:#fff;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+[data-theme=dark] .bnav-scan svg{stroke:#171717}
+.bnav-scan:hover{transform:translateX(-50%) translateY(-2px)}
+.bnav-scan:active{transform:translateX(-50%) scale(.92)}
+/* home indicator */
+.nav-home{display:flex;justify-content:center;padding:8px 0 10px;background:var(--mav-bg,#fff)}
+[data-theme=dark] .nav-home{background:#141414}
+.nav-home span{width:130px;height:5px;border-radius:100px;background:#b9c0c9}
 
-/* Tabs */
-.tabs-row{display:flex;border-bottom:2px solid var(--mav-border)}
-.tab{padding:10px 20px;font-size:14px;font-weight:500;color:var(--mav-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s}
-.tab.active{color:var(--mav-primary);border-bottom-color:var(--mav-primary);font-weight:600}
-.tab:hover:not(.active){color:var(--mav-fg)}
+/* ── gliding underline tabs ──────────────────────────────────────────────── */
+.gtabs{position:relative;display:flex;border-bottom:1px solid var(--mav-border,#efefef);max-width:520px}
+.gtabs-ink{position:absolute;bottom:-1px;height:2px;background:var(--accent);left:0;width:0;transition:var(--glide);border-radius:2px}
+.gtab{flex:1;background:none;border:0;padding:12px 16px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:500;font-size:14px;
+  color:var(--mav-muted);cursor:pointer;white-space:nowrap;transition:color .2s ease}
+.gtab.on{color:var(--accent);font-weight:600}
+.gtab:hover:not(.on){color:var(--main-text\/default,#171717)}
+[data-theme=dark] .gtab:hover:not(.on){color:var(--mav-fg)}
 
-/* Pill tabs */
-.pill-tabs{display:flex;gap:4px;background:var(--mav-border);padding:4px;border-radius:9999px;width:fit-content}
-.pill-tab{padding:6px 18px;border-radius:9999px;font-size:13px;font-weight:500;color:var(--mav-muted);cursor:pointer;transition:all .15s}
-.pill-tab.active{background:var(--mav-bg);color:var(--mav-fg);font-weight:600;box-shadow:var(--shadow-xs)}
+/* ── gliding pill tabs ───────────────────────────────────────────────────── */
+.gpills{position:relative;display:inline-flex;gap:2px;background:var(--mav-bg-secondary,#eee);padding:4px;border-radius:999px}
+[data-theme=dark] .gpills{background:#242424}
+.gpills-ink{position:absolute;top:4px;bottom:4px;left:0;width:0;background:var(--mav-bg,#fff);border-radius:999px;
+  box-shadow:0 1px 3px rgba(0,0,0,.12);transition:var(--glide)}
+[data-theme=dark] .gpills-ink{background:#3a3a3a}
+.gpill{position:relative;z-index:1;background:none;border:0;padding:8px 18px;border-radius:999px;font-family:'Plus Jakarta Sans',sans-serif;
+  font-weight:600;font-size:13px;color:var(--mav-muted);cursor:pointer;white-space:nowrap;transition:color .2s ease}
+.gpill.on{color:var(--main-text\/default,#171717)}
+[data-theme=dark] .gpill.on{color:var(--mav-fg)}
 
-/* Stepper */
-.stepper{display:flex;align-items:center}
-.step-item{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1}
+/* stepper */
+.step-row{display:flex;align-items:center;max-width:460px}
+.step-item{display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0}
 .step-circle{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
-.step-done{background:var(--mav-primary);color:var(--bc-white)}
-[data-theme=dark] .step-done{color:var(--mav-fg)}
-.step-active{background:var(--mav-primary);color:var(--bc-white);box-shadow:0 0 0 4px rgba(53,46,255,0.2)}
-[data-theme=dark] .step-active{color:var(--mav-fg)}
-.step-todo{background:var(--mav-border);color:var(--mav-muted)}
-.step-label{font-size:10px;font-weight:600;color:var(--mav-muted)}
-.step-label.active{color:var(--mav-primary)}
-.step-connector{flex:1;height:2px;background:var(--mav-border);margin-top:-16px}
-.step-connector.done{background:var(--mav-primary)}
+.step-done{background:var(--accent);color:#fff}
+[data-theme=dark] .step-done{color:#171717}
+.step-active{background:var(--accent);color:#fff;box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 22%,transparent)}
+[data-theme=dark] .step-active{color:#171717}
+.step-todo{background:var(--mav-border,#e5e5e5);color:var(--mav-muted)}
+.step-lbl{font-size:11px;font-weight:600;color:var(--mav-muted);font-family:'Inter',sans-serif}
+.step-lbl.on{color:var(--accent)}
+.step-conn{flex:1;height:2px;background:var(--mav-border,#e5e5e5);margin:0 6px 22px}
+.step-conn.done{background:var(--accent)}
 
-/* Coachmark */
-.coachmark{
-  position:relative;display:inline-block;
-  background:var(--bc-mono900-l);color:var(--bc-white);border-radius:10px;
-  padding:12px 16px;font-size:13px;line-height:1.5;
-  max-width:220px;box-shadow:var(--shadow-md);
-}
-.coachmark::after{
-  content:'';position:absolute;bottom:-8px;left:24px;
-  border:8px solid transparent;border-bottom:none;
-  border-top-color:var(--bc-mono900-l);
-}
-.coachmark-title{font-weight:700;margin-bottom:4px}
-.coachmark-desc{opacity:.7;font-size:12px}
-.coachmark-actions{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
-.cm-skip{font-size:12px;opacity:.5;cursor:pointer}
-.cm-next{font-size:12px;font-weight:600;color:var(--mav-primary-dark);cursor:pointer}
-.cm-dots{display:flex;gap:4px}
-.cm-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,0.3)}
-.cm-dot.active{background:var(--bc-white)}
+/* header + breadcrumb */
+.top-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px;background:var(--mav-bg,#fff);
+  border:1px solid var(--mav-border,#efefef);border-radius:14px;max-width:460px}
+.breadcrumb{display:flex;align-items:center;gap:8px;font-size:13px;font-family:'Inter',sans-serif;flex-wrap:wrap}
+.bc-link{color:var(--accent);cursor:pointer}
+.bc-sep{color:var(--mav-muted);opacity:.5}
+.bc-current{color:var(--main-text\/default,#171717);font-weight:600}
+[data-theme=dark] .bc-current{color:var(--mav-fg)}
+.th-title{font-size:18px;font-weight:700;color:var(--main-text\/default,#171717);margin-top:4px}
+[data-theme=dark] .th-title{color:var(--mav-fg)}
+.th-actions{display:flex;gap:8px}
+.th-icon-btn{width:38px;height:38px;border-radius:50%;background:var(--mav-bg-secondary,#efefef);display:flex;align-items:center;justify-content:center;cursor:pointer;border:0;color:var(--main-text\/default,#171717);transition:transform .12s}
+[data-theme=dark] .th-icon-btn{background:#242424;color:var(--mav-fg)}
+.th-icon-btn:hover{transform:translateY(-1px)}
+.th-icon-btn svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round}
 
-/* Side drawer indicator */
-.drawer-handle{width:4px;height:40px;background:var(--mav-border);border-radius:9999px}
+.nav-hint{margin-top:14px;font-size:12px;color:var(--mav-muted);font-family:'Inter',sans-serif;text-align:center}
+.nav-cols{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}
+.nav-col{display:flex;flex-direction:column;gap:10px}
+.nav-tag{font-size:11px;color:var(--mav-muted);font-family:'Inter',sans-serif}
+.canvas-dark{background:var(--main\/white,#171717);border-radius:16px;padding:28px;display:flex;flex-wrap:wrap;gap:28px;justify-content:center}
+.canvas-dark .nav-tag{color:#9a9a9a}
 </style>
 </head>
 <body>
 <div class="doc-layout">
-<nav class="doc-sidebar">
-  <div class="sidebar-logo"><a href="../index.html" class="sidebar-logo-mark"><div class="sidebar-logo-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><rect x="1" y="1" width="5" height="5" rx="1"/><rect x="8" y="1" width="5" height="5" rx="1"/><rect x="1" y="8" width="5" height="5" rx="1"/><rect x="8" y="8" width="5" height="5" rx="1" opacity=".4"/></svg></div><span class="sidebar-logo-name">MaV Design System</span></a></div>
-  <div class="sidebar-section-label">Components</div>
-  <a href="buttons.html" class="sidebar-link">Buttons</a>
-  <a href="inputs.html" class="sidebar-link">Input Fields</a>
-  <a href="otp.html" class="sidebar-link">OTP Input</a>
-  <a href="forms.html" class="sidebar-link">Forms & Controls</a>
-  <a href="feedback.html" class="sidebar-link">Alerts & Toasts</a>
-  <a href="badges.html" class="sidebar-link">Badges & Chips</a>
-  <a href="avatars.html" class="sidebar-link">Avatars</a>
-  <a href="cards.html" class="sidebar-link">Payment Cards</a>
-  <a href="navigation.html" class="sidebar-link active">Navigation</a>
-  <a href="chat.html" class="sidebar-link">Chat Bubbles</a>
-  <a href="finance.html" class="sidebar-link">Finance Modules</a>
-  <a href="divider.html" class="sidebar-link">Divider</a>
-  <a href="all.html" class="sidebar-link">Kitchen Sink</a>
-</nav>
+<nav class="doc-sidebar"></nav>
 <main class="doc-main">
   <div class="topbar">
     <a href="../index.html" class="topbar-back">← MaV</a>
@@ -131,91 +126,31 @@
   <div class="page-header">
     <div class="page-breadcrumb"><a href="../index.html">MaV</a> / Components</div>
     <h1 class="page-title">Navigation</h1>
-    <p class="page-desc">Mobile nav bar, tabs, steppers, breadcrumbs, and coachmarks.</p>
+    <p class="page-desc">Bottom nav bar, tabs, stepper and breadcrumb. The active state uses <code>--btn/primary/default</code> (→ lime in dark), and a <strong>gliding indicator</strong> slides between items when you tap — the same motion as the pagination control.</p>
   </div>
 
-  <!-- Mobile nav bar -->
+  <!-- Bottom nav bar -->
   <div class="section">
-    <h2 class="section-title">Mobile Bottom Nav Bar</h2>
-    <p class="section-desc">5-item tab bar. Active tab uses primary color + dot indicator. Icon opacity 0.4 → 1 on active.</p>
+    <h2 class="section-title">Bottom Nav Bar <span class="section-badge">try it</span></h2>
+    <p class="section-desc">Tap a tab — the top indicator glides across while the icon &amp; label ease into the accent colour. A floating Scan button sits centre. Four-item (with Scan) and five-item variants.</p>
     <div class="preview-card">
       <div class="preview-canvas">
-        <div class="mob-frame">
-          <div class="mob-screen">Screen content</div>
-          <div class="mob-navbar">
-            <div class="nav-item">
-              <div class="nav-icon active">
-                <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="var(--mav-primary)" stroke-width="1.8"><path d="M3 9l8-6 8 6v10a1 1 0 01-1 1H4a1 1 0 01-1-1z"/><path d="M9 20V13h4v7"/></svg>
-              </div>
-              <span class="nav-label active">Home</span>
-              <div class="nav-dot"></div>
-            </div>
-            <div class="nav-item">
-              <div class="nav-icon">
-                <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="12" y="3" width="7" height="7" rx="1"/><rect x="3" y="12" width="7" height="7" rx="1"/><rect x="12" y="12" width="7" height="7" rx="1"/></svg>
-              </div>
-              <span class="nav-label">Cards</span>
-            </div>
-            <div class="nav-item">
-              <div class="nav-icon">
-                <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><path d="M11 7v4l3 2"/></svg>
-              </div>
-              <span class="nav-label">History</span>
-            </div>
-            <div class="nav-item">
-              <div class="nav-icon">
-                <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 2a9 9 0 100 18A9 9 0 0011 2zM11 8v4M11 14v.5"/></svg>
-              </div>
-              <span class="nav-label">Support</span>
-            </div>
-            <div class="nav-item">
-              <div class="nav-icon">
-                <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="8" r="3"/><path d="M4 20c0-4 3.1-7 7-7h0c3.9 0 7 3.1 7 7"/></svg>
-              </div>
-              <span class="nav-label">Profile</span>
-            </div>
+        <div class="nav-cols" style="justify-content:center;width:100%">
+          <div class="nav-col">
+            <span class="nav-tag">Four items + Scan</span>
+            <div class="nav"><div class="nav-phone"><div class="nav-screen">Screen</div>
+              <div class="bnav" data-bnav data-scan="1"></div><div class="nav-home"><span></span></div>
+            </div></div>
           </div>
-        </div>
-
-        <!-- Dark nav bar -->
-        <div class="mob-frame">
-          <div class="mob-screen"></div>
-          <div class="mob-navbar">
-            <div class="nav-item">
-              <div class="nav-icon">
-                <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="var(--bc-mono300-d)" stroke-width="1.8"><path d="M3 9l8-6 8 6v10a1 1 0 01-1 1H4a1 1 0 01-1-1z"/><path d="M9 20V13h4v7"/></svg>
-              </div>
-              <span class="nav-label">Home</span>
-            </div>
-            <div class="nav-item">
-              <div class="nav-icon">
-                <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="var(--mav-primary-dark)" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="12" y="3" width="7" height="7" rx="1"/><rect x="3" y="12" width="7" height="7" rx="1"/><rect x="12" y="12" width="7" height="7" rx="1"/></svg>
-              </div>
-              <span class="nav-label">Cards</span>
-              <div class="nav-dot"></div>
-            </div>
-            <div class="nav-item">
-              <div class="nav-icon">
-                <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="var(--bc-mono300-d)" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><path d="M11 7v4l3 2"/></svg>
-              </div>
-              <span class="nav-label">History</span>
-            </div>
-            <div class="nav-item">
-              <div class="nav-icon">
-                <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="var(--bc-mono300-d)" stroke-width="1.8"><path d="M11 2a9 9 0 100 18A9 9 0 0011 2zM11 8v4M11 14v.5"/></svg>
-              </div>
-              <span class="nav-label">Support</span>
-            </div>
-            <div class="nav-item">
-              <div class="nav-icon">
-                <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="var(--bc-mono300-d)" stroke-width="1.8"><circle cx="11" cy="8" r="3"/><path d="M4 20c0-4 3.1-7 7-7h0c3.9 0 7 3.1 7 7"/></svg>
-              </div>
-              <span class="nav-label">Profile</span>
-            </div>
+          <div class="nav-col">
+            <span class="nav-tag">Five items</span>
+            <div class="nav"><div class="nav-phone"><div class="nav-screen">Screen</div>
+              <div class="bnav" data-bnav data-items="home,statistic,search,history,profile"></div><div class="nav-home"><span></span></div>
+            </div></div>
           </div>
         </div>
       </div>
-      <div class="preview-meta"><span class="preview-label">Bottom nav — 375px frame · active: primary color + dot · dark: #a1ff5b accent</span></div>
+      <div class="preview-meta"><span class="preview-label">Gliding top indicator · accent colour ease · floating Scan</span><span class="preview-sublabel">--btn/primary/default → lime · cubic-bezier(.34,1.1,.35,1)</span></div>
     </div>
   </div>
 
@@ -224,27 +159,44 @@
   <!-- Tabs -->
   <div class="section">
     <h2 class="section-title">Tabs</h2>
+    <p class="section-desc">Underline tabs with a gliding ink bar, and pill tabs with a gliding pill — both slide between items on tap.</p>
     <div class="preview-card">
-      <div class="preview-canvas">
-        <div>
-          <div>Underline tabs</div>
-          <div class="tabs-row" id="tabs1">
-            <div class="tab active" onclick="selectTab('tabs1',this)">Overview</div>
-            <div class="tab" onclick="selectTab('tabs1',this)">Transactions</div>
-            <div class="tab" onclick="selectTab('tabs1',this)">Analytics</div>
-            <div class="tab" onclick="selectTab('tabs1',this)">Settings</div>
-          </div>
+      <div class="preview-canvas" style="flex-direction:column;align-items:flex-start;gap:28px">
+        <div style="width:100%;max-width:520px">
+          <div class="nav-tag" style="margin-bottom:8px">Underline tabs</div>
+          <div class="nav"><div class="gtabs" data-gtabs>
+            <button class="gtab on">Overview</button><button class="gtab">Transactions</button><button class="gtab">Analytics</button><button class="gtab">Settings</button>
+          </div></div>
         </div>
         <div>
-          <div>Pill tabs</div>
-          <div class="pill-tabs" id="pills1">
-            <div class="pill-tab active" onclick="selectPill('pills1',this)">Monthly</div>
-            <div class="pill-tab" onclick="selectPill('pills1',this)">Weekly</div>
-            <div class="pill-tab" onclick="selectPill('pills1',this)">Daily</div>
-          </div>
+          <div class="nav-tag" style="margin-bottom:8px">Pill tabs</div>
+          <div class="nav"><div class="gpills" data-gpills>
+            <button class="gpill on">Monthly</button><button class="gpill">Weekly</button><button class="gpill">Daily</button>
+          </div></div>
         </div>
       </div>
-      <div class="preview-meta"><span class="preview-label">Tabs — underline: 2px border · pill: bg toggle on active</span></div>
+      <div class="preview-meta"><span class="preview-label">Underline ink &amp; pill both glide · accent → lime in dark</span></div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- Dark -->
+  <div class="section">
+    <h2 class="section-title">In dark</h2>
+    <p class="section-desc">The accent re-themes to lime; the gliding indicators behave identically.</p>
+    <div class="preview-card">
+      <div class="preview-canvas">
+        <div class="canvas-dark" data-theme="dark">
+          <div class="nav"><div class="nav-phone"><div class="nav-screen">Screen</div>
+            <div class="bnav" data-bnav data-scan="1" data-active="2"></div><div class="nav-home"><span></span></div>
+          </div></div>
+          <div class="nav" style="align-self:center"><div class="gpills" data-gpills>
+            <button class="gpill">Monthly</button><button class="gpill on">Weekly</button><button class="gpill">Daily</button>
+          </div></div>
+        </div>
+      </div>
+      <div class="preview-meta"><span class="preview-label">Dark — accent → lime</span></div>
     </div>
   </div>
 
@@ -253,114 +205,142 @@
   <!-- Stepper -->
   <div class="section">
     <h2 class="section-title">Progress Stepper</h2>
-    <p class="section-desc">Onboarding and multi-step flows. Step 1–2 done, step 3 active, step 4 pending.</p>
+    <p class="section-desc">Multi-step flow — steps 1–2 done, 3 active, 4 pending.</p>
     <div class="preview-card">
       <div class="preview-canvas">
-        <div>
-          <div>
-            <div class="step-item">
-              <div class="step-circle step-done">✓</div>
-              <span class="step-label">Identity</span>
-            </div>
-            <div class="step-connector done"></div>
-            <div class="step-item">
-              <div class="step-circle step-done">✓</div>
-              <span class="step-label">Address</span>
-            </div>
-            <div class="step-connector done"></div>
-            <div class="step-item">
-              <div class="step-circle step-active">3</div>
-              <span class="step-label active">Documents</span>
-            </div>
-            <div class="step-connector"></div>
-            <div class="step-item">
-              <div class="step-circle step-todo">4</div>
-              <span class="step-label">Review</span>
-            </div>
-          </div>
-        </div>
+        <div class="nav" style="width:100%"><div class="step-row">
+          <div class="step-item"><div class="step-circle step-done">✓</div><span class="step-lbl">Identity</span></div>
+          <div class="step-conn done"></div>
+          <div class="step-item"><div class="step-circle step-done">✓</div><span class="step-lbl">Address</span></div>
+          <div class="step-conn done"></div>
+          <div class="step-item"><div class="step-circle step-active">3</div><span class="step-lbl on">Documents</span></div>
+          <div class="step-conn"></div>
+          <div class="step-item"><div class="step-circle step-todo">4</div><span class="step-lbl">Review</span></div>
+        </div></div>
       </div>
-      <div class="preview-meta"><span class="preview-label">Stepper — 32px circle · connector 2px · active: focus ring glow</span></div>
+      <div class="preview-meta"><span class="preview-label">Stepper — 32px circle · done/active use the accent</span></div>
     </div>
   </div>
 
   <div class="section-divider"></div>
 
-  <!-- Breadcrumb + Header -->
+  <!-- Header + breadcrumb -->
   <div class="section">
-    <h2 class="section-title">Page Header & Breadcrumb</h2>
+    <h2 class="section-title">Page Header &amp; Breadcrumb</h2>
     <div class="preview-card">
       <div class="preview-canvas">
-        <div class="top-header">
+        <div class="nav" style="width:100%"><div class="top-header">
           <div>
-            <div class="breadcrumb">
-              <a class="bc-link">Home</a><span class="bc-sep">/</span>
-              <a class="bc-link">Wallet</a><span class="bc-sep">/</span>
-              <span class="bc-current">Transfer</span>
-            </div>
+            <div class="breadcrumb"><a class="bc-link">Home</a><span class="bc-sep">/</span><a class="bc-link">Wallet</a><span class="bc-sep">/</span><span class="bc-current">Transfer</span></div>
             <div class="th-title">Send Money</div>
           </div>
           <div class="th-actions">
-            <div class="th-icon-btn">
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="5"/><path d="M13 13l3 3"/></svg>
-            </div>
-            <div class="th-icon-btn">
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 2a7 7 0 100 14A7 7 0 009 2zM9 6v4M9 11v.5"/></svg>
-            </div>
+            <button class="th-icon-btn"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button>
+            <button class="th-icon-btn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16h.01"/></svg></button>
           </div>
-        </div>
+        </div></div>
       </div>
-      <div class="preview-meta"><span class="preview-label">Header — border-bottom 1px · 48px height · breadcrumb 13px</span></div>
+      <div class="preview-meta"><span class="preview-label">Header — breadcrumb (accent links) + title + actions</span></div>
     </div>
   </div>
 
   <div class="section-divider"></div>
 
-  <!-- Coachmark -->
+  <!-- Token reference -->
   <div class="section">
-    <h2 class="section-title">Coachmark / Tooltip</h2>
-    <p class="section-desc">Onboarding overlay tooltip. Dark background #191919. Action text #a1ff5b.</p>
-    <div class="preview-card">
-      <div class="preview-canvas">
-        <div>
-          <div>Target element</div>
-          <div class="coachmark">
-            <div class="coachmark-title">Quick transfer</div>
-            <div class="coachmark-desc">Tap this button to send money instantly to any bank in Nigeria.</div>
-            <div class="coachmark-actions">
-              <span class="cm-skip">Skip tour</span>
-              <div class="cm-dots">
-                <div class="cm-dot active"></div>
-                <div class="cm-dot"></div>
-                <div class="cm-dot"></div>
-              </div>
-              <span class="cm-next">Next →</span>
-            </div>
-          </div>
-        </div>
-        <div>
-          <div>Simple tooltip</div>
-          <div>
-            <div>Hover target</div>
-            <div>Fee: 0.3% · Max ₦500<div></div></div>
-          </div>
-        </div>
-      </div>
-      <div class="preview-meta"><span class="preview-label">Coachmark — bg #191919 · action #a1ff5b · border-radius 10px · arrow offset 24px</span></div>
-    </div>
+    <h2 class="section-title">Token Reference</h2>
+    <table class="token-table">
+      <thead><tr><th>Token</th><th>Value</th><th>Usage</th></tr></thead>
+      <tbody>
+        <tr><td class="token-name">--btn/primary/default</td><td><span class="token-swatch-sm" style="background:#352eff"></span><span class="token-value">#352eff → #a1ff5b</span></td><td class="token-value">Active tab/nav · gliding indicators · Scan (→ lime)</td></tr>
+        <tr><td class="token-name">--main-text/default</td><td><span class="token-swatch-sm" style="background:#171717"></span><span class="token-value">#171717</span></td><td class="token-value">Inactive icon · label · title</td></tr>
+        <tr><td class="token-name">--mav-muted</td><td><span class="token-swatch-sm" style="background:#7f7f7f"></span><span class="token-value">#7f7f7f</span></td><td class="token-value">Inactive tabs · breadcrumb separators</td></tr>
+        <tr><td class="token-name">--mav-bg-secondary</td><td><span class="token-swatch-sm" style="background:#e5e5e5"></span><span class="token-value">#e5e5e5</span></td><td class="token-value">Pill-tabs track · icon buttons</td></tr>
+        <tr><td class="token-name">Motion</td><td><span class="token-value">.42s cubic-bezier(.34,1.1,.35,1)</span></td><td class="token-value">Gliding indicator (matches Pagination)</td></tr>
+      </tbody>
+    </table>
   </div>
 
 </main>
 </div>
 <script>
-function selectTab(groupId, el){
-  document.querySelectorAll('#'+groupId+' .tab').forEach(t=>t.classList.remove('active'));
-  el.classList.add('active');
-}
-function selectPill(groupId, el){
-  document.querySelectorAll('#'+groupId+' .pill-tab').forEach(t=>t.classList.remove('active'));
-  el.classList.add('active');
-}
+(function () {
+  var ICON = {
+    home:      '<path d="M4 10.5 12 4l8 6.5"/><path d="M6 9.5V20h12V9.5"/>',
+    statistic: '<path d="M4 19V5"/><path d="M4 15l4.5-4.5 3.5 3 5-6"/><path d="M4 19h16"/>',
+    cards:     '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/>',
+    profile:   '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="10" r="3"/><path d="M6.5 18.4a6 6 0 0 1 11 0"/>',
+    search:    '<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',
+    history:   '<path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3 4v4h4"/><path d="M12 8v4l3 2"/>'
+  };
+  var scanIco = '<svg viewBox="0 0 24 24"><path d="M4 8V6a2 2 0 0 1 2-2h2"/><path d="M16 4h2a2 2 0 0 1 2 2v2"/><path d="M20 16v2a2 2 0 0 1-2 2h-2"/><path d="M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M4 12h16"/></svg>';
+  var LABELS = { home:'Home', statistic:'Statistic', cards:'Cards', profile:'Profile', search:'Search', history:'History' };
+  function svg(k){ return '<svg viewBox="0 0 24 24">' + ICON[k] + '</svg>'; }
+
+  /* ── bottom nav bar ─────────────────────────────────────────────────────── */
+  document.querySelectorAll('[data-bnav]').forEach(function (bar) {
+    var items = (bar.dataset.items || 'home,statistic,cards,profile').split(',');
+    var scan = bar.dataset.scan === '1';
+    var activeIdx = parseInt(bar.dataset.active || '0', 10);
+    var html = '<span class="bnav-ink"></span>';
+    items.forEach(function (k, i) {
+      if (scan && i === Math.ceil(items.length / 2)) html += '<span class="bnav-item spacer"></span>';
+      html += '<button class="bnav-item" data-i="' + i + '">' + svg(k) + '<span class="lbl">' + LABELS[k] + '</span></button>';
+    });
+    if (scan) html += '<button class="bnav-scan" aria-label="Scan">' + scanIco + '</button>';
+    bar.innerHTML = html;
+
+    var ink = bar.querySelector('.bnav-ink');
+    var btns = [].slice.call(bar.querySelectorAll('.bnav-item:not(.spacer)'));
+    function move(i, animate) {
+      if (!animate) ink.style.transition = 'none';
+      var el = btns[i], w = 26;
+      var cx = el.offsetLeft + el.offsetWidth / 2;
+      ink.style.width = w + 'px';
+      ink.style.transform = 'translateX(' + (cx - w / 2) + 'px)';
+      btns.forEach(function (b, k) { b.classList.toggle('on', k === i); });
+      if (!animate) requestAnimationFrame(function () { ink.style.transition = ''; });
+    }
+    btns.forEach(function (b, i) { b.addEventListener('click', function () { move(i, true); }); });
+    requestAnimationFrame(function () { move(activeIdx, false); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () {
+      var i = btns.findIndex(function (b) { return b.classList.contains('on'); });
+      move(i < 0 ? activeIdx : i, false);
+    });
+  });
+
+  /* ── gliding underline tabs ─────────────────────────────────────────────── */
+  document.querySelectorAll('[data-gtabs]').forEach(function (row) {
+    var ink = document.createElement('span'); ink.className = 'gtabs-ink'; row.appendChild(ink);
+    var tabs = [].slice.call(row.querySelectorAll('.gtab'));
+    function move(el, animate) {
+      if (!animate) ink.style.transition = 'none';
+      ink.style.width = el.offsetWidth + 'px';
+      ink.style.transform = 'translateX(' + el.offsetLeft + 'px)';
+      tabs.forEach(function (t) { t.classList.toggle('on', t === el); });
+      if (!animate) requestAnimationFrame(function () { ink.style.transition = ''; });
+    }
+    tabs.forEach(function (t) { t.addEventListener('click', function () { move(t, true); }); });
+    requestAnimationFrame(function () { move(row.querySelector('.gtab.on') || tabs[0], false); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { move(row.querySelector('.gtab.on') || tabs[0], false); });
+  });
+
+  /* ── gliding pill tabs ──────────────────────────────────────────────────── */
+  document.querySelectorAll('[data-gpills]').forEach(function (row) {
+    var ink = document.createElement('span'); ink.className = 'gpills-ink'; row.insertBefore(ink, row.firstChild);
+    var pills = [].slice.call(row.querySelectorAll('.gpill'));
+    function move(el, animate) {
+      if (!animate) ink.style.transition = 'none';
+      ink.style.width = el.offsetWidth + 'px';
+      ink.style.transform = 'translateX(' + el.offsetLeft + 'px)';
+      pills.forEach(function (p) { p.classList.toggle('on', p === el); });
+      if (!animate) requestAnimationFrame(function () { ink.style.transition = ''; });
+    }
+    pills.forEach(function (p) { p.addEventListener('click', function () { move(p, true); }); });
+    requestAnimationFrame(function () { move(row.querySelector('.gpill.on') || pills[0], false); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { move(row.querySelector('.gpill.on') || pills[0], false); });
+  });
+})();
 </script>
 <script src="../js/theme.js"></script>
 </body>
