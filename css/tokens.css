@@ -527,6 +527,10 @@
   --background\/bg-secondary: #e5e5e5;
   --background\/bg-tertiary:  #e6edff;
 
+  /* Bottom sheet / overlay */
+  --color\/blanket\/bold:     #0d0d0d80;
+  --radius\/sheet\/lg:        32px;
+
   /* Text */
   --main-text\/default:     #171717;
   --main-text\/description: #7f7f7f;
@@ -926,6 +930,10 @@
   --background\/bg-default:   #171717;
   --background\/bg-secondary: #242424;
   --background\/bg-tertiary:  #f6fff1;
+
+  /* Bottom sheet / overlay — scrim slightly stronger over dark UI */
+  --color\/blanket\/bold:     #00000099;
+  --radius\/sheet\/lg:        32px;
 
   --main-text\/default:     #ffffff;
   --main-text\/brand:       #a1ff5b;
