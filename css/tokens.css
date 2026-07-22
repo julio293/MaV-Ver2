@@ -1001,11 +1001,15 @@
   --coachmark\/dots:     #ffffff;
   --coachmark\/dot-dash: #ffffff;
 
-  --bubble\/bg-incoming:    #ffffff;
-  --bubble\/bg-outcoming:   #ffffff;
-  --bubble\/name-incoming:  #ffffff;
-  --bubble\/text-outcoming: #ffffff;
-  --bubble\/text-incoming:  #ffffff;
+  /* Chat bubbles — dark: incoming dark-grey, outgoing solid blue,
+     sender name re-themes to lime (per the Figma dark screen). */
+  --bubble\/bg-incoming:       #2c2c2e;
+  --bubble\/bg-outcoming:      #2f43d9;
+  --bubble\/name-incoming:     #a1ff5b;
+  --bubble\/text-outcoming:    #ffffff;
+  --bubble\/text-incoming:     #f2f2f2;
+  --bubble\/bg-outcoming-reply:#ffffff26;
+  --bubble\/outline-incoming:  #a1ff5b;
 
   --Balance\/Bg:           #171717;
   --Balance\/Bg-secondary: #484848;
