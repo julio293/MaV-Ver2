@@ -101,6 +101,67 @@
 .canvas-dark{background:var(--main\/white,#171717);border-radius:16px;padding:32px;display:flex;flex-wrap:wrap;gap:40px;justify-content:center;align-items:flex-start}
 .bal-cell{display:flex;flex-direction:column;gap:12px;align-items:center}
 .bal-tag{font-size:11px;color:var(--mav-muted);font-family:'Inter',sans-serif}
+
+/* ══ Interactivity & microinteractions ═══════════════════════════════════ */
+.try-badge{display:inline-block;vertical-align:middle;margin-left:8px;font-family:'Inter',sans-serif;
+  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:3px 8px;border-radius:999px;
+  color:#fff;background:var(--btn\/primary\/default,#352eff)}
+[data-theme=dark] .try-badge{background:var(--mav-primary-dark,#a1ff5b);color:#171717}
+
+/* trend badge pops in on load */
+@media (prefers-reduced-motion:no-preference){.bal-badge{animation:bal-pop .5s cubic-bezier(.34,1.4,.4,1) both}}
+@keyframes bal-pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+
+/* eye / privacy toggle */
+.bal-eye{cursor:pointer;transition:transform .18s ease,stroke .2s ease}
+.bal-eye:hover{transform:scale(1.12)}
+.bal-eye:active{transform:scale(.9)}
+
+/* amount masking + count-up fade */
+.bal-amount,.w-amt{transition:opacity .16s ease}
+.bal-amount.masked,.w-amt.masked{letter-spacing:3px}
+
+/* action buttons — press + hover + icon pop */
+.bal-btn{transition:transform .12s ease,box-shadow .2s ease,background .2s ease,filter .2s ease}
+.bal-btn.primary:hover{filter:brightness(1.04);box-shadow:0 8px 20px -8px var(--btn\/primary\/default,#352eff)}
+[data-theme=dark] .bal-btn.primary:hover{box-shadow:0 8px 20px -8px var(--mav-primary-dark,#a1ff5b)}
+.bal-btn.secondary:hover{background:var(--background\/bg-tertiary,#f4f6ff)}
+[data-theme=dark] .bal-btn.secondary:hover{background:rgba(255,255,255,.06)}
+.bal-btn:active{transform:scale(.96)}
+.bal-btn svg,.q-btn svg{transition:transform .2s cubic-bezier(.34,1.4,.4,1)}
+.bal-btn:hover svg{transform:scale(1.18)}
+
+/* quick round actions */
+.q-btn{cursor:pointer;transition:transform .16s cubic-bezier(.34,1.4,.4,1),border-color .2s ease,background .2s ease}
+.q:hover .q-btn{border-color:var(--btn\/primary\/default,#352eff);background:var(--background\/bg-tertiary,#f4f6ff)}
+[data-theme=dark] .q:hover .q-btn{border-color:var(--mav-primary-dark,#a1ff5b);background:rgba(255,255,255,.06)}
+.q:active .q-btn{transform:scale(.9)}
+.q:hover .q-btn svg{transform:scale(1.18)}
+
+/* change / detail buttons */
+.cf-change{transition:transform .12s ease,background .2s ease,border-color .2s ease}
+.cf-change:hover{background:var(--background\/bg-tertiary,#f4f6ff)}
+[data-theme=dark] .cf-change:hover{background:rgba(255,255,255,.06)}
+.cf-change:active{transform:scale(.96)}
+.cf-detail{transition:opacity .15s ease,transform .15s ease}
+.cf-detail:hover{opacity:.7}
+.cf-detail:active{transform:scale(.95)}
+
+/* segmented Main/Secondary tabs — gliding indicator */
+.cf-seg{position:relative}
+.cf-seg .seg-ink{position:absolute;top:2px;bottom:2px;left:0;border-radius:var(--border\/border-radius\/sm,4px);
+  background:var(--background\/bg-default,#ffffff);box-shadow:0 0 .5px rgba(20,20,20,.04),0 1px 4px rgba(20,20,20,.12);
+  transition:transform .38s cubic-bezier(.34,1.1,.35,1),width .38s cubic-bezier(.34,1.1,.35,1);z-index:0}
+[data-theme=dark] .cf-seg .seg-ink{background:var(--background\/bg-default,#171717)}
+.cf-seg .s{position:relative;z-index:1;cursor:pointer;background:transparent !important;box-shadow:none !important;transition:color .25s ease}
+/* number swap on tab change */
+.cf-split .col .v{transition:opacity .18s ease,transform .18s ease}
+.cf-split .col .v.swapping{opacity:0;transform:translateY(5px)}
+
+@media (prefers-reduced-motion:reduce){
+  .cf-seg .seg-ink{transition:none}
+  .bal-btn:hover svg,.q:hover .q-btn svg{transform:none}
+}
 </style>
 </head>
 <body>
@@ -123,8 +184,8 @@
 
   <!-- Anatomy -->
   <div class="section">
-    <h2 class="section-title">Anatomy</h2>
-    <p class="section-desc">Label + big amount (<code>--heading/xl</code>, 32px) with an eye toggle, a success trend badge, then a Send / Request action pair.</p>
+    <h2 class="section-title">Anatomy <span class="try-badge">interactive</span></h2>
+    <p class="section-desc">Label + big amount (<code>--heading/xl</code>, 32px) with an eye toggle, a success trend badge, then a Send / Request action pair. <strong>Try it:</strong> the amount counts up on view, the eye hides/shows it, and the buttons respond to press.</p>
     <div class="preview-card">
       <div class="preview-canvas">
         <div class="bal-stage" style="justify-content:flex-start">
@@ -195,8 +256,8 @@
 
   <!-- Cashflow cards -->
   <div class="section">
-    <h2 class="section-title">Cashflow cards</h2>
-    <p class="section-desc">Compact wallet cards on a soft <code>--Balance/Bg-secondary</code> surface: <strong>Default</strong> (top-up), <strong>Button</strong> (change wallet), and <strong>Detail</strong> (segmented + income/expense).</p>
+    <h2 class="section-title">Cashflow cards <span class="try-badge">try it</span></h2>
+    <p class="section-desc">Compact wallet cards on a soft <code>--Balance/Bg-secondary</code> surface: <strong>Default</strong> (top-up), <strong>Button</strong> (change wallet), and <strong>Detail</strong> (segmented + income/expense). On the Detail card the <strong>Main / Secondary</strong> segmented control is a live tab — press it and a gliding indicator slides across while the balance counts to the new wallet and the income/expense figures swap.</p>
     <div class="preview-card">
       <div class="preview-canvas">
         <div class="bal-stage">
@@ -311,5 +372,110 @@
 </main>
 </div>
 <script src="../js/theme.js"></script>
+<script>
+(function(){
+  var RM = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+  /* ── number format + count-up ─────────────────────────────────────────── */
+  function fmtUS(v, dec){ return v.toLocaleString('en-US', {minimumFractionDigits:dec, maximumFractionDigits:dec}); }
+  function parseAmt(txt){
+    var digits = txt.replace(/[^0-9.]/g, '');
+    var i = txt.search(/[0-9]/);
+    return { prefix: i < 0 ? '' : txt.slice(0, i), value: parseFloat(digits) || 0, dec: (digits.split('.')[1] || '').length };
+  }
+  function startCount(el, from, to, prefix, dec, dur){
+    if (RM){ el.textContent = prefix + fmtUS(to, dec); return; }
+    dur = dur || 650; var t0 = null;
+    function step(ts){
+      if (t0 == null) t0 = ts;
+      var p = Math.min((ts - t0) / dur, 1), e = 1 - Math.pow(1 - p, 3);
+      el.textContent = prefix + fmtUS(from + (to - from) * e, dec);
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  // stash raw value + count up on first view
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if (!en.isIntersecting) return;
+      var el = en.target; io.unobserve(el);
+      if (el.dataset.counted || el.classList.contains('masked')) return;
+      el.dataset.counted = '1';
+      startCount(el, 0, parseFloat(el.dataset.value), el.dataset.prefix, +el.dataset.dec, 700);
+    });
+  }, {threshold:.6});
+  document.querySelectorAll('.bal-amount, .w-amt').forEach(function(el){
+    var p = parseAmt(el.textContent);
+    el.dataset.value = p.value; el.dataset.prefix = p.prefix; el.dataset.dec = p.dec;
+    io.observe(el);
+  });
+
+  /* ── eye / privacy toggle ─────────────────────────────────────────────── */
+  var EYE_OPEN = '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>';
+  var EYE_OFF  = '<path d="M3 3l18 18"/><path d="M10.6 10.6a3 3 0 0 0 4.2 4.2"/><path d="M9.5 5.2A10.6 10.6 0 0 1 12 5c7 0 11 7 11 7a17.3 17.3 0 0 1-3.1 3.8"/><path d="M6.1 6.1A17.2 17.2 0 0 0 1 12s4 7 11 7a10.4 10.4 0 0 0 4-.8"/>';
+  function findAmt(eye){
+    var host = eye.closest('.bal-hero') || eye.closest('.cf') || eye.closest('.bal-cell');
+    return host ? host.querySelector('.bal-amount, .w-amt') : null;
+  }
+  document.querySelectorAll('.bal-eye').forEach(function(eye){
+    eye.addEventListener('click', function(){
+      var amt = findAmt(eye); if (!amt) return;
+      var hide = !amt.classList.contains('masked');
+      amt.style.opacity = 0;
+      setTimeout(function(){
+        if (hide){ amt.classList.add('masked'); amt.textContent = '••••••'; }
+        else { amt.classList.remove('masked'); amt.textContent = amt.dataset.prefix + fmtUS(parseFloat(amt.dataset.value), +amt.dataset.dec); }
+        amt.style.opacity = 1;
+      }, 150);
+      eye.innerHTML = hide ? EYE_OFF : EYE_OPEN;
+    });
+  });
+
+  /* ── segmented Main / Secondary tabs (gliding + data swap) ────────────── */
+  var DATA = {
+    Main:      { amt: 82758.10, income: '+$20.000', expense: '−$5.200' },
+    Secondary: { amt: 12340.55, income: '+$6.400',  expense: '−$2.100' }
+  };
+  var repos = [];
+  document.querySelectorAll('.cf-seg').forEach(function(seg){
+    var ink = document.createElement('span'); ink.className = 'seg-ink'; seg.insertBefore(ink, seg.firstChild);
+    var tabs = [].slice.call(seg.querySelectorAll('.s'));
+    var card = seg.closest('.cf');
+
+    function move(el, animate){
+      if (!animate) ink.style.transition = 'none';
+      ink.style.width = el.offsetWidth + 'px';
+      ink.style.transform = 'translateX(' + el.offsetLeft + 'px)';
+      tabs.forEach(function(t){ t.classList.toggle('active', t === el); });
+      if (!animate) requestAnimationFrame(function(){ ink.style.transition = ''; });
+    }
+    function apply(key){
+      if (!card) return;
+      var d = DATA[key]; if (!d) return;
+      var amt = card.querySelector('.w-amt');
+      if (amt){
+        if (amt.classList.contains('masked')){ amt.dataset.value = d.amt; amt.dataset.prefix = '$'; amt.dataset.dec = 2; }
+        else {
+          var from = parseFloat(amt.dataset.value);
+          amt.dataset.value = d.amt; amt.dataset.prefix = '$'; amt.dataset.dec = 2;
+          startCount(amt, isNaN(from) ? 0 : from, d.amt, '$', 2, 520);
+        }
+      }
+      [[card.querySelector('.cf-split .v.gain'), d.income], [card.querySelector('.cf-split .v.loss'), d.expense]].forEach(function(pair){
+        var el = pair[0]; if (!el) return;
+        el.classList.add('swapping');
+        setTimeout(function(){ el.textContent = pair[1]; el.classList.remove('swapping'); }, 160);
+      });
+    }
+    tabs.forEach(function(t){ t.addEventListener('click', function(){ move(t, true); apply(t.textContent.trim()); }); });
+    var init = seg.querySelector('.s.active') || tabs[0];
+    repos.push(function(){ move(seg.querySelector('.s.active') || tabs[0], false); });
+    requestAnimationFrame(function(){ move(init, false); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ move(seg.querySelector('.s.active') || tabs[0], false); });
+  });
+  var rt; window.addEventListener('resize', function(){ clearTimeout(rt); rt = setTimeout(function(){ repos.forEach(function(f){ f(); }); }, 120); });
+})();
+</script>
 </body>
 </html>

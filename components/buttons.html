@@ -180,6 +180,105 @@
   border-radius:50%;animation:spin .6s linear infinite;display:inline-block;flex-shrink:0}
 @keyframes spin{to{transform:rotate(360deg)}}
 .mav-btn-xl{padding:16px 24px;font-size:16px;width:100%;max-width:343px}
+
+/* ══ Live Component Playground ═══════════════════════════════════════════ */
+.playground{margin-top:20px;border:1px dashed var(--btn\/sliding\/default,#352eff);border-radius:12px;
+  padding:22px;background:var(--background\/bg-tertiary,#f4f6ff);display:flex;flex-direction:column;gap:14px}
+[data-theme=dark] .playground{background:#141b33}
+.playground-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.playground-title{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--main-text\/default,#171717)}
+[data-theme=dark] .playground-title{color:var(--mav-fg)}
+.playground-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#fff;
+  background:var(--btn\/sliding\/default,#352eff);padding:3px 8px;border-radius:999px}
+.playground-hint{font-size:12px;line-height:1.5;color:var(--mav-muted);font-family:'Inter',sans-serif;margin:0;max-width:52ch}
+.playground-reset{font-size:12px;font-weight:600;color:var(--btn\/sliding\/default,#352eff);background:none;border:0;
+  cursor:pointer;padding:6px 10px;border-radius:6px;transition:background .15s}
+.playground-reset:hover{background:var(--background\/bg-default,#fff)}
+[data-theme=dark] .playground-reset:hover{background:#1f2947}
+.swipe-follow{width:100%;max-width:420px;background:linear-gradient(to right,var(--btn\/sliding\/default,#352eff),var(--btn\/sliding\/hover,#0033da))}
+.swipe-follow .swipe-label{color:#fff}
+
+/* full-screen takeover — circular reveal from the handle */
+.takeover{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:16px;text-align:center;color:#fff;background:linear-gradient(150deg,var(--btn\/sliding\/default,#352eff),var(--btn\/sliding\/hover,#0033da));
+  clip-path:circle(0 at var(--ox,50%) var(--oy,90%));opacity:0;pointer-events:none;
+  transition:clip-path .6s cubic-bezier(.4,0,.2,1),opacity .35s ease}
+.takeover.on{clip-path:circle(150% at var(--ox,50%) var(--oy,90%));opacity:1;pointer-events:auto}
+.takeover-check{width:92px;height:92px;border-radius:50%;background:rgba(255,255,255,.16);
+  display:flex;align-items:center;justify-content:center;transform:scale(.4);opacity:0;
+  transition:transform .45s cubic-bezier(.34,1.5,.4,1) .2s,opacity .3s ease .2s}
+.takeover.on .takeover-check{transform:scale(1);opacity:1}
+.takeover-check svg{width:46px;height:46px;stroke:#fff;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round;
+  stroke-dasharray:30;stroke-dashoffset:30;transition:stroke-dashoffset .5s ease .45s}
+.takeover.on .takeover-check svg{stroke-dashoffset:0}
+.takeover-title{font-family:var(--font-active);font-size:26px;font-weight:700;transform:translateY(12px);opacity:0;
+  transition:transform .4s ease .35s,opacity .35s ease .35s}
+.takeover.on .takeover-title{transform:none;opacity:1}
+.takeover-sub{font-family:'Inter',sans-serif;font-size:13px;opacity:0;transition:opacity .35s ease .45s}
+.takeover.on .takeover-sub{opacity:.85}
+.takeover-dismiss{margin-top:8px;font-family:'Inter',sans-serif;font-size:12px;opacity:0;transition:opacity .35s ease .55s}
+.takeover.on .takeover-dismiss{opacity:.6}
+@media (prefers-reduced-motion:reduce){
+  .takeover{transition:opacity .2s ease}
+  .takeover-check,.takeover-check svg,.takeover-title,.takeover-sub,.takeover-dismiss{transition:opacity .2s ease}
+}
+
+/* ══ Swipe-up-to-complete flow (Buy-BTC style) ═══════════════════════════ */
+/* accent re-themes blue→lime in dark, matching the swipe-up token */
+.swipe-complete-btn,.completeover{--co-accent:var(--btn\/primary\/default,#352eff);--co-ink:#0a0a0a}
+[data-theme=dark] .swipe-complete-btn,[data-theme=dark] .completeover{--co-accent:var(--mav-primary-dark,#a1ff5b)}
+
+/* the trigger — a full-width bar flush on a screen edge; drag it up (or tap) */
+.swipe-complete-btn{position:relative;width:100%;max-width:420px;border:0;cursor:grab;touch-action:none;user-select:none;
+  background:var(--co-accent);color:var(--bc-white,#ffffff);border-radius:20px 20px 0 0;padding:22px 24px 30px;
+  display:flex;flex-direction:column;align-items:center;gap:6px;font-family:var(--font-active);font-weight:700;font-size:16px;
+  transition:transform .3s cubic-bezier(.32,.72,0,1),box-shadow .3s ease;box-shadow:0 -6px 24px -10px var(--co-accent)}
+.swipe-complete-btn:active{cursor:grabbing}
+.swipe-complete-btn .chev{display:flex;flex-direction:column;align-items:center;animation:swipeup-bounce 1.5s ease-in-out infinite}
+.swipe-complete-btn .chev svg{width:22px;height:22px;stroke:var(--bc-white,#ffffff);stroke-width:2.4;fill:none;stroke-linecap:round;stroke-linejoin:round;margin-bottom:-9px}
+/* dark mode: bar is lime, so ink the label/chevrons black for contrast */
+[data-theme=dark] .swipe-complete-btn{color:var(--co-ink,#0a0a0a)}
+[data-theme=dark] .swipe-complete-btn .chev svg{stroke:var(--co-ink,#0a0a0a)}
+@keyframes swipeup-bounce{0%,100%{transform:translateY(2px)}50%{transform:translateY(-4px)}}
+
+/* full-screen completion overlay — expands from the button, then flips to success */
+.completeover{position:fixed;inset:0;z-index:9999;overflow:hidden;display:flex;align-items:center;justify-content:center;
+  background:var(--co-accent);clip-path:circle(0 at var(--ox,50%) var(--oy,100%));opacity:0;pointer-events:none;
+  transition:clip-path .6s cubic-bezier(.4,0,.2,1),opacity .3s ease,background-color .5s ease .15s}
+.completeover.on{clip-path:circle(150% at var(--ox,50%) var(--oy,100%));opacity:1;pointer-events:auto}
+.completeover.co-done{background:var(--co-ink)}
+
+.co-phase{position:absolute;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center;padding:0 32px;
+  transition:opacity .4s ease,transform .5s cubic-bezier(.4,0,.2,1)}
+/* processing (lime) */
+.co-processing{color:var(--co-ink)}
+.co-logo{width:96px;height:96px;border-radius:50%;background:var(--co-ink);color:var(--co-accent);
+  display:flex;align-items:center;justify-content:center;font-family:var(--font-active);font-size:46px;font-weight:800;
+  animation:co-pulse 1.2s ease-in-out infinite}
+@keyframes co-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.co-proc-text{font-family:var(--font-active);font-size:22px;font-weight:700;letter-spacing:.01em}
+.completeover.co-done .co-processing{opacity:0;transform:translateY(-48px)}
+/* success (black) */
+.co-success{opacity:0;transform:translateY(36px);color:var(--co-accent)}
+.completeover.co-done .co-success{opacity:1;transform:none;transition-delay:.18s}
+.co-check{width:120px;height:120px}
+.co-check svg{width:120px;height:120px;stroke:var(--co-accent);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.co-check .co-ring{stroke-dasharray:295;stroke-dashoffset:295}
+.co-check .co-tick{stroke-dasharray:44;stroke-dashoffset:44}
+.completeover.co-done .co-check .co-ring{transition:stroke-dashoffset .55s ease .25s;stroke-dashoffset:0}
+.completeover.co-done .co-check .co-tick{transition:stroke-dashoffset .4s ease .7s;stroke-dashoffset:0}
+.co-title{font-family:var(--font-active);font-size:30px;font-weight:800}
+.co-sub{font-family:'Inter',sans-serif;font-size:15px;color:#c9c9c9;margin:0}
+/* Done button — appears with the success screen */
+.co-done-btn{position:absolute;left:24px;right:24px;bottom:calc(40px + env(safe-area-inset-bottom));max-width:420px;margin:0 auto;
+  padding:18px;border:0;border-radius:100px;background:var(--co-accent);color:var(--co-ink);
+  font-family:var(--font-active);font-size:16px;font-weight:700;cursor:pointer;
+  opacity:0;transform:translateY(24px);pointer-events:none;transition:opacity .35s ease,transform .35s ease}
+.completeover.co-done .co-done-btn{opacity:1;transform:none;transition-delay:.35s;pointer-events:auto}
+@media (prefers-reduced-motion:reduce){
+  .completeover{transition:opacity .2s ease,background-color .2s ease}
+  .co-phase,.co-check .co-ring,.co-check .co-tick,.co-done-btn,.swipe-complete-btn .chev{transition:opacity .2s ease;animation:none}
+}
 </style>
 </head>
 <body>
@@ -316,6 +415,20 @@
         <button class="mav-btn mav-btn-swipe" disabled>Disabled</button>
       </div>
       <div class="preview-meta"><span class="preview-label">Swipe — btn/swipeup/*</span><span class="preview-sublabel">radius: 8px 8px 0 0</span></div>
+    </div>
+
+    <!-- ── Live Component Playground ── -->
+    <div class="playground">
+      <div class="playground-head">
+        <span class="playground-title"><span class="playground-badge">Live</span> Component Playground</span>
+      </div>
+      <p class="playground-hint">Drag the bar upward (or tap it) to complete. It expands into a full-screen “Processing” takeover, then flips to a success screen with an animated checkmark and a Done button — the exact production flow.</p>
+      <div style="display:flex;justify-content:center;padding-top:6px">
+        <button class="swipe-complete-btn" id="swipe-complete-trigger" aria-label="Swipe up to complete">
+          <span class="chev"><svg viewBox="0 0 24 24"><path d="m6 15 6-6 6 6"/></svg><svg viewBox="0 0 24 24"><path d="m6 15 6-6 6 6"/></svg></span>
+          Swipe up to complete
+        </button>
+      </div>
     </div>
   </div>
 
@@ -534,6 +647,20 @@
         <span class="preview-sublabel">track 362px · thumb 46px (13px pad + 20px chevrons) · label Medium 20px at 50% opacity</span>
       </div>
     </div>
+
+    <!-- ── Live Component Playground ── -->
+    <div class="playground">
+      <div class="playground-head">
+        <span class="playground-title"><span class="playground-badge">Live</span> Component Playground</span>
+        <button class="playground-reset" id="follow-reset" type="button">↺ Reset</button>
+      </div>
+      <p class="playground-hint">Drag the handle all the way to the right to follow. Completing the swipe plays the full-screen takeover — the exact production behaviour, so you can test the real interaction, not just look at a static mock.</p>
+      <div class="swipe swipe-follow swipe-pill" id="follow-swipe">
+        <button class="swipe-thumb" aria-label="Swipe to follow"><svg><use href="#ic-chevrons-right"/></svg></button>
+        <span class="swipe-label">Swipe to Follow</span>
+        <svg class="swipe-hint"><use href="#ic-chevrons-right"/></svg>
+      </div>
+    </div>
   </div>
 
   <div class="section-divider"></div>
@@ -579,37 +706,174 @@
 
 </main>
 </div>
+
+<!-- full-screen takeover, played when the Follow swipe completes -->
+<div class="takeover" id="follow-takeover" aria-hidden="true" role="status">
+  <div class="takeover-check"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
+  <div class="takeover-title">Following</div>
+  <div class="takeover-sub">You’ll now see their updates in your feed</div>
+  <div class="takeover-dismiss">tap anywhere to dismiss</div>
+</div>
+
+<!-- full-screen completion, played when the swipe-up bar is swiped up -->
+<div class="completeover" id="swipe-complete" aria-hidden="true" role="status">
+  <!-- phase 1: processing (lime) -->
+  <div class="co-phase co-processing">
+    <div class="co-logo">φ</div>
+    <div class="co-proc-text">Processing Order</div>
+  </div>
+  <!-- phase 2: success (black) -->
+  <div class="co-phase co-success">
+    <div class="co-check"><svg viewBox="0 0 100 100">
+      <circle class="co-ring" cx="50" cy="50" r="47"/>
+      <path class="co-tick" d="M30 52 44 66 72 36"/>
+    </svg></div>
+    <div class="co-title">Successful!</div>
+    <p class="co-sub">Bought 0.00000845 (Rp9,998 worth of BTC)</p>
+  </div>
+  <button class="co-done-btn" id="co-done">Done</button>
+</div>
+
 <script src="../js/theme.js"></script>
 <script>
-/* live slider — V1: drag the thumb to the end to confirm */
-(function(){
-  const track = document.getElementById('live-swipe');
+/* Reusable swipe-to-confirm: drag the thumb to the end to complete.
+   Powers both the static V1 demo and the Playground's Swipe-to-Follow. */
+function makeSwipe(track, opts){
+  opts = opts || {};
   const thumb = track.querySelector('.swipe-thumb');
   const label = track.querySelector('.swipe-label');
-  let startX = null, max = 0;
+  const restLabel = label ? label.textContent : '';
+  let startX = null, max = 0, done = false;
+
   thumb.addEventListener('pointerdown', e => {
+    if (done) return;
     startX = e.clientX; max = track.clientWidth - thumb.offsetWidth - 10;
-    thumb.setPointerCapture(e.pointerId);
+    thumb.style.transition = ''; thumb.setPointerCapture(e.pointerId);
   });
   thumb.addEventListener('pointermove', e => {
     if (startX === null) return;
     const dx = Math.min(Math.max(e.clientX - startX, 0), max);
     thumb.style.transform = `translateX(${dx}px)`;
-    label.style.opacity = .5 * (1 - dx / max);
-    if (dx >= max) done();
+    if (label) label.style.opacity = .5 * (1 - dx / max);
+    if (dx >= max) complete();
   });
   thumb.addEventListener('pointerup', reset);
   thumb.addEventListener('pointercancel', reset);
-  function reset(){ if (startX === null) return; startX = null;
-    thumb.style.transition = 'transform .25s'; thumb.style.transform = 'translateX(0)';
-    label.style.opacity = .5; setTimeout(() => thumb.style.transition = '', 260); }
-  function done(){
+
+  function reset(){
+    if (startX === null || done) { startX = null; return; }
     startX = null;
-    track.classList.add('swipe-done');
-    label.textContent = 'Confirmed'; label.style.opacity = 1;
-    setTimeout(() => { track.classList.remove('swipe-done');
-      thumb.style.transform = 'translateX(0)'; label.textContent = 'Swipe to start'; label.style.opacity = .5; }, 1600);
+    thumb.style.transition = 'transform .25s'; thumb.style.transform = 'translateX(0)';
+    if (label) label.style.opacity = .5;
+    setTimeout(() => thumb.style.transition = '', 260);
   }
+  function complete(){
+    startX = null; done = true;
+    thumb.style.transition = 'transform .25s'; thumb.style.transform = `translateX(${max}px)`;
+    (opts.onDone || defaultDone)({ thumb, label, track, restart });
+  }
+  function defaultDone(){
+    track.classList.add('swipe-done');
+    if (label){ label.textContent = 'Confirmed'; label.style.opacity = 1; }
+    setTimeout(restart, 1600);
+  }
+  function restart(){
+    done = false;
+    track.classList.remove('swipe-done');
+    thumb.style.transition = 'transform .3s'; thumb.style.transform = 'translateX(0)';
+    if (label){ label.textContent = restLabel; label.style.opacity = .5; }
+    setTimeout(() => thumb.style.transition = '', 320);
+  }
+  return { restart };
+}
+
+/* V1 static demo — simple inline "Confirmed" state */
+makeSwipe(document.getElementById('live-swipe'));
+
+/* Playground — Swipe to Follow → full-screen takeover */
+(function(){
+  const overlay = document.getElementById('follow-takeover');
+  const swipe = document.getElementById('follow-swipe');
+  let hideTimer = null, controller = null;
+
+  controller = makeSwipe(swipe, { onDone(ctx){
+    // originate the circular reveal from the handle's centre
+    const r = ctx.thumb.getBoundingClientRect();
+    overlay.style.setProperty('--ox', (r.left + r.width / 2) + 'px');
+    overlay.style.setProperty('--oy', (r.top + r.height / 2) + 'px');
+    swipe.classList.add('swipe-done');
+    if (ctx.label){ ctx.label.textContent = 'Following'; ctx.label.style.opacity = 1; }
+    overlay.classList.add('on');
+    overlay.setAttribute('aria-hidden', 'false');
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(dismiss, 2600);
+  }});
+
+  function dismiss(){
+    clearTimeout(hideTimer);
+    overlay.classList.remove('on');
+    overlay.setAttribute('aria-hidden', 'true');
+    swipe.classList.remove('swipe-done');
+    controller.restart();
+  }
+  overlay.addEventListener('click', dismiss);
+  document.getElementById('follow-reset').addEventListener('click', dismiss);
+})();
+
+/* Swipe-up-to-complete → full-screen Processing → Success takeover */
+(function(){
+  const trigger = document.getElementById('swipe-complete-trigger');
+  const overlay = document.getElementById('swipe-complete');
+  if (!trigger || !overlay) return;
+  const LIFT_MAX = 130, THRESHOLD = 80;
+  let startY = null, dy = 0, busy = false, procTimer = null;
+
+  function fire(){
+    if (busy) return; busy = true;
+    // originate the reveal from the bar's top-centre
+    const r = trigger.getBoundingClientRect();
+    overlay.style.setProperty('--ox', (r.left + r.width / 2) + 'px');
+    overlay.style.setProperty('--oy', r.top + 'px');
+    // snap the bar back under the expanding overlay
+    trigger.style.transition = 'transform .3s cubic-bezier(.32,.72,0,1)';
+    trigger.style.transform = '';
+    overlay.classList.add('on');
+    overlay.setAttribute('aria-hidden', 'false');
+    // processing → success
+    clearTimeout(procTimer);
+    procTimer = setTimeout(() => overlay.classList.add('co-done'), 1400);
+  }
+  function reset(){
+    clearTimeout(procTimer);
+    overlay.classList.remove('on', 'co-done');
+    overlay.setAttribute('aria-hidden', 'true');
+    busy = false;
+  }
+
+  // drag the bar upward
+  trigger.addEventListener('pointerdown', e => {
+    startY = e.clientY; dy = 0; trigger.style.transition = 'none'; trigger.setPointerCapture(e.pointerId);
+  });
+  trigger.addEventListener('pointermove', e => {
+    if (startY === null) return;
+    dy = Math.max(0, startY - e.clientY);
+    const lift = Math.min(dy, LIFT_MAX);
+    trigger.style.transform = `translateY(${-lift}px) scaleY(${1 + lift / 600})`;
+    if (dy >= LIFT_MAX) { startY = null; fire(); }
+  });
+  function release(){
+    if (startY === null) return; startY = null;
+    trigger.style.transition = 'transform .3s cubic-bezier(.32,.72,0,1)';
+    if (dy >= THRESHOLD) fire();
+    else trigger.style.transform = '';
+  }
+  trigger.addEventListener('pointerup', release);
+  trigger.addEventListener('pointercancel', release);
+  // tap also completes (keyboard / click accessibility)
+  trigger.addEventListener('click', () => { if (dy < 4) fire(); });
+
+  document.getElementById('co-done').addEventListener('click', reset);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') reset(); });
 })();
 </script>
 </body>
