@@ -1,0 +1,14 @@
+{
+  "pkg": "@mav/design-system",
+  "globalName": "MaV",
+  "shape": "package",
+  "cssEntry": "styles/components.css",
+  "readmeHeader": ".design-sync/conventions.md",
+  "dtsPropsFor": {
+    "Button": "variant?: 'primary' | 'secondary' | 'clear' | 'swipe'; size?: 'xs' | 'sm' | 'lg'; iconOnly?: boolean; leadingIcon?: string; children?: React.ReactNode; className?: string;",
+    "Alert": "variant?: 'primary' | 'danger' | 'success' | 'warning'; title?: string; children?: React.ReactNode; actions?: Array<{ label: string; onClick?: () => void }>; className?: string;",
+    "Toast": "status?: 'success' | 'error' | 'info' | 'warning'; title?: string; description?: string; action?: string; light?: boolean; onClose?: () => void; className?: string;",
+    "Balance": "label?: string; amount?: string; trend?: string; actions?: boolean; className?: string;",
+    "CashflowCard": "tab?: 'Main' | 'Secondary'; amount?: string; income?: string; expense?: string; className?: string;"
+  }
+}
