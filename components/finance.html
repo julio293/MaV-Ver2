@@ -25,6 +25,10 @@
   display:flex;flex-direction:column;align-items:center;gap:5px;font-family:inherit;
 }
 .bal-btn svg{opacity:.9}
+.bal-btn{transition:background .15s,transform .12s}
+.bal-btn:hover{background:rgba(255,255,255,0.28)}
+.balance-card-dk .bal-btn:hover{background:rgba(161,255,91,0.2)}
+.bal-btn:active{transform:scale(.96)}
 
 /* Dark balance card */
 .balance-card-dk{
@@ -53,7 +57,8 @@
 .stat-change-up{color:var(--mav-success)}
 .stat-change-down{color:var(--mav-danger)}
 
-/* Transaction list item */
+/* Transaction list — vertical stack of rows */
+.txn-list{display:flex;flex-direction:column;width:100%;max-width:480px}
 .txn-item{
   display:flex;align-items:center;gap:14px;
   padding:14px 0;border-bottom:1px solid var(--mav-border);
@@ -68,16 +73,35 @@
 .txn-amount-debit{color:var(--mav-danger)}
 .txn-date{font-size:11px;color:var(--mav-muted);margin-top:2px;text-align:right}
 
+/* Spend limit + chart layout */
+.spend-grid{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start}
+.spend-col{flex:1;min-width:min(100%,280px)}
+.spend-head{font-size:13px;font-weight:700;color:var(--mav-fg);margin-bottom:14px}
+.limit-block{margin-bottom:18px}
+.limit-block:last-child{margin-bottom:0}
+.limit-row{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;margin-bottom:6px}
+.limit-row .limit-used{font-weight:600;color:var(--mav-fg)}
+.limit-row .limit-of{color:var(--mav-muted)}
+.limit-note{font-size:11px;color:var(--mav-muted);margin-top:6px}
+.limit-note-warn{color:var(--mav-warning);font-weight:600}
+.limit-note-over{color:var(--mav-danger);font-weight:600}
+
 /* Mini chart bar */
-.chart-bar-wrap{display:flex;align-items:flex-end;gap:6px;height:80px}
-.chart-bar{border-radius:4px 4px 0 0;flex:1;transition:opacity .15s;cursor:pointer}
-.chart-bar:hover{opacity:.7}
+.chart-bar-wrap{display:flex;align-items:flex-end;gap:6px;height:96px}
+.chart-bar{border-radius:4px 4px 0 0;flex:1;transition:opacity .15s,transform .12s;cursor:pointer;transform-origin:bottom}
+.chart-bar:hover{opacity:.75}
 .chart-bar-active{background:var(--mav-primary)}
 .chart-bar-inactive{background:var(--mav-border)}
+.chart-labels{display:flex;gap:6px;margin-top:8px}
+.chart-labels span{flex:1;text-align:center;font-size:11px;color:var(--mav-muted)}
+.chart-labels .chart-label-active{color:var(--mav-fg);font-weight:700}
 
 /* Limit indicator */
 .limit-track{height:8px;border-radius:9999px;background:var(--mav-border);overflow:hidden}
 .limit-fill{height:100%;border-radius:9999px;transition:width .3s}
+.limit-fill-ok{background:var(--mav-primary)}
+.limit-fill-warn{background:var(--mav-warning)}
+.limit-fill-over{background:var(--mav-danger)}
 
 /* Account card (minimal) */
 .acc-card{
@@ -85,12 +109,22 @@
   padding:16px;border-radius:12px;border:1px solid var(--mav-border);
   background:var(--mav-bg);
 }
-.acc-logo{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0}
+.acc-logo{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;background:color-mix(in srgb,var(--mav-primary) 12%,transparent);color:var(--mav-primary)}
+.acc-card{transition:border-color .15s,transform .12s}
+.acc-card:hover{border-color:var(--mav-primary)}
+.acc-add{color:var(--mav-muted);border-style:dashed!important;justify-content:center;cursor:pointer}
+.acc-add > div{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600}
+.acc-add:hover{color:var(--mav-primary)}
 .acc-info{flex:1}
 .acc-bank{font-size:13px;font-weight:600;color:var(--mav-fg)}
 .acc-num{font-size:11px;color:var(--mav-muted);font-family:var(--font-mono);margin-top:2px}
 .acc-bal{font-size:15px;font-weight:700;color:var(--mav-fg)}
 .acc-bal-sub{font-size:11px;color:var(--mav-muted)}
+
+@media (prefers-reduced-motion:no-preference){
+  .acc-card:hover{transform:translateY(-2px)}
+  .chart-bar:hover{transform:scaleY(1.03)}
+}
 </style>
 </head>
 <body>
@@ -235,6 +269,7 @@
     <h2 class="section-title">Transaction List</h2>
     <div class="preview-card">
       <div class="preview-canvas">
+        <div class="txn-list">
         <div class="txn-item">
           <div class="txn-icon">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 10h14M10 3l7 7-7 7" stroke="var(--mav-success)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -287,6 +322,7 @@
             <div class="txn-date">Completed</div>
           </div>
         </div>
+        </div>
       </div>
       <div class="preview-meta"><span class="preview-label">Transaction row — 42px icon · credit #629c28 · debit #ff0000 · 14px 16px</span></div>
     </div>
@@ -299,55 +335,49 @@
     <h2 class="section-title">Spend Limit & Bar Chart</h2>
     <div class="preview-card">
       <div class="preview-canvas">
-        <div>
-          <div>Daily limit</div>
-          <div>
-            <span>₦ 68,000 used</span>
-            <span>of ₦ 100,000</span>
-          </div>
-          <div class="limit-track">
-            <div class="limit-fill"></div>
-          </div>
-          <div>₦ 32,000 remaining</div>
+        <div class="spend-grid">
+          <div class="spend-col">
+            <div class="spend-head">Daily limit</div>
 
-          <div>
-            <span>₦ 88,000 used</span>
-            <span>of ₦ 100,000</span>
-          </div>
-          <div class="limit-track">
-            <div class="limit-fill"></div>
-          </div>
-          <div>⚠ Near limit — ₦ 12,000 left</div>
+            <div class="limit-block">
+              <div class="limit-row"><span class="limit-used">₦ 68,000 used</span><span class="limit-of">of ₦ 100,000</span></div>
+              <div class="limit-track"><div class="limit-fill limit-fill-ok" style="width:68%"></div></div>
+              <div class="limit-note">₦ 32,000 remaining</div>
+            </div>
 
-          <div>
-            <span>₦ 100,000 used</span>
-            <span>of ₦ 100,000</span>
-          </div>
-          <div class="limit-track">
-            <div class="limit-fill"></div>
-          </div>
-          <div>Limit reached</div>
-        </div>
+            <div class="limit-block">
+              <div class="limit-row"><span class="limit-used">₦ 88,000 used</span><span class="limit-of">of ₦ 100,000</span></div>
+              <div class="limit-track"><div class="limit-fill limit-fill-warn" style="width:88%"></div></div>
+              <div class="limit-note limit-note-warn">⚠ Near limit — ₦ 12,000 left</div>
+            </div>
 
-        <div>
-          <div>Weekly spend</div>
-          <div class="chart-bar-wrap">
-            <div class="chart-bar chart-bar-inactive"></div>
-            <div class="chart-bar chart-bar-inactive"></div>
-            <div class="chart-bar chart-bar-inactive"></div>
-            <div class="chart-bar chart-bar-inactive"></div>
-            <div class="chart-bar chart-bar-active"></div>
-            <div class="chart-bar chart-bar-inactive"></div>
-            <div class="chart-bar chart-bar-inactive"></div>
+            <div class="limit-block">
+              <div class="limit-row"><span class="limit-used">₦ 100,000 used</span><span class="limit-of">of ₦ 100,000</span></div>
+              <div class="limit-track"><div class="limit-fill limit-fill-over" style="width:100%"></div></div>
+              <div class="limit-note limit-note-over">Limit reached</div>
+            </div>
           </div>
-          <div>
-            <span>M</span>
-            <span>T</span>
-            <span>W</span>
-            <span>T</span>
-            <span>F</span>
-            <span>S</span>
-            <span>S</span>
+
+          <div class="spend-col">
+            <div class="spend-head">Weekly spend</div>
+            <div class="chart-bar-wrap">
+              <div class="chart-bar chart-bar-inactive" style="height:38%"></div>
+              <div class="chart-bar chart-bar-inactive" style="height:55%"></div>
+              <div class="chart-bar chart-bar-inactive" style="height:30%"></div>
+              <div class="chart-bar chart-bar-inactive" style="height:72%"></div>
+              <div class="chart-bar chart-bar-active" style="height:100%"></div>
+              <div class="chart-bar chart-bar-inactive" style="height:48%"></div>
+              <div class="chart-bar chart-bar-inactive" style="height:60%"></div>
+            </div>
+            <div class="chart-labels">
+              <span>M</span>
+              <span>T</span>
+              <span>W</span>
+              <span>T</span>
+              <span class="chart-label-active">F</span>
+              <span>S</span>
+              <span>S</span>
+            </div>
           </div>
         </div>
       </div>
@@ -384,7 +414,7 @@
             <div class="acc-bal-sub">Savings</div>
           </div>
         </div>
-        <div class="acc-card">
+        <div class="acc-card acc-add">
           <div>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
             Add bank account

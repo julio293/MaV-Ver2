@@ -1628,6 +1628,92 @@ html.theme-anim *:not(svg):not(path):not(.dp-ind):not(.pg-ind) {
 
 /* ═══ COMPONENTS ═══ */
 
+/* ══════════ _finance_dark_tmp.html ══════════ */
+/* Balance card */
+.balance-card{
+  background:linear-gradient(135deg,var(--mav-primary) 0%,var(--mav-secondary) 100%);
+  border-radius:20px;padding:28px;color:var(--bc-white);width:343px;
+  box-shadow:0 8px 32px rgba(53,46,255,0.35);
+}
+.bal-label{font-size:12px;opacity:.7;font-weight:500;text-transform:uppercase;letter-spacing:.08em}
+.bal-amount{font-size:36px;font-weight:700;letter-spacing:-0.02em;margin:6px 0 4px}
+.bal-sub{font-size:12px;opacity:.6}
+.bal-row{display:flex;justify-content:space-between;align-items:flex-end}
+.bal-actions{display:flex;gap:12px;margin-top:24px}
+.bal-btn{
+  flex:1;padding:10px;border-radius:10px;
+  background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.25);
+  color:var(--bc-white);font-size:12px;font-weight:600;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:5px;font-family:inherit;
+}
+.bal-btn svg{opacity:.9}
+
+/* Dark balance card */
+.balance-card-dk{
+  background:linear-gradient(135deg,var(--mav-fg) 0%,var(--mav-code-bg) 100%);
+  border:1px solid var(--bc-mono100-d);
+}
+.balance-card-dk .bal-btn{
+  background:rgba(161,255,91,0.12);border-color:rgba(161,255,91,0.25);
+}
+
+/* Gain/Loss widget */
+.stat-widget{
+  display:flex;align-items:center;gap:12px;
+  padding:16px;border-radius:12px;border:1px solid var(--mav-border);
+  background:var(--mav-bg);
+}
+.stat-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.stat-icon-gain{background:color-mix(in srgb,var(--mav-success) 12%,transparent)}
+.stat-icon-loss{background:rgba(255,0,0,0.08)}
+.stat-icon-neutral{background:rgba(53,46,255,0.08)}
+.stat-label{font-size:12px;color:var(--mav-muted);margin-bottom:2px}
+.stat-value{font-size:20px;font-weight:700;color:var(--mav-fg);letter-spacing:-0.01em}
+.stat-value-gain{color:var(--mav-success)}
+.stat-value-loss{color:var(--mav-danger)}
+.stat-change{font-size:11px;font-weight:500;margin-top:2px}
+.stat-change-up{color:var(--mav-success)}
+.stat-change-down{color:var(--mav-danger)}
+
+/* Transaction list item */
+.txn-item{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 0;border-bottom:1px solid var(--mav-border);
+}
+.txn-item:last-child{border-bottom:none}
+.txn-icon{width:42px;height:42px;border-radius:12px;background:var(--mav-border);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.txn-body{flex:1}
+.txn-name{font-size:14px;font-weight:600;color:var(--mav-fg)}
+.txn-meta{font-size:12px;color:var(--mav-muted);margin-top:2px}
+.txn-amount{font-size:15px;font-weight:700;text-align:right}
+.txn-amount-credit{color:var(--mav-success)}
+.txn-amount-debit{color:var(--mav-danger)}
+.txn-date{font-size:11px;color:var(--mav-muted);margin-top:2px;text-align:right}
+
+/* Mini chart bar */
+.chart-bar-wrap{display:flex;align-items:flex-end;gap:6px;height:80px}
+.chart-bar{border-radius:4px 4px 0 0;flex:1;transition:opacity .15s;cursor:pointer}
+.chart-bar:hover{opacity:.7}
+.chart-bar-active{background:var(--mav-primary)}
+.chart-bar-inactive{background:var(--mav-border)}
+
+/* Limit indicator */
+.limit-track{height:8px;border-radius:9999px;background:var(--mav-border);overflow:hidden}
+.limit-fill{height:100%;border-radius:9999px;transition:width .3s}
+
+/* Account card (minimal) */
+.acc-card{
+  display:flex;align-items:center;gap:14px;
+  padding:16px;border-radius:12px;border:1px solid var(--mav-border);
+  background:var(--mav-bg);
+}
+.acc-logo{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0}
+.acc-info{flex:1}
+.acc-bank{font-size:13px;font-weight:600;color:var(--mav-fg)}
+.acc-num{font-size:11px;color:var(--mav-muted);font-family:var(--font-mono);margin-top:2px}
+.acc-bal{font-size:15px;font-weight:700;color:var(--mav-fg)}
+.acc-bal-sub{font-size:11px;color:var(--mav-muted)}
+
 /* ══════════ app-bar.html ══════════ */
 /* ══ Header / App Bar — Figma "❖ Top Navigation" (203:1615) ═══════════════════
    The mobile top navigation bar: an iOS status bar over a 56px row with a
@@ -3206,6 +3292,10 @@ html.theme-anim *:not(svg):not(path):not(.dp-ind):not(.pg-ind) {
   display:flex;flex-direction:column;align-items:center;gap:5px;font-family:inherit;
 }
 .bal-btn svg{opacity:.9}
+.bal-btn{transition:background .15s,transform .12s}
+.bal-btn:hover{background:rgba(255,255,255,0.28)}
+.balance-card-dk .bal-btn:hover{background:rgba(161,255,91,0.2)}
+.bal-btn:active{transform:scale(.96)}
 
 /* Dark balance card */
 .balance-card-dk{
@@ -3234,7 +3324,8 @@ html.theme-anim *:not(svg):not(path):not(.dp-ind):not(.pg-ind) {
 .stat-change-up{color:var(--mav-success)}
 .stat-change-down{color:var(--mav-danger)}
 
-/* Transaction list item */
+/* Transaction list — vertical stack of rows */
+.txn-list{display:flex;flex-direction:column;width:100%;max-width:480px}
 .txn-item{
   display:flex;align-items:center;gap:14px;
   padding:14px 0;border-bottom:1px solid var(--mav-border);
@@ -3249,16 +3340,35 @@ html.theme-anim *:not(svg):not(path):not(.dp-ind):not(.pg-ind) {
 .txn-amount-debit{color:var(--mav-danger)}
 .txn-date{font-size:11px;color:var(--mav-muted);margin-top:2px;text-align:right}
 
+/* Spend limit + chart layout */
+.spend-grid{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start}
+.spend-col{flex:1;min-width:min(100%,280px)}
+.spend-head{font-size:13px;font-weight:700;color:var(--mav-fg);margin-bottom:14px}
+.limit-block{margin-bottom:18px}
+.limit-block:last-child{margin-bottom:0}
+.limit-row{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;margin-bottom:6px}
+.limit-row .limit-used{font-weight:600;color:var(--mav-fg)}
+.limit-row .limit-of{color:var(--mav-muted)}
+.limit-note{font-size:11px;color:var(--mav-muted);margin-top:6px}
+.limit-note-warn{color:var(--mav-warning);font-weight:600}
+.limit-note-over{color:var(--mav-danger);font-weight:600}
+
 /* Mini chart bar */
-.chart-bar-wrap{display:flex;align-items:flex-end;gap:6px;height:80px}
-.chart-bar{border-radius:4px 4px 0 0;flex:1;transition:opacity .15s;cursor:pointer}
-.chart-bar:hover{opacity:.7}
+.chart-bar-wrap{display:flex;align-items:flex-end;gap:6px;height:96px}
+.chart-bar{border-radius:4px 4px 0 0;flex:1;transition:opacity .15s,transform .12s;cursor:pointer;transform-origin:bottom}
+.chart-bar:hover{opacity:.75}
 .chart-bar-active{background:var(--mav-primary)}
 .chart-bar-inactive{background:var(--mav-border)}
+.chart-labels{display:flex;gap:6px;margin-top:8px}
+.chart-labels span{flex:1;text-align:center;font-size:11px;color:var(--mav-muted)}
+.chart-labels .chart-label-active{color:var(--mav-fg);font-weight:700}
 
 /* Limit indicator */
 .limit-track{height:8px;border-radius:9999px;background:var(--mav-border);overflow:hidden}
 .limit-fill{height:100%;border-radius:9999px;transition:width .3s}
+.limit-fill-ok{background:var(--mav-primary)}
+.limit-fill-warn{background:var(--mav-warning)}
+.limit-fill-over{background:var(--mav-danger)}
 
 /* Account card (minimal) */
 .acc-card{
@@ -3266,12 +3376,22 @@ html.theme-anim *:not(svg):not(path):not(.dp-ind):not(.pg-ind) {
   padding:16px;border-radius:12px;border:1px solid var(--mav-border);
   background:var(--mav-bg);
 }
-.acc-logo{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0}
+.acc-logo{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;background:color-mix(in srgb,var(--mav-primary) 12%,transparent);color:var(--mav-primary)}
+.acc-card{transition:border-color .15s,transform .12s}
+.acc-card:hover{border-color:var(--mav-primary)}
+.acc-add{color:var(--mav-muted);border-style:dashed!important;justify-content:center;cursor:pointer}
+.acc-add > div{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600}
+.acc-add:hover{color:var(--mav-primary)}
 .acc-info{flex:1}
 .acc-bank{font-size:13px;font-weight:600;color:var(--mav-fg)}
 .acc-num{font-size:11px;color:var(--mav-muted);font-family:var(--font-mono);margin-top:2px}
 .acc-bal{font-size:15px;font-weight:700;color:var(--mav-fg)}
 .acc-bal-sub{font-size:11px;color:var(--mav-muted)}
+
+@media (prefers-reduced-motion:no-preference){
+  .acc-card:hover{transform:translateY(-2px)}
+  .chart-bar:hover{transform:scaleY(1.03)}
+}
 
 /* ══════════ forms.html ══════════ */
 /* ══ Forms & Controls — Checkbox · Toggle · Search · Radio ═══════════════════
