@@ -12,7 +12,7 @@ Live site: https://mav-ver2.pages.dev · Builder: https://mav-ver2.pages.dev/bui
 ### 3 more builder components
 - Added **Pagination**, **Button Dock** (reuses real `.dock` classes), and **Number Pad** (numeric PIN/amount pad) — palette 49 → 52.
 - Wired into DESC, compose ORDER, prompt cues, and VARIANTS (pagination active page; dock content + secondary-button toggle). Verified all 3 render light & dark.
-- Commit `PENDING` · v23
+- Commit `d95b2a4` · Deploy `13372c54` · v23
 
 ---
 
