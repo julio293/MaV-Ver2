@@ -244,6 +244,45 @@ const CATALOG = {
     for (let d = 1; d <= 30; d++) cells += `<span class="bld-dp-day${d === 14 ? ' sel' : ''}${d <= 3 ? ' dim' : ''}">${d}</span>`;
     return `<div class="bld-dp"><div class="bld-dp-head"><button class="bld-dp-nav">‹</button><span class="bld-dp-month">${esc(p.month || 'August 2026')}</span><button class="bld-dp-nav">›</button></div>
       <div class="bld-dp-wd">${days.map((x) => `<span>${x}</span>`).join('')}</div><div class="bld-dp-grid">${cells}</div></div>`; } },
+
+  chart: { label: 'Chart', group: 'Finance', render: (p) => {
+    const bars = [46, 62, 38, 82, 54, 70, 48]; const act = 3; const labels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+    return `<div class="chart"><div class="chart-card bld-chart">
+      <div class="bld-chart-hd"><div><div class="bld-chart-lbl">${esc(p.label || 'Spending this week')}</div><div class="bld-chart-amt">${esc(p.amount || '$1,248.30')}</div></div><span class="b b-green">${esc(p.trend || '▲ 8.2%')}</span></div>
+      <div class="chart-bar-wrap">${bars.map((h, i) => `<span class="chart-bar ${i === act ? 'chart-bar-active' : 'chart-bar-inactive'}" style="height:${h}%"></span>`).join('')}</div>
+      <div class="bld-chart-x">${labels.map((l) => `<span>${l}</span>`).join('')}</div></div></div>`; } },
+
+  list: { label: 'Menu List', group: 'Content', render: (p) => {
+    const chev = '<svg class="li-chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>';
+    const row = (ic, name, sub) => `<div class="li"><span class="li-softic"><svg viewBox="0 0 24 24">${ic}</svg></span><div class="li-body"><span class="li-name">${esc(name)}</span>${sub ? `<span class="li-sub">${esc(sub)}</span>` : ''}</div>${chev}</div>`;
+    return `<div class="list-card bld-menu"><div class="list">
+      ${row('<circle cx="12" cy="12" r="9"/><circle cx="12" cy="10" r="3"/><path d="M6.5 18.5a6 6 0 0 1 11 0"/>', 'Personal details', 'Name, email, phone')}
+      ${row('<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/>', 'Cards & accounts', '2 linked')}
+      ${row('<path d="M12 2a7 7 0 0 0-7 7v3l-2 3h18l-2-3V9a7 7 0 0 0-7-7z"/><path d="M9 18a3 3 0 0 0 6 0"/>', 'Notifications', 'On')}
+      ${row('<circle cx="12" cy="12" r="3"/><path d="M19.4 13a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V20a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 7 18.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0-1.2-2.9H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.3 7l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1A1.7 1.7 0 0 0 19 4.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H23a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>', 'Settings', '')}
+    </div></div>`; } },
+
+  blog: { label: 'Article Card', group: 'Content', render: (p) =>
+    `<div class="bld-article"><div class="bld-article-thumb"><img src="../app/assets/illustrations/${esc(p.src || 'il-166.svg')}" alt="" loading="lazy"><span class="bld-article-badge">${esc(p.badge || 'Blog')}</span></div>
+      <div class="bld-article-body"><div class="bld-article-date">${esc(p.date || 'Jul 27')} ・ ${esc(p.meta || '4 min read')}</div>
+        <h4 class="bld-article-title">${esc(p.title || 'AI-driven fraud detection in modern banking')}</h4>
+        <span class="bld-article-more">Read more →</span></div></div>` },
+
+  bottomsheet: { label: 'Bottom Sheet', group: 'Feedback', bleed: true, cta: true, render: (p) => {
+    const rows = [['Amount', '$250.00'], ['To', 'James K.'], ['Fee', '$0.00']];
+    return `<div class="bld-sheet"><span class="bld-sheet-grab"></span>
+      <div class="bld-sheet-title">${esc(p.title || 'Confirm payment')}</div>
+      <div class="bld-sheet-rows">${rows.map(([k, v]) => `<div class="bld-sheet-row"><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join('')}</div>
+      <button class="mav-btn mav-btn-primary mav-btn-lg bld-full" data-cta="1">${esc(p.cta || 'Confirm')}</button></div>`; } },
+
+  upload: { label: 'File Upload', group: 'Inputs', render: (p) =>
+    `<div class="bld-upload"><div class="bld-upload-drop">
+        <span class="bld-upload-ic"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></span>
+        <span class="bld-upload-t">${esc(p.title || 'Upload your document')}</span>
+        <span class="bld-upload-s">${esc(p.hint || 'Drag & drop or tap to browse · PDF, JPG up to 10MB')}</span></div>
+      <div class="bld-upload-file"><span class="bld-upload-fic"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span>
+        <div class="bld-upload-meta"><span class="bld-upload-fn">${esc(p.file || 'passport.pdf')}</span><span class="bld-upload-fs">2.4 MB · Uploaded</span></div>
+        <span class="bld-upload-ok"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></span></div></div>` },
 };
 
 const GROUPS = ['Navigation', 'Content', 'Finance', 'Inputs', 'Actions', 'Feedback'];
@@ -266,6 +305,8 @@ const DESC = {
   avatar: 'Stacked avatar group', stat: 'Income / spend stat card', accountselect: 'Choose an account',
   loader: 'Loading spinner', coachmark: 'Onboarding coach tip', emptystate: 'Empty / no-results state',
   chat: 'Chat message bubbles', quickactions: 'Quick action shortcuts', datepicker: 'Calendar date picker',
+  chart: 'Bar chart / spending graph', list: 'Menu / settings list', blog: 'Article / blog card',
+  bottomsheet: 'Bottom sheet dialog', upload: 'File upload / dropzone',
 };
 /* e-banking screens offered in the "Add a Page" library */
 const PAGE_LIBRARY = ['Onboarding', 'Login', 'Verify OTP', 'Dashboard', 'Transfer', 'Confirmation', 'Cards', 'Statements', 'Beneficiaries', 'Notifications', 'Settings', 'Profile'];
@@ -363,10 +404,10 @@ const PRESETS = [
 
 /* canonical top-to-bottom order for composed screens */
 const ORDER = ['appbar', 'stepper', 'tabs', 'pilltabs', 'illustration', 'success', 'title', 'subtitle', 'coachmark',
-  'balance', 'quickactions', 'stat', 'cashflow', 'paycard', 'amount', 'chips', 'sectionheader', 'emptystate',
-  'searchfield', 'textfield', 'phone', 'password', 'otp', 'datepicker', 'radio', 'checkbox', 'toggleRow',
-  'accountselect', 'transactions', 'contacts', 'avatar', 'chat', 'badges',
-  'alert', 'toast', 'progress', 'loader', 'divider', 'biometric', 'swipe', 'button', 'buttonSecondary', 'bottomnav'];
+  'balance', 'quickactions', 'stat', 'chart', 'cashflow', 'paycard', 'amount', 'chips', 'sectionheader', 'emptystate',
+  'searchfield', 'textfield', 'phone', 'password', 'otp', 'datepicker', 'upload', 'radio', 'checkbox', 'toggleRow',
+  'accountselect', 'list', 'transactions', 'contacts', 'avatar', 'blog', 'chat', 'badges',
+  'alert', 'toast', 'progress', 'loader', 'divider', 'biometric', 'swipe', 'bottomsheet', 'button', 'buttonSecondary', 'bottomnav'];
 
 function titleFrom(text) {
   const t = (text || '').replace(/[^a-z0-9 ]/gi, ' ')
@@ -421,7 +462,12 @@ function screenFromPrompt(text) {
     [/toggle|switch|preferences?|settings?/, () => add('toggleRow', {})],
     [/transactions?|activity|history/, () => { add('sectionheader', { title: 'Recent activity' }); add('transactions', {}); }],
     [/quick actions?|shortcuts?/, () => add('quickactions', {})],
+    [/chart|graph|spending (?:graph|trend)|bar chart/, () => add('chart', {})],
     [/stat|statistic|income.*(spend|expense)|analytics/, () => add('stat', {})],
+    [/menu list|settings? list|list of options|options list|preferences list/, () => add('list', {})],
+    [/blog|article|news|read more|feed/, () => add('blog', {})],
+    [/upload|dropzone|attach|document upload|\bkyc\b.*document|file picker|choose a file/, () => add('upload', {})],
+    [/bottom sheet|action sheet|confirm(?:ation)? sheet|slide.?up (?:panel|sheet)/, () => add('bottomsheet', {})],
     [/choose|select|pick.*account|account selector|from which account/, () => add('accountselect', {})],
     [/avatars?|members?|participants?|group photo/, () => add('avatar', {})],
     [/\bchat\b|messages?|conversation|inbox thread/, () => add('chat', {})],

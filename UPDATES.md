@@ -9,6 +9,12 @@ Live site: https://mav-ver2.pages.dev · Builder: https://mav-ver2.pages.dev/bui
 
 ## 2026-07-27
 
+### 5 more builder components
+- Added **Chart** (real `chart-bar` classes), **Menu List** (real `list-card`/`li` classes), **Article Card** (blog), **Bottom Sheet**, and **File Upload** — palette 44 → 49.
+- Chart & Menu List reuse real MaV classes; Article, Bottom Sheet, Upload are compact hand-built (the design-system versions are JS-drawn / absolute-positioned). Upload is net-new (no DS component existed).
+- Wired into DESC, compose ORDER, and prompt cues. Verified all 5 render light & dark.
+- Commit `e8322ea` · v22
+
 ### 9 new builder components
 - Added to the palette (35 → 44 components): **Avatar Group, Stat Widget, Account Selector, Loader, Coachmark, Empty State** (real MaV classes) and **Chat Bubbles, Quick Actions, Date Picker** (compact hand-built, since those are JS-drawn in the design system).
 - Wired into DESC, sensible compose ORDER, inspector VARIANTS (Stat direction, Loader size, Empty-state illustration), and prompt cues so they can be generated from a prompt.
