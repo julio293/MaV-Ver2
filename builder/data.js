@@ -15,6 +15,8 @@ const IC = {
   bell:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 5a2 2 0 0 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6"/><path d="M9 17v1a3 3 0 0 0 6 0v-1"/></svg>',
   face:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2"/><path d="M16 4h2a2 2 0 0 1 2 2v2"/><path d="M20 16v2a2 2 0 0 1-2 2h-2"/><path d="M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M9 10h.01M15 10h.01"/><path d="M9.5 15a3.5 3.5 0 0 0 5 0"/></svg>',
   chevY:  '<span class="chev"><svg viewBox="0 0 24 24"><path d="m6 15 6-6 6 6"/></svg><svg viewBox="0 0 24 24"><path d="m6 15 6-6 6 6"/></svg></span>',
+  arrowR: '<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+  chevD:  '<svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>',
 };
 const STATUS = '<span class="ab-time">9:41</span><span class="ab-levels"><svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx=".5"/><rect x="5" y="5" width="3" height="7" rx=".5"/><rect x="10" y="2.5" width="3" height="9.5" rx=".5"/><rect x="15" y="0" width="3" height="12" rx=".5"/></svg><svg width="26" height="12" viewBox="0 0 26 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3" fill="none" stroke="currentColor" stroke-opacity=".35"/><rect x="2" y="2" width="18" height="8" rx="1.5"/><rect x="23" y="4" width="1.6" height="4" rx=".8"/></svg></span>';
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -24,6 +26,20 @@ function txnRow(icon, name, meta, amt, cls) {
   return `<div class="li"><span class="li-avatar" style="background:${icon.bg}">${icon.t}</span>
     <div class="li-body"><span class="li-name">${esc(name)}</span><span class="li-sub">${esc(meta)}</span></div>
     <span class="bld-amt ${cls}">${esc(amt)}</span></div>`;
+}
+
+/* shared button markup — honours size / type / state / text / dropdown /
+   icon-right / full-width / content, driven by the inspector's variant controls */
+function btnMarkup(p, defVariant, defLabel, cta) {
+  const v = p.variant || defVariant;
+  const sz = p.size || 'lg';
+  const szc = sz === 'sm' ? 'mav-btn-sm' : sz === 'md' ? '' : 'mav-btn-lg';
+  const stc = p.state === 'hover' ? 'is-hover' : p.state === 'pressed' ? 'is-pressed' : p.state === 'disabled' ? 'is-disabled' : '';
+  const cls = ['mav-btn', 'mav-btn-' + v, szc, stc, p.full !== false ? 'bld-full' : '', p.showText === false ? 'mav-btn-icon' : ''].filter(Boolean).join(' ');
+  const txt = p.showText === false ? '' : esc(p.label || defLabel);
+  const right = p.iconRight ? IC.arrowR : p.dropdown ? IC.chevD : '';
+  const dis = p.state === 'disabled' ? ' disabled' : '';
+  return `<button class="${cls}"${dis}${cta ? ' data-cta="1"' : ''}>${txt}${right ? `<span class="mav-btn-ic">${right}</span>` : ''}</button>`;
 }
 
 /* ── Component catalog ─────────────────────────────────────────────────────
@@ -75,14 +91,8 @@ const CATALOG = {
   toggleRow: { label: 'Toggle Row', group: 'Inputs', render: (p) =>
     `<div class="li"><div class="li-body"><span class="li-name">${esc(p.label || 'Enable notifications')}</span></div><span class="tgl${p.on === false ? '' : ' on'}"></span></div>` },
 
-  button: { label: 'Primary Button', group: 'Actions', cta: true, render: (p) => {
-    const v = p.variant || 'primary'; const sz = p.size || 'lg'; const szc = sz === 'sm' ? 'mav-btn-sm' : sz === 'md' ? '' : 'mav-btn-lg';
-    const cls = ['mav-btn', 'mav-btn-' + v, szc, p.full !== false ? 'bld-full' : ''].filter(Boolean).join(' ');
-    return `<button class="${cls}" data-cta="1">${esc(p.label || 'Continue')}</button>`; } },
-  buttonSecondary: { label: 'Secondary Button', group: 'Actions', render: (p) => {
-    const sz = p.size || 'lg'; const szc = sz === 'sm' ? 'mav-btn-sm' : sz === 'md' ? '' : 'mav-btn-lg';
-    const cls = ['mav-btn', 'mav-btn-secondary', szc, p.full !== false ? 'bld-full' : ''].filter(Boolean).join(' ');
-    return `<button class="${cls}">${esc(p.label || 'Cancel')}</button>`; } },
+  button: { label: 'Primary Button', group: 'Actions', cta: true, render: (p) => btnMarkup(p, p.variant || 'primary', 'Continue', true) },
+  buttonSecondary: { label: 'Secondary Button', group: 'Actions', render: (p) => btnMarkup(p, 'secondary', 'Cancel', false) },
   biometric: { label: 'Biometric Sign-in', group: 'Actions', cta: true, render: (p) =>
     `<button class="mav-btn mav-btn-secondary mav-btn-lg bld-full bld-bio" data-cta="1">${IC.face} ${esc(p.label || 'Sign in with Face ID')}</button>` },
   swipe: { label: 'Swipe to Complete', group: 'Actions', cta: true, bleed: true, render: (p) =>
@@ -208,13 +218,21 @@ const PAGE_LIBRARY = ['Onboarding', 'Login', 'Verify OTP', 'Dashboard', 'Transfe
    { key: prop name, label, def: render default, opts: [[label, value], …] } */
 const VARIANTS = {
   button: [
-    { key: 'variant', label: 'Style', def: 'primary', opts: [['Primary', 'primary'], ['Secondary', 'secondary'], ['Clear', 'clear']] },
-    { key: 'size', label: 'Size', def: 'lg', opts: [['Small', 'sm'], ['Medium', 'md'], ['Large', 'lg']] },
-    { key: 'full', label: 'Width', def: true, opts: [['Full', true], ['Auto', false]] },
+    { key: 'size', label: 'Size', def: 'lg', opts: [['sm', 'sm'], ['md', 'md'], ['lg', 'lg']] },
+    { key: 'variant', label: 'Type', def: 'primary', opts: [['Primary', 'primary'], ['Secondary', 'secondary'], ['Clear', 'clear']] },
+    { key: 'state', label: 'State', def: '', opts: [['Default', ''], ['Hover', 'hover'], ['Pressed', 'pressed'], ['Disabled', 'disabled']] },
+    { key: 'showText', label: 'Text', def: true, ctrl: 'toggle' },
+    { key: 'dropdown', label: 'Dropdown', def: false, ctrl: 'toggle' },
+    { key: 'iconRight', label: 'Icon right', def: false, ctrl: 'toggle' },
+    { key: 'full', label: 'Full width', def: true, ctrl: 'toggle' },
+    { key: 'label', label: 'Content', def: 'Continue', ctrl: 'text' },
   ],
   buttonSecondary: [
-    { key: 'size', label: 'Size', def: 'lg', opts: [['Small', 'sm'], ['Medium', 'md'], ['Large', 'lg']] },
-    { key: 'full', label: 'Width', def: true, opts: [['Full', true], ['Auto', false]] },
+    { key: 'size', label: 'Size', def: 'lg', opts: [['sm', 'sm'], ['md', 'md'], ['lg', 'lg']] },
+    { key: 'state', label: 'State', def: '', opts: [['Default', ''], ['Hover', 'hover'], ['Pressed', 'pressed'], ['Disabled', 'disabled']] },
+    { key: 'iconRight', label: 'Icon right', def: false, ctrl: 'toggle' },
+    { key: 'full', label: 'Full width', def: true, ctrl: 'toggle' },
+    { key: 'label', label: 'Content', def: 'Cancel', ctrl: 'text' },
   ],
   appbar: [
     { key: 'back', label: 'Back button', def: true, opts: [['Show', true], ['Hide', false]] },

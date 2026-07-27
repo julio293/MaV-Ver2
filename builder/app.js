@@ -539,6 +539,52 @@
     return sec;
   }
 
+  /* ── variant controls: infer control type, render a Figma-style row ──── */
+  function ctrlType(v) {
+    if (v.ctrl) return v.ctrl;
+    if (v.opts && v.opts.length === 2 && v.opts.every((o) => typeof o[1] === 'boolean')) return 'toggle';
+    if (v.opts) return 'select';
+    return 'text';
+  }
+  // live-update a component's rendered markup in-canvas without a full re-render
+  function liveProps(comp) {
+    const cat = CATALOG[comp.type]; if (!cat) return;
+    document.querySelectorAll(`.bxcomp[data-cid="${comp.id}"]`).forEach((w) => {
+      const tools = w.querySelector('.bxcomptools');
+      w.innerHTML = cat.render(comp.props || {});
+      if (tools) w.appendChild(tools);
+    });
+  }
+  function variantRow(comp, v) {
+    const cur = comp.props[v.key] !== undefined ? comp.props[v.key] : v.def;
+    const type = ctrlType(v);
+    const row = el(`<div class="vc-row"><span class="vc-lbl">${v.label}</span></div>`);
+    if (type === 'toggle') {
+      const t = el(`<span class="ctl-tgl${cur ? ' on' : ''}" role="switch" tabindex="0"></span>`);
+      const flip = () => { comp.props[v.key] = !cur; render(); };
+      t.onclick = flip;
+      t.onkeydown = (e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flip(); } };
+      row.appendChild(t);
+    } else if (type === 'text') {
+      const wrap = el('<div class="vc-ctl"></div>');
+      const inp = el(`<input class="vc-text" type="text" value="${esc(cur == null ? '' : cur)}" placeholder="${esc(v.def || '')}">`);
+      inp.addEventListener('input', () => { comp.props[v.key] = inp.value; liveProps(comp); });
+      wrap.appendChild(inp); row.appendChild(wrap);
+    } else { // select dropdown — value stored by index to preserve type (bool/num/str)
+      const wrap = el('<div class="vc-ctl"></div>');
+      const sel = el('<select class="vc-select"></select>');
+      v.opts.forEach((o, i) => {
+        const opt = document.createElement('option');
+        opt.textContent = o[0]; opt.value = String(i);
+        if (o[1] === cur) opt.selected = true;
+        sel.appendChild(opt);
+      });
+      sel.onchange = () => { comp.props[v.key] = v.opts[+sel.value][1]; render(); };
+      wrap.appendChild(sel); row.appendChild(wrap);
+    }
+    return row;
+  }
+
   function renderInspector() {
     const rp = $('#rightPanel');
     const comp = S.selComp && S.screens[S.selScreen] && S.screens[S.selScreen].comps.find((c) => c.id === S.selComp);
@@ -549,14 +595,14 @@
     comp.props = comp.props || {};
     const isPinned = comp.type === 'appbar' || comp.type === 'bottomnav';
     ps.appendChild(positionPanel(comp, isPinned));
-    // ── component variants (size / type / state / …) ──
+    // ── component variants — Figma-style controls (dropdown / toggle / text) ──
     const vs = VARIANTS[comp.type] || [];
-    if (vs.length) ps.appendChild(el('<div class="sg-label" style="margin:12px 0 2px;color:var(--e-fg)">Variants</div>'));
-    vs.forEach((v) => {
-      const cur = comp.props[v.key] !== undefined ? comp.props[v.key] : v.def;
-      const opts = v.opts.map((o) => ({ n: o[0], v: o[1] }));
-      ps.appendChild(sgOptions(v.label, opts, cur, (val) => { comp.props[v.key] = val; render(); }));
-    });
+    if (vs.length) {
+      ps.appendChild(el('<div class="sg-label" style="margin:14px 0 8px;color:var(--e-fg)">Properties</div>'));
+      const vc = el('<div class="vc-sec"></div>');
+      vs.forEach((v) => vc.appendChild(variantRow(comp, v)));
+      ps.appendChild(vc);
+    }
     ps.appendChild(el('<div class="sg-label" style="margin:16px 0 2px;color:var(--e-fg)">Style &amp; spacing</div>'));
     ps.appendChild(el('<div class="sg-block"><div class="sg-label">Accent override</div></div>'));
     const swr = el('<div class="sw-row"></div>');
