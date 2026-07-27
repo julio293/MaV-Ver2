@@ -673,6 +673,443 @@
     setTimeout(() => document.addEventListener('pointerdown', function off(ev) { if (!m.contains(ev.target)) { m.remove(); document.removeEventListener('pointerdown', off, true); } }, true), 0);
   }
 
+  /* ══ SAVE / EXPORT ════════════════════════════════════════════════════
+     Hands off a functional build: a self-contained HTML prototype (real MaV
+     markup + styles, tap-through nav) or a runnable Expo React-Native App.js. */
+  function download(name, text, mime) {
+    const blob = new Blob([text], { type: mime || 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = name;
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { a.remove(); URL.revokeObjectURL(url); }, 500);
+  }
+  async function fetchText(u) { try { const r = await fetch(u); return r.ok ? await r.text() : ''; } catch (e) { return ''; } }
+
+  /* Static React-Native UI library emitted into every RN export. Theme-aware
+     via context; every screen composes these. NB: no backticks / ${} inside. */
+  const RN_LIB = `
+/* ── UI library (generated from your MaV design system) ─────────────── */
+const lightT = { bg: '#ffffff', card: '#f6f7f9', text: '#171717', sub: '#71757f', line: '#ececec' };
+const darkT  = { bg: '#141414', card: '#1e1e1e', text: '#ededed', sub: '#9aa0aa', line: '#2a2a2a' };
+const ThemeCtx = React.createContext(lightT);
+const useT = () => React.useContext(ThemeCtx);
+
+function Screen({ dark, children }) {
+  const c = dark ? darkT : lightT;
+  return (
+    <ThemeCtx.Provider value={c}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: c.bg }}>{children}</SafeAreaView>
+    </ThemeCtx.Provider>
+  );
+}
+function AppBar({ title, back, action, onBack }) {
+  const c = useT();
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, height: 52, borderBottomWidth: 1, borderColor: c.line, backgroundColor: c.bg }}>
+      <View style={{ width: 40 }}>{back ? <Text onPress={onBack} style={{ fontSize: 30, color: c.text, marginTop: -6 }}>‹</Text> : null}</View>
+      <Text style={{ flex: 1, textAlign: 'center', fontWeight: '700', fontSize: 16, color: c.text }}>{title}</Text>
+      <View style={{ width: 40, alignItems: 'flex-end' }}>{action ? <Text style={{ fontSize: 20, color: c.text }}>{action === 'close' ? '×' : '⋯'}</Text> : null}</View>
+    </View>
+  );
+}
+function H1({ text }) { const c = useT(); return <Text style={{ color: c.text, fontSize: 26, fontWeight: '800', letterSpacing: -0.4 }}>{text}</Text>; }
+function Sub({ text }) { const c = useT(); return <Text style={{ color: c.sub, fontSize: 15, lineHeight: 22 }}>{text}</Text>; }
+function Btn({ label, variant, size, full, iconRight, disabled, onPress }) {
+  const c = useT(); variant = variant || 'primary';
+  const primary = variant === 'primary';
+  const bg = primary ? T.accent : 'transparent';
+  const fg = primary ? T.onAccent : (variant === 'clear' ? T.accent : c.text);
+  const h = size === 'sm' ? 42 : size === 'md' ? 48 : 54;
+  return (
+    <TouchableOpacity activeOpacity={0.85} disabled={disabled} onPress={onPress}
+      style={{ height: h, borderRadius: T.radius + 4, backgroundColor: bg, borderWidth: variant === 'secondary' ? 1 : 0, borderColor: c.line, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', alignSelf: full === false ? 'flex-start' : 'stretch', paddingHorizontal: full === false ? 24 : 0, opacity: disabled ? 0.45 : 1 }}>
+      {label ? <Text style={{ color: fg, fontSize: 16, fontWeight: '700' }}>{label}</Text> : null}
+      {iconRight ? <Text style={{ color: fg, fontSize: 17, fontWeight: '700', marginLeft: 8 }}>→</Text> : null}
+    </TouchableOpacity>
+  );
+}
+function Field({ label, placeholder, value, secure, prefix }) {
+  const c = useT();
+  return (
+    <View style={{ gap: 6 }}>
+      {label ? <Text style={{ color: c.sub, fontSize: 13, fontWeight: '600' }}>{label}</Text> : null}
+      <View style={{ flexDirection: 'row', alignItems: 'center', height: 52, borderRadius: T.radius + 2, borderWidth: 1, borderColor: c.line, backgroundColor: c.card, paddingHorizontal: 14, gap: 8 }}>
+        {prefix ? <Text style={{ color: c.text, fontWeight: '600' }}>{prefix}</Text> : null}
+        <TextInput style={{ flex: 1, color: c.text, fontSize: 15 }} placeholder={placeholder} placeholderTextColor={c.sub} defaultValue={value} secureTextEntry={!!secure} />
+      </View>
+    </View>
+  );
+}
+function Otp({ value }) {
+  const c = useT(); const arr = [0, 1, 2, 3, 4, 5];
+  return (
+    <View style={{ flexDirection: 'row', gap: 8 }}>
+      {arr.map(function (i) { const ch = (value || '')[i]; return (
+        <View key={i} style={{ flex: 1, height: 54, borderRadius: T.radius + 2, borderWidth: 1, borderColor: ch ? T.accent : c.line, backgroundColor: c.card, alignItems: 'center', justifyContent: 'center' }}>
+          <Text style={{ color: c.text, fontSize: 20, fontWeight: '700' }}>{ch || ''}</Text>
+        </View>); })}
+    </View>
+  );
+}
+function Balance({ label, amount, trend, onPress }) {
+  const c = useT();
+  return (
+    <View style={{ gap: 14 }}>
+      <View style={{ gap: 6 }}>
+        <Text style={{ color: c.sub, fontSize: 13, fontWeight: '600' }}>{label}</Text>
+        <Text style={{ color: c.text, fontSize: 34, fontWeight: '800', letterSpacing: -0.5 }}>{amount}</Text>
+        <Text style={{ color: T.success, fontSize: 12, fontWeight: '700' }}>{trend}</Text>
+      </View>
+      <View style={{ flexDirection: 'row', gap: 12 }}>
+        <View style={{ flex: 1 }}><Btn label="+  Send" onPress={onPress} /></View>
+        <View style={{ flex: 1 }}><Btn label="+  Request" variant="secondary" onPress={onPress} /></View>
+      </View>
+    </View>
+  );
+}
+function Amount({ cur, value, caption }) {
+  const c = useT();
+  return (
+    <View style={{ alignItems: 'center', gap: 6, paddingVertical: 10 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
+        <Text style={{ color: c.sub, fontSize: 22, fontWeight: '700', marginTop: 6 }}>{cur}</Text>
+        <Text style={{ color: c.text, fontSize: 46, fontWeight: '800' }}>{value}</Text>
+      </View>
+      <Text style={{ color: c.sub, fontSize: 13 }}>{caption}</Text>
+    </View>
+  );
+}
+function SectionHeader({ title }) {
+  const c = useT();
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 4 }}>
+      <Text style={{ color: c.text, fontSize: 16, fontWeight: '700' }}>{title}</Text>
+      <Text style={{ color: T.accent, fontSize: 13, fontWeight: '600' }}>See all</Text>
+    </View>
+  );
+}
+function Txns() {
+  const c = useT();
+  const rows = [['Salary — GTBank', 'Transfer · 09:14', '+₦350,000', true], ['Airtime — MTN', 'Bill payment · 11:45', '−₦2,000', false], ['P2P — James K.', 'Send money · 14:33', '−₦20,000', false]];
+  return (
+    <View>
+      {rows.map(function (r, i) { return (
+        <View key={i} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 12, gap: 12 }}>
+          <View style={{ width: 38, height: 38, borderRadius: 12, backgroundColor: c.card, alignItems: 'center', justifyContent: 'center' }}><Text style={{ color: r[3] ? T.success : T.danger, fontSize: 18, fontWeight: '700' }}>{r[3] ? '↓' : '↑'}</Text></View>
+          <View style={{ flex: 1 }}><Text style={{ color: c.text, fontSize: 14, fontWeight: '600' }}>{r[0]}</Text><Text style={{ color: c.sub, fontSize: 12 }}>{r[1]}</Text></View>
+          <Text style={{ color: r[3] ? T.success : c.text, fontSize: 14, fontWeight: '700' }}>{r[2]}</Text>
+        </View>); })}
+    </View>
+  );
+}
+function Contacts() {
+  const c = useT();
+  const rows = [['J', 'Julio Santos', '•••• 6467'], ['M', 'Mom', '•••• 2210'], ['A', 'Amara N.', '•••• 8891']];
+  return (
+    <View>
+      {rows.map(function (r, i) { return (
+        <View key={i} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 10, gap: 12 }}>
+          <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: T.accent, alignItems: 'center', justifyContent: 'center' }}><Text style={{ color: '#fff', fontWeight: '700' }}>{r[0]}</Text></View>
+          <View style={{ flex: 1 }}><Text style={{ color: c.text, fontSize: 14, fontWeight: '600' }}>{r[1]}</Text><Text style={{ color: c.sub, fontSize: 12 }}>{r[2]}</Text></View>
+        </View>); })}
+    </View>
+  );
+}
+function ToggleRow({ label, on }) {
+  const c = useT(); const [val, setVal] = useState(!!on);
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12, borderBottomWidth: 1, borderColor: c.line }}>
+      <Text style={{ color: c.text, fontSize: 15 }}>{label}</Text>
+      <Switch value={val} onValueChange={setVal} trackColor={{ true: T.accent }} />
+    </View>
+  );
+}
+function Success({ title, sub }) {
+  const c = useT();
+  return (
+    <View style={{ alignItems: 'center', gap: 12, paddingVertical: 20 }}>
+      <View style={{ width: 66, height: 66, borderRadius: 33, backgroundColor: T.success, alignItems: 'center', justifyContent: 'center' }}><Text style={{ color: '#fff', fontSize: 30, fontWeight: '800' }}>✓</Text></View>
+      <Text style={{ color: c.text, fontSize: 20, fontWeight: '800' }}>{title}</Text>
+      <Text style={{ color: c.sub, fontSize: 14, textAlign: 'center' }}>{sub}</Text>
+    </View>
+  );
+}
+function Banner({ kind, title, desc }) {
+  const c = useT();
+  const map = { primary: T.accent, success: T.success, error: T.danger, danger: T.danger, warning: T.warning, info: T.accent };
+  const col = map[kind] || T.accent;
+  return (
+    <View style={{ flexDirection: 'row', gap: 12, padding: 14, borderRadius: T.radius + 4, backgroundColor: c.card, borderLeftWidth: 3, borderLeftColor: col }}>
+      <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: col, marginTop: 6 }} />
+      <View style={{ flex: 1 }}><Text style={{ color: c.text, fontSize: 14, fontWeight: '700' }}>{title}</Text>{desc ? <Text style={{ color: c.sub, fontSize: 13, marginTop: 2 }}>{desc}</Text> : null}</View>
+    </View>
+  );
+}
+function Progress({ label, value }) {
+  const c = useT(); const v = Math.max(0, Math.min(100, value || 0));
+  return (
+    <View style={{ gap: 8 }}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}><Text style={{ color: c.sub, fontSize: 13 }}>{label}</Text><Text style={{ color: c.sub, fontSize: 13 }}>{v + '%'}</Text></View>
+      <View style={{ height: 8, borderRadius: 4, backgroundColor: c.line }}><View style={{ height: 8, borderRadius: 4, width: (v + '%'), backgroundColor: T.accent }} /></View>
+    </View>
+  );
+}
+function Badges() {
+  const items = [['Active', T.success], ['Pending', T.warning], ['Failed', T.danger], ['New', T.accent]];
+  return (<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>{items.map(function (b, i) { return (<View key={i} style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999, backgroundColor: b[1] + '22' }}><Text style={{ color: b[1], fontSize: 12, fontWeight: '700' }}>{b[0]}</Text></View>); })}</View>);
+}
+function Chips() {
+  const c = useT(); const items = ['All', 'Income', 'Expense'];
+  return (<View style={{ flexDirection: 'row', gap: 8 }}>{items.map(function (t, i) { const on = i === 0; return (<View key={i} style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999, backgroundColor: on ? T.accent : 'transparent', borderWidth: on ? 0 : 1, borderColor: c.line }}><Text style={{ color: on ? '#fff' : c.sub, fontSize: 13, fontWeight: '600' }}>{t}</Text></View>); })}</View>);
+}
+function Divider() { const c = useT(); return <View style={{ height: 1, backgroundColor: c.line, marginVertical: 4 }} />; }
+function Illustration({ src }) { return <View style={{ alignItems: 'center', paddingVertical: 12 }}><Image source={{ uri: src }} style={{ width: 210, height: 168 }} resizeMode="contain" /></View>; }
+function PayCard({ number, holder, exp }) {
+  return (
+    <View style={{ borderRadius: 18, padding: 20, backgroundColor: '#1b1f45', aspectRatio: 311 / 197, justifyContent: 'flex-end', gap: 14 }}>
+      <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700', letterSpacing: 2 }}>{number}</Text>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+        <View><Text style={{ color: '#9aa0c0', fontSize: 10 }}>Card holder</Text><Text style={{ color: '#fff', fontWeight: '600' }}>{holder}</Text></View>
+        <View><Text style={{ color: '#9aa0c0', fontSize: 10 }}>Exp</Text><Text style={{ color: '#fff', fontWeight: '600' }}>{exp}</Text></View>
+      </View>
+    </View>
+  );
+}
+function Cashflow({ amount, income, expense }) {
+  const c = useT();
+  return (
+    <View style={{ borderRadius: T.radius + 6, backgroundColor: c.card, padding: 16, gap: 14 }}>
+      <View><Text style={{ color: c.sub, fontSize: 13 }}>Available Balance</Text><Text style={{ color: c.text, fontSize: 26, fontWeight: '800' }}>{amount}</Text></View>
+      <View style={{ flexDirection: 'row' }}>
+        <View style={{ flex: 1 }}><Text style={{ color: c.sub, fontSize: 12 }}>Income</Text><Text style={{ color: T.success, fontSize: 15, fontWeight: '700' }}>{income}</Text></View>
+        <View style={{ flex: 1 }}><Text style={{ color: c.sub, fontSize: 12 }}>Expense</Text><Text style={{ color: T.danger, fontSize: 15, fontWeight: '700' }}>{expense}</Text></View>
+      </View>
+    </View>
+  );
+}
+function CheckRow({ label, checked }) {
+  const c = useT(); const [on, setOn] = useState(!!checked);
+  return (
+    <TouchableOpacity activeOpacity={0.7} onPress={function () { setOn(!on); }} style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+      <View style={{ width: 22, height: 22, borderRadius: 6, borderWidth: 2, borderColor: on ? T.accent : c.line, backgroundColor: on ? T.accent : 'transparent', alignItems: 'center', justifyContent: 'center' }}>{on ? <Text style={{ color: '#fff', fontSize: 13, fontWeight: '800' }}>✓</Text> : null}</View>
+      <Text style={{ color: c.text, fontSize: 14, flex: 1 }}>{label}</Text>
+    </TouchableOpacity>
+  );
+}
+function RadioGroup({ a, b }) {
+  const c = useT(); const [sel, setSel] = useState(0); const opts = [a, b];
+  return (
+    <View style={{ gap: 10 }}>
+      {opts.map(function (o, i) { return (
+        <TouchableOpacity key={i} activeOpacity={0.7} onPress={function () { setSel(i); }} style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+          <View style={{ width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: sel === i ? T.accent : c.line, alignItems: 'center', justifyContent: 'center' }}>{sel === i ? <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: T.accent }} /> : null}</View>
+          <Text style={{ color: c.text, fontSize: 14 }}>{o}</Text>
+        </TouchableOpacity>); })}
+    </View>
+  );
+}
+function Tabs({ items, active }) {
+  const c = useT(); const [sel, setSel] = useState(active || 0);
+  return (
+    <View style={{ flexDirection: 'row', borderBottomWidth: 1, borderColor: c.line }}>
+      {items.map(function (t, i) { const on = i === sel; return (
+        <TouchableOpacity key={i} onPress={function () { setSel(i); }} style={{ flex: 1, alignItems: 'center', paddingVertical: 12, borderBottomWidth: 2, borderColor: on ? T.accent : 'transparent' }}>
+          <Text style={{ color: on ? c.text : c.sub, fontWeight: on ? '700' : '500', fontSize: 14 }}>{t}</Text>
+        </TouchableOpacity>); })}
+    </View>
+  );
+}
+function Pills({ items, active }) {
+  const c = useT(); const [sel, setSel] = useState(active || 0);
+  return (
+    <View style={{ flexDirection: 'row', backgroundColor: c.card, borderRadius: 999, padding: 4 }}>
+      {items.map(function (t, i) { const on = i === sel; return (
+        <TouchableOpacity key={i} onPress={function () { setSel(i); }} style={{ flex: 1, alignItems: 'center', paddingVertical: 9, borderRadius: 999, backgroundColor: on ? T.accent : 'transparent' }}>
+          <Text style={{ color: on ? '#fff' : c.sub, fontWeight: '600', fontSize: 13 }}>{t}</Text>
+        </TouchableOpacity>); })}
+    </View>
+  );
+}
+function Stepper() {
+  const c = useT(); const steps = [['Identity', 'done'], ['Address', 'active'], ['Review', 'todo']];
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      {steps.map(function (s, i) { const st = s[1]; return (
+        <View key={i} style={{ flexDirection: 'row', alignItems: 'center', flex: i < steps.length - 1 ? 1 : 0 }}>
+          <View style={{ alignItems: 'center' }}>
+            <View style={{ width: 30, height: 30, borderRadius: 15, backgroundColor: st === 'todo' ? 'transparent' : T.accent, borderWidth: st === 'todo' ? 1 : 0, borderColor: c.line, alignItems: 'center', justifyContent: 'center' }}><Text style={{ color: st === 'todo' ? c.sub : '#fff', fontWeight: '700' }}>{st === 'done' ? '✓' : (i + 1)}</Text></View>
+            <Text style={{ color: st === 'active' ? c.text : c.sub, fontSize: 11, marginTop: 4 }}>{s[0]}</Text>
+          </View>
+          {i < steps.length - 1 ? <View style={{ flex: 1, height: 2, backgroundColor: st === 'todo' ? c.line : T.accent, marginHorizontal: 6, marginBottom: 16 }} /> : null}
+        </View>); })}
+    </View>
+  );
+}
+function BottomNav({ active, go }) {
+  const c = useT(); const items = ['Home', 'Stats', 'Cards', 'Profile'];
+  return (
+    <View style={{ flexDirection: 'row', borderTopWidth: 1, borderColor: c.line, paddingTop: 10, paddingBottom: 20, backgroundColor: c.bg }}>
+      {items.map(function (t, i) { const on = i === (active || 0); return (
+        <TouchableOpacity key={i} onPress={go} style={{ flex: 1, alignItems: 'center', gap: 3 }}>
+          <View style={{ width: 22, height: 22, borderRadius: 6, backgroundColor: on ? T.accent : c.line }} />
+          <Text style={{ color: on ? T.accent : c.sub, fontSize: 11, fontWeight: on ? '700' : '500' }}>{t}</Text>
+        </TouchableOpacity>); })}
+    </View>
+  );
+}
+function Placeholder({ name }) {
+  const c = useT();
+  return (<View style={{ padding: 16, borderRadius: T.radius + 2, borderWidth: 1, borderStyle: 'dashed', borderColor: c.line, alignItems: 'center' }}><Text style={{ color: c.sub, fontSize: 13, fontWeight: '600' }}>{name}</Text></View>);
+}
+`;
+
+  function openExportModal() {
+    document.querySelectorAll('.genmodal-back').forEach((n) => n.remove());
+    const back = el('<div class="genmodal-back"></div>');
+    const m = el('<div class="genmodal"></div>');
+    let fmt = 'html';
+    const htmlIco = '<svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M9 9l-2 3 2 3M15 9l2 3-2 3"/></svg>';
+    const rnIco = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.2"/><ellipse cx="12" cy="12" rx="10" ry="4.3"/><ellipse cx="12" cy="12" rx="10" ry="4.3" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4.3" transform="rotate(120 12 12)"/></svg>';
+    m.innerHTML =
+      '<div class="gm-title">Save &amp; export your app</div>' +
+      '<div class="gm-sub">Package all ' + S.order.length + ' screen(s) into a functional, hand-off-ready build for your frontend team. Pick a format:</div>' +
+      '<div class="exp-cards">' +
+        '<button class="exp-card on" data-fmt="html"><span class="tag">Recommended</span><span class="ico">' + htmlIco + '</span><span class="t">HTML + CSS</span><span class="d">One self-contained file — the real MaV markup &amp; styles, a clickable phone prototype. Opens in any browser; tap actions to move between screens.</span></button>' +
+        '<button class="exp-card" data-fmt="rn"><span class="tag">Expo</span><span class="ico">' + rnIco + '</span><span class="t">React Native</span><span class="d">A runnable <code>App.js</code> — each screen a component, your design tokens as a theme, tap-through navigation. A real RN starting point.</span></button>' +
+      '</div>' +
+      '<label class="exp-fname"><span class="k">File name</span><input id="expName" value="mav-app" spellcheck="false"></label>' +
+      '<div class="exp-note"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg><span>Images &amp; fonts link to your live design system so the export renders straight away — your frontend can vendor them locally later.</span></div>' +
+      '<div class="gm-actions"><button class="hbtn gm-cancel">Cancel</button><button class="hbtn primary gm-export">Download build →</button></div>';
+    m.querySelectorAll('.exp-card').forEach((c) => { c.onclick = () => { fmt = c.dataset.fmt; m.querySelectorAll('.exp-card').forEach((x) => x.classList.toggle('on', x === c)); }; });
+    const close = () => back.remove();
+    m.querySelector('.gm-cancel').onclick = close;
+    back.addEventListener('click', (e) => { if (e.target === back) close(); });
+    m.querySelector('.gm-export').onclick = async () => {
+      const btn = m.querySelector('.gm-export'); btn.textContent = 'Building…'; btn.disabled = true;
+      const base = (m.querySelector('#expName').value || 'mav-app').trim().replace(/[^a-z0-9-_]+/gi, '-').replace(/^-+|-+$/g, '') || 'mav-app';
+      try {
+        if (fmt === 'html') download(base + '.html', await buildHTMLExport(), 'text/html;charset=utf-8');
+        else download('App.js', buildRNExport(), 'text/javascript;charset=utf-8');
+        close();
+      } catch (e) { console.error(e); btn.textContent = 'Error — retry'; btn.disabled = false; }
+    };
+    back.appendChild(m); document.body.appendChild(back);
+    setTimeout(() => { const i = m.querySelector('#expName'); if (i) { i.focus(); i.select(); } }, 40);
+  }
+
+  /* ── HTML export — reuse the real render pipeline, inline the real CSS ── */
+  async function buildHTMLExport() {
+    const origin = location.origin;
+    let css = (await fetchText('mav-kit.css') + '\n\n' + await fetchText('builder.css')).replace(/\.\.\//g, origin + '/');
+    let body = '';
+    S.order.forEach((id, i) => {
+      const p = phone(S.screens[id], { styled: true, cap: false });
+      p.classList.add('exp-screen'); if (i === 0) p.classList.add('active');
+      p.setAttribute('data-name', S.screens[id].name || ('Screen ' + (i + 1)));
+      body += p.outerHTML + '\n';
+    });
+    body = body.replace(/\.\.\//g, origin + '/');
+    const extra = 'html,body{margin:0}.exp-body{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:radial-gradient(120% 120% at 50% 0,#161a22,#0c0e13);font-family:"Plus Jakarta Sans",system-ui,sans-serif;padding:30px 16px;box-sizing:border-box}.exp-name{color:#e6e8ee;font-size:14px;font-weight:700;letter-spacing:.02em}.exp-stage{position:relative}.exp-screen{display:none}.exp-screen.active{display:block;animation:expIn .34s cubic-bezier(.32,.72,0,1)}@keyframes expIn{from{opacity:0;transform:translateX(22px)}to{opacity:1;transform:none}}.exp-hint{color:#767c8a;font-size:12px;max-width:340px;text-align:center}.exp-dots{display:flex;gap:6px}.exp-dots i{width:7px;height:7px;border-radius:50%;background:#333a48;transition:.22s}.exp-dots i.on{background:#fff;width:18px;border-radius:4px}[data-cta],.bnav-item,.ab-ico{cursor:pointer}';
+    const nav = '(' + exportNavFn.toString() + ')();';
+    return '<!doctype html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">\n' +
+      '<title>' + esc(document.title.replace(/ Builder$/, '')) + ' — prototype</title>\n<style>' + css + '\n' + extra + '</style></head>\n' +
+      '<body class="exp-body"><div class="exp-name" id="expName"></div><div class="exp-stage">' + body + '</div>' +
+      '<div class="exp-dots" id="expDots"></div><div class="exp-hint">Tap the primary action or a nav item to go forward · tap the back arrow to go back</div>' +
+      '<script>' + nav + '</script></body></html>';
+  }
+  function exportNavFn() {
+    var screens = [].slice.call(document.querySelectorAll('.exp-screen'));
+    var cur = 0, hist = [];
+    var dots = document.getElementById('expDots'), name = document.getElementById('expName');
+    screens.forEach(function () { dots.appendChild(document.createElement('i')); });
+    function show(i) {
+      if (i == null || i < 0 || i >= screens.length) return;
+      screens[cur].classList.remove('active'); cur = i; screens[cur].classList.add('active');
+      [].forEach.call(dots.children, function (d, k) { d.className = k === cur ? 'on' : ''; });
+      if (name) name.textContent = screens[cur].getAttribute('data-name') || '';
+    }
+    var fwd = function () { if (cur + 1 < screens.length) { hist.push(cur); show(cur + 1); } };
+    screens.forEach(function (sc) {
+      sc.querySelectorAll('[data-cta]').forEach(function (b) { b.addEventListener('click', fwd); });
+      sc.querySelectorAll('.bnav-item').forEach(function (b) { b.addEventListener('click', fwd); });
+      var bk = sc.querySelector('.ab-ico'); if (bk) bk.addEventListener('click', function () { if (hist.length) show(hist.pop()); });
+    });
+    show(0);
+  }
+
+  /* ── React-Native export — a runnable Expo App.js scaffold ───────────── */
+  function buildRNExport() {
+    const st = S.style;
+    const illURL = (s) => location.origin + '/app/assets/illustrations/' + s;
+    const A = (v) => '{' + JSON.stringify(v == null ? '' : String(v)) + '}';   // JSX string attr as expression
+    const rnComp = (c) => {
+      const p = c.props || {};
+      switch (c.type) {
+        case 'appbar': return '<AppBar title=' + A(p.title || 'Screen') + ' back={' + (p.back === false ? 'false' : 'true') + '} action=' + A(p.action || '') + ' onBack={back} />';
+        case 'title': return '<H1 text=' + A(p.text || 'Welcome back') + ' />';
+        case 'subtitle': return '<Sub text=' + A(p.text || 'Sign in to continue to your account') + ' />';
+        case 'button': return '<Btn label=' + A(p.showText === false ? '' : (p.label || 'Continue')) + ' variant=' + A(p.variant || 'primary') + ' size=' + A(p.size || 'lg') + ' full={' + (p.full === false ? 'false' : 'true') + '} iconRight={' + (p.iconRight ? 'true' : 'false') + '} disabled={' + (p.state === 'disabled' ? 'true' : 'false') + '} onPress={go} />';
+        case 'buttonSecondary': return '<Btn label=' + A(p.label || 'Cancel') + ' variant="secondary" size=' + A(p.size || 'lg') + ' full={' + (p.full === false ? 'false' : 'true') + '} onPress={go} />';
+        case 'biometric': return '<Btn label=' + A(p.label || 'Sign in with Face ID') + ' variant="secondary" onPress={go} />';
+        case 'swipe': return '<Btn label=' + A(p.label || 'Swipe up to complete') + ' onPress={go} />';
+        case 'textfield': return '<Field label=' + A(p.label || '') + ' placeholder=' + A(p.placeholder || 'Enter value') + ' value=' + A(p.value || '') + ' />';
+        case 'password': return '<Field label=' + A(p.label || 'Password') + ' placeholder="********" secure />';
+        case 'phone': return '<Field label=' + A(p.label || 'Phone number') + ' prefix=' + A(p.code || '+234') + ' placeholder=' + A(p.placeholder || '801 234 5678') + ' />';
+        case 'searchfield': return '<Field placeholder=' + A(p.placeholder || 'Search') + ' />';
+        case 'otp': return '<Otp value=' + A(p.value || '1234') + ' />';
+        case 'balance': return '<Balance label=' + A(p.label || 'Available balance') + ' amount=' + A(p.amount || '$82,758.10') + ' trend=' + A(p.trend || '+24% this month') + ' onPress={go} />';
+        case 'amount': return '<Amount cur=' + A(p.cur || '$') + ' value=' + A(p.value || '250.00') + ' caption=' + A(p.caption || 'Enter amount to send') + ' />';
+        case 'sectionheader': return '<SectionHeader title=' + A(p.title || 'Recent activity') + ' />';
+        case 'transactions': return '<Txns />';
+        case 'contacts': return '<Contacts />';
+        case 'toggleRow': return '<ToggleRow label=' + A(p.label || 'Enable notifications') + ' on={' + (p.on === false ? 'false' : 'true') + '} />';
+        case 'success': return '<Success title=' + A(p.title || 'Successful!') + ' sub=' + A(p.sub || 'Your transfer has been completed') + ' />';
+        case 'alert': return '<Banner kind=' + A(p.variant || 'primary') + ' title=' + A(p.title || 'Heads up') + ' desc=' + A(p.desc || 'Your statement is ready to view.') + ' />';
+        case 'toast': return '<Banner kind=' + A(p.status || 'success') + ' title=' + A(p.title || 'Transfer complete') + ' desc=' + A(p.desc || 'Rp 50,000 sent to James K.') + ' />';
+        case 'progress': return '<Progress label=' + A(p.label || 'Uploading…') + ' value={' + (p.value == null ? 68 : p.value) + '} />';
+        case 'badges': return '<Badges />';
+        case 'chips': return '<Chips />';
+        case 'divider': return '<Divider />';
+        case 'spacer': return '<View style={{height:' + (p.size == null ? 24 : p.size) + '}} />';
+        case 'bottomnav': return '<BottomNav active={' + (p.active == null ? 0 : p.active) + '} go={go} />';
+        case 'illustration': return '<Illustration src=' + A(illURL(p.src || 'il-138.svg')) + ' />';
+        case 'paycard': return '<PayCard number=' + A(p.number || '4539 1488 0343 6467') + ' holder=' + A(p.holder || 'JULIO SANTOS') + ' exp=' + A(p.exp || '09/27') + ' />';
+        case 'cashflow': return '<Cashflow amount=' + A(p.amount || '$82,758.10') + ' income=' + A(p.income || '+$20.000') + ' expense=' + A(p.expense || '-$5.200') + ' />';
+        case 'checkbox': return '<CheckRow label=' + A(p.label || 'I agree to the terms & conditions') + ' checked={' + (p.checked === false ? 'false' : 'true') + '} />';
+        case 'radio': return '<RadioGroup a=' + A(p.a || 'Standard account') + ' b=' + A(p.b || 'Savings account') + ' />';
+        case 'tabs': return '<Tabs items={' + JSON.stringify(p.items || ['Overview', 'Transactions', 'Analytics']) + '} active={' + (p.active == null ? 0 : p.active) + '} />';
+        case 'pilltabs': return '<Pills items={' + JSON.stringify(p.items || ['Monthly', 'Weekly', 'Daily']) + '} active={' + (p.active == null ? 0 : p.active) + '} />';
+        case 'stepper': return '<Stepper />';
+        default: return '<Placeholder name=' + A((CATALOG[c.type] && CATALOG[c.type].label) || c.type) + ' />';
+      }
+    };
+    const screenFns = S.order.map((id, i) => {
+      const s = S.screens[id]; const comps = s.comps;
+      const ab = comps.find((c) => c.type === 'appbar');
+      const bn = comps.find((c) => c.type === 'bottomnav');
+      const bodyC = comps.filter((c) => c !== ab && c !== bn);
+      const bodyJSX = bodyC.map(rnComp).join('\n        ') || '<View />';
+      return 'function Screen' + i + '({ go, back }) {\n  return (\n    <Screen dark={' + (s.dark ? 'true' : 'false') + '}>\n      ' +
+        (ab ? rnComp(ab) : '') + '\n      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: T.pad, paddingBottom: 28, gap: T.gap }} showsVerticalScrollIndicator={false}>\n        ' +
+        bodyJSX + '\n      </ScrollView>\n      ' + (bn ? rnComp(bn) : '') + '\n    </Screen>\n  );\n}';
+    }).join('\n\n');
+    const list = S.order.map((id, i) => 'Screen' + i).join(', ');
+    const head = '/* ────────────────────────────────────────────────────────────────────────\n' +
+      '   MaV App Builder — React Native export (Expo-ready)\n' +
+      '   ' + S.order.length + ' screen(s). Drop into an Expo project or paste into snack.expo.dev.\n' +
+      '   Design tokens come from your builder Style Guide. A tap-through prototype:\n' +
+      '   the primary action / nav advances; the app-bar back arrow goes back.\n' +
+      '   ──────────────────────────────────────────────────────────────────────── */\n' +
+      "import React, { useState } from 'react';\n" +
+      "import { SafeAreaView, ScrollView, View, Text, TextInput, TouchableOpacity, Image, Switch } from 'react-native';\n\n" +
+      'const T = { accent: ' + JSON.stringify(st.accent) + ', onAccent: "#ffffff", radius: ' + (st.radius | 0) + ', pad: ' + (st.pad == null ? 16 : st.pad) + ', gap: ' + (st.space == null ? 14 : st.space) + ', success: "#1f9d55", danger: "#e5484d", warning: "#f5a524" };\n';
+    return head + RN_LIB + '\n' + screenFns + '\n\nconst SCREENS = [' + list + '];\n\n' +
+      'export default function App() {\n  const [i, setI] = useState(0);\n  const [hist, setHist] = useState([]);\n' +
+      '  const go = () => setI((p) => { if (p + 1 < SCREENS.length) { setHist((h) => [...h, p]); return p + 1; } return p; });\n' +
+      '  const back = () => setHist((h) => { if (h.length) { const n = h.slice(); setI(n.pop()); return n; } return h; });\n' +
+      '  const Cur = SCREENS[i];\n  return <Cur go={go} back={back} />;\n}\n';
+  }
+
   /* ══ MAIN RENDER ══════════════════════════════════════════════════════ */
   function render() {
     renderStepper();
@@ -691,6 +1128,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     seed(); render();
     $('#pvClose').onclick = closePreview;
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && S.pv) closePreview(); });
+    const sb = $('#saveBtn'); if (sb) sb.onclick = openExportModal;
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { if (S.pv) closePreview(); document.querySelectorAll('.genmodal-back').forEach((n) => n.remove()); } });
   });
 })();
