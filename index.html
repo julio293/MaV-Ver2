@@ -63,7 +63,7 @@ footer a { color: var(--mav-primary); text-decoration: none; }
   <div class="top">
     <div class="wrap" style="display:flex;align-items:center;width:100%">
       <a class="brand" href="index.html" style="text-decoration:none;color:inherit">
-        <span class="brand-mark"><svg width="16" height="16" viewBox="0 0 14 14"><rect x="1" y="1" width="5" height="5" rx="1"/><rect x="8" y="1" width="5" height="5" rx="1"/><rect x="1" y="8" width="5" height="5" rx="1"/><rect x="8" y="8" width="5" height="5" rx="1" opacity=".4"/></svg></span>
+        <span class="brand-mark"><svg width="20" height="20" viewBox="0 0 1024 1024"><path d="M857.946 258.305L831.569 412.58H226.896L253.468 258.305H857.946Z"/><path d="M680.165 765.692H517.289L570.089 456.822H733.08L680.165 765.692Z"/><path d="M492.872 611.911L217.705 611.202L351.506 633.936L328.929 765.695H166.053L219.277 456.824L519.444 456.493L492.872 611.911Z"/></svg></span>
         MaV Design System
       </a>
       <span class="top-spacer"></span>
@@ -77,7 +77,7 @@ footer a { color: var(--mav-primary); text-decoration: none; }
     <p>A token-driven, multi-theme foundation for building e-banking apps — every color, font, and radius routes through swappable role tokens, so the whole system re-themes (blue → lime in dark) from one source of truth.</p>
     <div class="hero-cta">
       <a class="btn btn-primary" href="components/buttons.html">Explore components →</a>
-      <a class="btn btn-ghost" href="customiser.html">✦ Live Customiser</a>
+      <a class="btn btn-ghost" href="builder/">✦ Open App Builder</a>
     </div>
     <div class="hero-stats">
       <div class="stat"><b>6</b><span>Foundations</span></div>
@@ -87,10 +87,23 @@ footer a { color: var(--mav-primary); text-decoration: none; }
     </div>
   </div></header>
 
+  <div class="wrap" style="margin-top:8px">
+    <section style="border:1px solid var(--mav-border,#efefef);border-radius:16px;overflow:hidden;background:var(--mav-bg,#fff)">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 20px;border-bottom:1px solid var(--mav-border,#efefef);flex-wrap:wrap">
+        <div>
+          <div style="font-weight:800;font-size:16px">✦ App Builder</div>
+          <div style="font-size:13px;color:var(--mav-muted,#7f7f7f)">Plan → Wireframe → Style → Visual — every screen built from MaV components.</div>
+        </div>
+        <a class="btn btn-primary" href="builder/" target="_blank" rel="noopener">Open full screen ↗</a>
+      </div>
+      <iframe src="builder/" title="MaV App Builder" loading="lazy" style="width:100%;height:660px;border:0;display:block;background:#0e1016"></iframe>
+    </section>
+  </div>
+
   <div class="wrap" id="sections"></div>
 
   <div class="wrap"><footer>
-    MaV Design System — built from Figma “Modular App Visualizer”. Open the <a href="customiser.html">Live Customiser</a> to retheme everything in real time.
+    MaV Design System — built from Figma “Modular App Visualizer”. Open the <a href="builder/">App Builder</a> to plan, wireframe, style and prototype e-banking screens from these components.
   </footer></div>
 
   <script src="js/theme.js"></script>
@@ -120,7 +133,8 @@ footer a { color: var(--mav-primary); text-decoration: none; }
       ['components/auth.html','Sign In / Sign Up','Full auth screens','login'],
       ['components/auth-otp.html','OTP Verification','6-digit verify flow','shield'],
       ['components/select-account.html','Select Account','Source-of-funds list','users'],
-      ['components/input-amount.html','Input Amount','Enter & confirm amount','dollar'] ] },
+      ['components/input-amount.html','Input Amount','Enter & confirm amount','dollar'],
+      ['components/splash.html','Splash / Opening','App launch screen','sparkles'] ] },
     { title: 'Components', items: [
       ['components/buttons.html','Buttons','square'],['components/inputs.html','Input Fields','input'],['components/otp.html','OTP Input','otp'],
       ['components/forms.html','Forms & Controls','check'],['components/datepicker.html','Datepicker','calendar'],['components/feedback.html','Alerts & Toasts','bell'],['components/toast.html','Toast','message'],
@@ -129,7 +143,7 @@ footer a { color: var(--mav-primary); text-decoration: none; }
       ['components/button-dock.html','Button Dock','panelbot'],['components/tabs.html','Tabs','tabs'],['components/chat.html','Chat Bubbles','chat'],
       ['components/message-chat.html','Message Chat','messages'],['components/finance.html','Finance Modules','chart'],['components/chart.html','Chart','linechart'],['components/blog.html','Blog','blog'],['components/bottom-sheet.html','Bottom Sheet','sheet'],['components/balance.html','Balance & Number','wallet'],
       ['components/divider.html','Divider','minus'],['components/progress.html','Progress Bar','progress'],['components/loader.html','Loader','loader'],
-      ['components/coachmark.html','Coachmark','help'],['components/all.html','Kitchen Sink','grid'] ] },
+      ['components/coachmark.html','Coachmark','help'],['components/illustration.html','Illustrations','palette'],['components/all.html','Kitchen Sink','grid'] ] },
     { title: 'Foundations', items: [
       ['foundations/colors.html','Color System','palette'],['foundations/typography.html','Typography','type'],['foundations/spacing.html','Spacing & Layout','ruler'],
       ['foundations/effects.html','Shadows & Effects','sun'],['foundations/dark-mode.html','Dark Mode','moon'],['foundations/tokens.html','Token Architecture','layers'] ] },

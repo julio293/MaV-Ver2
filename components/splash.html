@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Splash / Opening — MaV Design System</title>
+<link rel="stylesheet" href="../css/tokens.css">
+<link rel="stylesheet" href="../css/shared.css">
+<style>
+/* ══ Splash / Opening — Figma "Opening" (845:25608) ═══════════════════════
+   Full-screen launch screen using the real exported background SVGs, the
+   centred Fyscal Technologies logomark, and a footer legal line. Backgrounds
+   drift, a light sweep passes, a glow pulses behind the mark, and the mark
+   eases in then breathes — all gated behind prefers-reduced-motion. ───────── */
+.sp-row{display:flex;flex-wrap:wrap;gap:32px;justify-content:center;align-items:flex-start}
+.sp-cell{display:flex;flex-direction:column;gap:12px;align-items:center}
+.sp-tag{font-size:11px;color:var(--mav-muted);font-family:'Inter',sans-serif}
+
+.sp-phone{width:288px;max-width:100%;box-sizing:border-box;border-radius:34px;overflow:hidden;
+  border:1px solid var(--mav-border,#efefef);box-shadow:0 22px 48px -20px rgba(0,0,0,.28);position:relative;background:#fff}
+.sp-screen{height:610px;display:flex;flex-direction:column;position:relative;overflow:hidden}
+
+/* real exported background (393×852), covering the screen */
+.sp-bg{position:absolute;inset:0;background-position:center;background-size:cover;background-repeat:no-repeat;transform-origin:center;z-index:0}
+/* moving light sweep */
+.sp-sheen{position:absolute;inset:-40%;z-index:1;pointer-events:none;
+  background:linear-gradient(115deg,transparent 34%,rgba(255,255,255,.22) 49%,transparent 64%);
+  transform:translateX(-65%)}
+/* soft glow behind the mark */
+.sp-glow{position:absolute;left:50%;top:50%;width:250px;height:250px;transform:translate(-50%,-50%);z-index:1;
+  border-radius:50%;background:radial-gradient(circle,var(--sp-glow,rgba(53,46,255,.22)),transparent 68%);filter:blur(6px)}
+
+.sp-status{display:flex;align-items:center;justify-content:space-between;padding:16px 22px 0;
+  font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:14px;z-index:3}
+.sp-status .sp-levels{display:flex;align-items:center;gap:5px}
+.sp-status svg{display:block;fill:currentColor}
+.sp-body{flex:1;display:flex;align-items:center;justify-content:center;position:relative;z-index:2}
+.sp-mark{width:66px;height:66px;position:relative}
+.sp-mark svg{width:100%;height:100%;fill:currentColor}
+.sp-foot{padding:0 28px 30px;text-align:center;font-family:'Inter',sans-serif;font-size:9.5px;line-height:1.5;z-index:3}
+
+/* ── variants: background SVG + logo colour + glow tint ── */
+.sp-a{color:var(--main-text\/default,#171717)}                 /* squares */
+.sp-a .sp-bg{background-image:url(../app/assets/brand/splash/opening-1.svg)}
+.sp-a .sp-foot{color:var(--main-text\/description,#7f7f7f)}
+.sp-a{--sp-glow:rgba(53,46,255,.16)}
+.sp-b{color:#fff}                                              /* brand gradient */
+.sp-b .sp-bg{background-image:url(../app/assets/brand/splash/opening-2.svg)}
+.sp-b .sp-foot{color:rgba(255,255,255,.66)}
+.sp-b{--sp-glow:rgba(255,255,255,.34)}
+.sp-c{color:var(--main-text\/default,#171717)}                 /* beam */
+.sp-c .sp-bg{background-image:url(../app/assets/brand/splash/opening-3.svg)}
+.sp-c .sp-foot{color:var(--main-text\/description,#7f7f7f)}
+.sp-c{--sp-glow:rgba(53,46,255,.20)}
+
+/* ── animation: alive & smooth ── */
+@media (prefers-reduced-motion:no-preference){
+  .sp-bg{animation:spDrift 16s ease-in-out infinite}
+  .sp-sheen{animation:spSheen 7.5s ease-in-out infinite}
+  .sp-glow{animation:spGlow 3.6s ease-in-out infinite}
+  .sp-mark{animation:spMarkIn .85s cubic-bezier(.34,1.45,.4,1) both}
+  .sp-mark svg{animation:spBreathe 4.2s ease-in-out 1s infinite}
+  .sp-foot{animation:spFade 1s ease .5s both}
+  @keyframes spDrift{0%,100%{transform:scale(1.06)}50%{transform:scale(1.14) translateY(-1.5%)}}
+  @keyframes spSheen{0%,100%{transform:translateX(-65%)}52%{transform:translateX(65%)}}
+  @keyframes spGlow{0%,100%{opacity:.55;transform:translate(-50%,-50%) scale(.9)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.12)}}
+  @keyframes spMarkIn{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
+  @keyframes spBreathe{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+  @keyframes spFade{from{opacity:0}to{opacity:1}}
+}
+.sp-bg{transform:scale(1.06)} /* static fallback: subtle fill */
+.dark-canvas{background:var(--main\/white,#171717);border-radius:16px;padding:28px;display:flex;flex-wrap:wrap;gap:32px;justify-content:center}
+</style>
+</head>
+<body>
+<div class="doc-layout">
+<nav class="doc-sidebar"></nav>
+<main class="doc-main">
+  <div class="topbar">
+    <a href="../index.html" class="topbar-back">← MaV</a>
+    <span>/</span>
+    <span class="topbar-title">Splash / Opening</span>
+    <div class="topbar-spacer"></div>
+    <button class="theme-btn" data-theme-toggle><span data-theme-icon>☾</span> <span data-theme-label>Dark mode</span></button>
+  </div>
+
+  <div class="page-header">
+    <div class="page-breadcrumb"><a href="../index.html">MaV</a> / Organisms</div>
+    <h1 class="page-title">Splash / Opening</h1>
+    <p class="page-desc">The app launch screen — the real exported background artwork, the centred <strong>Fyscal Technologies</strong> logomark, and a footer legal line. Three treatments: floating squares, the brand indigo gradient, and a light beam. Everything animates — the background drifts, a light sweep passes, a glow pulses, and the mark eases in then breathes (all disabled under reduced-motion).</p>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Variants <span class="section-badge">animated</span></h2>
+    <p class="section-desc">Opening 1 (squares) · Opening 2 (brand gradient) · Opening 3 (beam) — backgrounds are the exact Figma SVGs.</p>
+    <div class="preview-card">
+      <div class="preview-canvas"><div class="sp-row" id="sp-row"></div></div>
+      <div class="preview-meta"><span class="preview-label">Splash — exported SVG background · centred logomark · footer legal</span><span class="preview-sublabel">drift · light-sweep · glow-pulse · mark ease-in + breathe</span></div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <div class="section">
+    <h2 class="section-title">On dark</h2>
+    <p class="section-desc">The brand splash on a dark canvas alongside a light variant.</p>
+    <div class="preview-card">
+      <div class="preview-canvas"><div class="dark-canvas" data-theme="dark" id="sp-dark"></div></div>
+      <div class="preview-meta"><span class="preview-label">Dark canvas</span></div>
+    </div>
+  </div>
+</main>
+</div>
+<script src="../js/theme.js"></script>
+<script>
+(function () {
+  var MARK = '<svg viewBox="0 0 1024 1024"><path d="M857.946 258.305L831.569 412.58H226.896L253.468 258.305H857.946Z"/><path d="M680.165 765.692H517.289L570.089 456.822H733.08L680.165 765.692Z"/><path d="M492.872 611.911L217.705 611.202L351.506 633.936L328.929 765.695H166.053L219.277 456.824L519.444 456.493L492.872 611.911Z"/></svg>';
+  var STATUS = '<span>9:41</span><span class="sp-levels">' +
+    '<svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx=".5"/><rect x="5" y="5" width="3" height="7" rx=".5"/><rect x="10" y="2.5" width="3" height="9.5" rx=".5"/><rect x="15" y="0" width="3" height="12" rx=".5"/></svg>' +
+    '<svg width="17" height="12" viewBox="0 0 17 12"><path d="M8.5 2.2c2.6 0 5 1 6.8 2.7l-1.4 1.5A7.6 7.6 0 0 0 8.5 4.3 7.6 7.6 0 0 0 3.1 6.4L1.7 4.9A9.7 9.7 0 0 1 8.5 2.2Z"/></svg>' +
+    '<svg width="26" height="12" viewBox="0 0 26 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3" fill="none" stroke="currentColor" stroke-opacity=".35"/><rect x="2" y="2" width="18" height="8" rx="1.5"/><rect x="23" y="4" width="1.6" height="4" rx=".8"/></svg></span>';
+  var FOOT = '© 2025 Fyscal Technologies PTE LTD.<br>All rights reserved.';
+  function phone(v) {
+    return '<div class="sp-phone"><div class="sp-screen sp-' + v + '">' +
+      '<div class="sp-bg"></div><div class="sp-sheen"></div>' +
+      '<div class="sp-status">' + STATUS + '</div>' +
+      '<div class="sp-body"><span class="sp-glow"></span><span class="sp-mark">' + MARK + '</span></div>' +
+      '<div class="sp-foot">' + FOOT + '</div></div></div>';
+  }
+  var vars = [['a', 'Floating squares'], ['b', 'Brand gradient'], ['c', 'Light beam']];
+  document.getElementById('sp-row').innerHTML = vars.map(function (v) {
+    return '<div class="sp-cell"><span class="sp-tag">' + v[1] + '</span>' + phone(v[0]) + '</div>';
+  }).join('');
+  document.getElementById('sp-dark').innerHTML = phone('b') + phone('c');
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>MaV App Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="mav-kit.css?v=16">
+<link rel="stylesheet" href="builder.css?v=16">
+</head>
+<body>
+<div class="app">
+  <header class="hdr">
+    <div class="brand">
+      <span class="logo"><svg viewBox="0 0 1024 1024" width="17" height="17" fill="currentColor"><path d="M857.946 258.305L831.569 412.58H226.896L253.468 258.305H857.946Z"/><path d="M680.165 765.692H517.289L570.089 456.822H733.08L680.165 765.692Z"/><path d="M492.872 611.911L217.705 611.202L351.506 633.936L328.929 765.695H166.053L219.277 456.824L519.444 456.493L492.872 611.911Z"/></svg></span>
+      MaV App Builder
+    </div>
+    <nav class="steps" id="steps"></nav>
+    <div class="hdr-actions">
+      <div class="dev-ctl" id="deviceCtl"></div>
+      <a class="hbtn" href="../index.html">Design system</a>
+    </div>
+  </header>
+  <div class="work">
+    <aside class="panel" id="leftPanel"></aside>
+    <main class="canvas-wrap"><div class="canvas" id="canvas"></div></main>
+    <aside class="panel right" id="rightPanel" style="display:none"></aside>
+  </div>
+</div>
+
+<!-- interactive prototype overlay -->
+<div class="preview-back" id="preview">
+  <div class="preview-bar">
+    <span id="pvName"></span>
+    <button id="pvClose">✕ Close preview</button>
+  </div>
+  <div id="pvStage"></div>
+</div>
+
+<script src="data.js?v=16"></script>
+<script src="app.js?v=16"></script>
+</body>
+</html>

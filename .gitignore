@@ -10,3 +10,4 @@ ds-src/node_modules/
 .design-sync/.cache/
 .design-sync/learnings/
 .design-sync/node_modules
+.wrangler/

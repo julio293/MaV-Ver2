@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Illustrations — MaV Design System</title>
+<link rel="stylesheet" href="../css/tokens.css">
+<link rel="stylesheet" href="../css/shared.css">
+<style>
+/* ══ Illustrations — isometric fintech set (SVG + PNG) ═══════════════════ */
+.ill-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;width:100%}
+.ill-tile{position:relative;display:flex;flex-direction:column;gap:0;border:1px solid var(--mav-border,#efefef);border-radius:12px;overflow:hidden;background:var(--mav-bg,#fff);cursor:pointer;transition:transform .14s ease,box-shadow .2s ease,border-color .14s}
+.ill-tile:hover{transform:translateY(-3px);box-shadow:0 12px 26px -14px rgba(0,0,0,.25);border-color:var(--mav-primary,#352eff)}
+[data-theme=dark] .ill-tile{background:#1b1b1b;border-color:#2a2a2a}
+.ill-frame{aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;padding:16px;
+  background:linear-gradient(160deg,var(--background\/bg-tertiary,#f4f6ff),var(--mav-bg,#fff))}
+[data-theme=dark] .ill-frame{background:linear-gradient(160deg,#1c2140,#151515)}
+.ill-frame img{max-width:100%;max-height:100%;object-fit:contain;pointer-events:none}
+.ill-meta{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:8px 10px;border-top:1px solid var(--mav-border,#efefef);
+  font-family:var(--font-mono,monospace);font-size:11px;color:var(--mav-muted,#7f7f7f)}
+[data-theme=dark] .ill-meta{border-top-color:#2a2a2a}
+.ill-badge{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:2px 6px;border-radius:999px;background:var(--mav-bg-secondary,#eee);color:var(--mav-muted)}
+[data-theme=dark] .ill-badge{background:#2a2a2a}
+.ill-copied{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--mav-primary,#352eff) 90%,transparent);color:#fff;font-weight:700;font-size:13px;opacity:0;pointer-events:none;transition:opacity .18s}
+[data-theme=dark] .ill-copied{background:color-mix(in srgb,var(--mav-primary-dark,#a1ff5b) 90%,transparent);color:#171717}
+.ill-tile.copied .ill-copied{opacity:1}
+
+/* in-use examples */
+.ill-uses{display:flex;flex-wrap:wrap;gap:24px}
+.use-card{flex:1 1 300px;min-width:0;border:1px solid var(--mav-border,#efefef);border-radius:16px;padding:32px 24px;background:var(--mav-bg,#fff);
+  display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px}
+[data-theme=dark] .use-card{background:#1b1b1b;border-color:#2a2a2a}
+.use-card img{width:180px;height:150px;object-fit:contain}
+.use-title{font-family:'Inter',sans-serif;font-weight:700;font-size:20px;color:var(--main-text\/default,#171717)}
+[data-theme=dark] .use-title{color:var(--mav-fg)}
+.use-sub{font-family:'Inter',sans-serif;font-size:13px;color:var(--main-text\/description,#7f7f7f);max-width:300px}
+.use-tag{font-size:11px;color:var(--mav-muted);font-family:'Inter',sans-serif}
+</style>
+</head>
+<body>
+<div class="doc-layout">
+<nav class="doc-sidebar">
+  <div class="sidebar-logo"><a href="../index.html" class="sidebar-logo-mark"><div class="sidebar-logo-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><rect x="1" y="1" width="5" height="5" rx="1"/><rect x="8" y="1" width="5" height="5" rx="1"/><rect x="1" y="8" width="5" height="5" rx="1"/><rect x="8" y="8" width="5" height="5" rx="1" opacity=".4"/></svg></div><span class="sidebar-logo-name">MaV Design System</span></a></div>
+  <div class="sidebar-section-label">Components</div>
+  <a href="buttons.html" class="sidebar-link">Buttons</a>
+  <a href="inputs.html" class="sidebar-link">Input Fields</a>
+  <a href="forms.html" class="sidebar-link">Forms &amp; Controls</a>
+  <a href="feedback.html" class="sidebar-link">Alerts &amp; Toasts</a>
+  <a href="badges.html" class="sidebar-link">Badges &amp; Chips</a>
+  <a href="avatars.html" class="sidebar-link">Avatars</a>
+  <a href="cards.html" class="sidebar-link">Payment Cards</a>
+  <a href="balance.html" class="sidebar-link">Balance &amp; Number</a>
+  <a href="navigation.html" class="sidebar-link">Navigation</a>
+  <a href="message-chat.html" class="sidebar-link">Message Chat</a>
+  <a href="finance.html" class="sidebar-link">Finance Modules</a>
+  <a href="illustration.html" class="sidebar-link active">Illustrations</a>
+  <a href="all.html" class="sidebar-link">Kitchen Sink</a>
+</nav>
+<main class="doc-main">
+  <div class="topbar">
+    <a href="../index.html" class="topbar-back">← MaV</a>
+    <span>/</span>
+    <span class="topbar-title">Illustrations</span>
+    <div class="topbar-spacer"></div>
+    <button class="theme-btn" data-theme-toggle><span data-theme-icon>☾</span> <span data-theme-label>Dark mode</span></button>
+  </div>
+
+  <div class="page-header">
+    <div class="page-breadcrumb"><a href="../index.html">MaV</a> / Components</div>
+    <h1 class="page-title">Illustrations</h1>
+    <p class="page-desc">A cohesive set of isometric fintech illustrations in the MaV brand palette (indigo → violet → magenta). Use them for empty states, onboarding, success and error screens, and feature highlights. <strong>SVG</strong> where the source is vector (crisp at any size); optimised <strong>PNG</strong> for the richly-shaded scenes. Click a tile to copy its path.</p>
+  </div>
+
+  <!-- In use -->
+  <div class="section">
+    <h2 class="section-title">In use</h2>
+    <p class="section-desc">Illustrations sit above a title + subtitle in empty, onboarding, and confirmation states.</p>
+    <div class="preview-card">
+      <div class="preview-canvas">
+        <div class="ill-uses">
+          <div class="use-card"><span class="use-tag">Onboarding</span><img id="use-onboard" alt=""><div class="use-title">Bank smarter, move faster</div><div class="use-sub">Send, save and spend — all in one place.</div></div>
+          <div class="use-card"><span class="use-tag">Empty state</span><img id="use-empty" alt=""><div class="use-title">No items were found</div><div class="use-sub">Please try adjusting your search.</div></div>
+          <div class="use-card"><span class="use-tag">Success</span><img id="use-success" alt=""><div class="use-title">Transfer complete</div><div class="use-sub">Rp 50,000 was sent to James K.</div></div>
+        </div>
+      </div>
+      <div class="preview-meta"><span class="preview-label">Illustration + title (Inter Bold) + subtitle</span><span class="preview-sublabel">Re-themes on the dark canvas · centered, 150–180px</span></div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- Full set -->
+  <div class="section">
+    <h2 class="section-title">The set <span class="section-badge" id="ill-count"></span></h2>
+    <p class="section-desc">All illustrations in <code>app/assets/illustrations/</code>. Reference with <code>&lt;img src="app/assets/illustrations/il-###.svg"&gt;</code> — size the container, not the image.</p>
+    <div class="preview-card">
+      <div class="preview-canvas"><div class="ill-grid" id="ill-grid"></div></div>
+    </div>
+  </div>
+</main>
+</div>
+<script src="../js/theme.js"></script>
+<script>
+(function () {
+  var FILES = ['il-138.svg','il-139.svg','il-140.svg','il-141.svg','il-142.svg','il-143.svg','il-144.svg','il-145.png','il-146.svg','il-147.svg','il-148.svg','il-149.svg','il-150.svg','il-151.png','il-152.svg','il-153.svg','il-154.svg','il-155.png','il-156.svg','il-157.svg','il-158.svg','il-159.svg','il-160.svg','il-161.svg','il-162.svg','il-163.svg','il-164.svg','il-165.svg','il-166.svg','il-167.svg','il-168.svg','il-169.svg','il-170.svg','il-171.svg','il-172.png','il-173.png','il-174.png','il-175.png','il-176.png','il-177.png','il-178.png','il-179.png','il-180.png','il-182.png','il-252.png','il-264.png','il-267.png','il-407.svg','il-1983.png'];
+  var BASE = '../app/assets/illustrations/';
+  var grid = document.getElementById('ill-grid');
+  document.getElementById('ill-count').textContent = FILES.length + ' illustrations';
+  FILES.forEach(function (f) {
+    var ext = f.split('.').pop().toUpperCase();
+    var tile = document.createElement('div');
+    tile.className = 'ill-tile';
+    tile.innerHTML = '<div class="ill-frame"><img src="' + BASE + f + '" loading="lazy" alt=""></div>' +
+      '<div class="ill-meta"><span>' + f + '</span><span class="ill-badge">' + ext + '</span></div>' +
+      '<div class="ill-copied">Path copied</div>';
+    tile.addEventListener('click', function () {
+      var path = 'app/assets/illustrations/' + f;
+      if (navigator.clipboard) navigator.clipboard.writeText(path).catch(function(){});
+      tile.classList.add('copied');
+      setTimeout(function () { tile.classList.remove('copied'); }, 900);
+    });
+    grid.appendChild(tile);
+  });
+  // in-use samples
+  document.getElementById('use-onboard').src = BASE + 'il-138.svg';
+  document.getElementById('use-empty').src = BASE + 'il-140.svg';
+  document.getElementById('use-success').src = BASE + 'il-166.svg';
+})();
+</script>
+</body>
+</html>

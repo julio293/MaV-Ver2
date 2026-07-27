@@ -61,13 +61,14 @@
   var NAV = [
     { group: 'Getting Started' },
     { href: 'index.html',                    label: 'Overview',          ic: 'home' },
-    { href: 'customiser.html',               label: '✦ Live Customiser', ic: 'sparkles' },
+    { href: 'builder/index.html',            label: '✦ App Builder',     ic: 'sparkles' },
 
     { group: 'Organisms' },
     { href: 'components/auth.html',          label: 'Sign In / Sign Up', ic: 'login' },
     { href: 'components/auth-otp.html',      label: 'OTP Verification',  ic: 'shield' },
     { href: 'components/select-account.html', label: 'Select Account',   ic: 'users' },
     { href: 'components/input-amount.html',  label: 'Input Amount',      ic: 'dollar' },
+    { href: 'components/splash.html',        label: 'Splash / Opening',  ic: 'sparkles' },
 
     { group: 'Components' },
     { href: 'components/buttons.html',       label: 'Buttons',           ic: 'square' },
@@ -98,6 +99,7 @@
     { href: 'components/progress.html',      label: 'Progress Bar',      ic: 'progress' },
     { href: 'components/loader.html',        label: 'Loader',            ic: 'loader' },
     { href: 'components/coachmark.html',     label: 'Coachmark',         ic: 'help' },
+    { href: 'components/illustration.html',  label: 'Illustrations',     ic: 'palette' },
     { href: 'components/all.html',           label: 'Kitchen Sink',      ic: 'grid' },
 
     { group: 'Foundations' },
@@ -161,11 +163,10 @@
       '<div class="sidebar-logo">' +
         '<a href="' + prefix + 'index.html" class="sidebar-logo-mark">' +
           '<div class="sidebar-logo-icon">' +
-            '<svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">' +
-              '<rect x="1" y="1" width="5" height="5" rx="1"/>' +
-              '<rect x="8" y="1" width="5" height="5" rx="1"/>' +
-              '<rect x="1" y="8" width="5" height="5" rx="1"/>' +
-              '<rect x="8" y="8" width="5" height="5" rx="1" opacity=".4"/>' +
+            '<svg width="21" height="21" viewBox="0 0 1024 1024" fill="currentColor">' +
+              '<path d="M857.946 258.305L831.569 412.58H226.896L253.468 258.305H857.946Z"/>' +
+              '<path d="M680.165 765.692H517.289L570.089 456.822H733.08L680.165 765.692Z"/>' +
+              '<path d="M492.872 611.911L217.705 611.202L351.506 633.936L328.929 765.695H166.053L219.277 456.824L519.444 456.493L492.872 611.911Z"/>' +
             '</svg>' +
           '</div>' +
           '<span class="sidebar-logo-name">MaV Design System</span>' +
