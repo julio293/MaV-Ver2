@@ -271,11 +271,13 @@
         items.forEach(([t, c]) => {
           const b = el(`<button class="pick"><span class="pi"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/></svg></span><span style="flex:1;text-align:left"><span style="display:block">${c.label}</span><span style="display:block;font-size:10.5px;color:var(--e-muted);font-weight:500">${DESC[t] || ''}</span></span><span style="color:var(--e-accent);font-weight:800">+</span></button>`);
           b.onclick = () => { screen.comps.push({ id: nid('c'), type: t, props: {} }); render(); };
+          attachPreview(b, t);
           list.appendChild(b);
         });
       });
     };
     draw(''); head.querySelector('input').addEventListener('input', (e) => draw(e.target.value.toLowerCase()));
+    ps.addEventListener('scroll', () => { clearTimeout(palTimer); hidePalettePreview(); });
     panel.appendChild(ps);
   }
 
@@ -391,7 +393,33 @@
   }
 
   /* ══ WIREFRAME ════════════════════════════════════════════════════════ */
+  /* ── palette hover preview — renders the real component in a mini card ── */
+  let palTimer = null;
+  function hidePalettePreview() { document.querySelectorAll('.pal-prev').forEach((n) => n.remove()); }
+  function showPalettePreview(type, anchor) {
+    hidePalettePreview();
+    const c = CATALOG[type]; if (!c) return;
+    const pop = el('<div class="pal-prev"></div>');
+    pop.innerHTML = '<div class="pal-prev-h"><span class="t">' + esc(c.label) + '</span><span class="d">' + esc(DESC[type] || '') + '</span></div>';
+    const scr = el('<div class="bxscreen pal-prev-scr' + (c.bleed ? ' pal-bleed' : '') + '"></div>');
+    applyVars(scr, S.style, { space: true, font: true });
+    const wrap = el('<div class="bxcomp' + (c.bleed ? ' bxbleed' : '') + '"></div>');
+    try { wrap.innerHTML = c.render({}); } catch (e) { wrap.textContent = c.label; }
+    scr.appendChild(wrap); pop.appendChild(scr);
+    document.body.appendChild(pop);
+    const r = anchor.getBoundingClientRect();
+    const pw = pop.offsetWidth, ph = pop.offsetHeight;
+    let left = r.right + 12; if (left + pw > innerWidth - 8) left = Math.max(8, r.left - pw - 12);
+    const top = Math.max(8, Math.min(r.top - 6, innerHeight - ph - 8));
+    pop.style.left = left + 'px'; pop.style.top = top + 'px';
+  }
+  function attachPreview(btn, type) {
+    btn.addEventListener('mouseenter', () => { clearTimeout(palTimer); palTimer = setTimeout(() => showPalettePreview(type, btn), 110); });
+    btn.addEventListener('mouseleave', () => { clearTimeout(palTimer); hidePalettePreview(); });
+  }
+
   function renderWireframe(panel, canvas) {
+    hidePalettePreview();
     panel.appendChild(promptBar('e.g. “login with biometric”', (v) => { const g = screenFromPrompt(v); const s = S.screens[S.selScreen]; s.comps = g.comps.map((c) => ({ id: nid('c'), ...c })); s.name = g.name; s.dark = g.dark; render(); }));
     panel.appendChild(el('<div class="panel-h">Components · tap to add</div>'));
     const ps = el('<div class="panel-scroll"></div>');
@@ -400,9 +428,11 @@
       Object.entries(CATALOG).filter(([, c]) => c.group === g).forEach(([type, c]) => {
         const b = el(`<button class="pick"><span class="pi"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/></svg></span>${c.label}</button>`);
         b.onclick = () => { const s = S.screens[S.selScreen]; s.comps.push({ id: nid('c'), type, props: {} }); render(); };
+        attachPreview(b, type);
         ps.appendChild(b);
       });
     });
+    ps.addEventListener('scroll', () => { clearTimeout(palTimer); hidePalettePreview(); });
     panel.appendChild(ps);
 
     S.order.forEach((id) => {
