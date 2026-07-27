@@ -84,11 +84,12 @@
       const wrap = el(`<div class="bxcomp${cat.bleed ? ' bxbleed' : ''}"></div>`);
       wrap.dataset.cid = c.id;
       wrap.innerHTML = cat.render(c.props || {});
+      const isPinned = c.type === 'appbar' || c.type === 'bottomnav';
       if (c.override) {
         applyVars(wrap, { accent: c.override.accent || S.style.accent, radius: c.override.radius ?? S.style.radius, font: S.style.font }, { font: false });
-        if (c.override.mt != null) wrap.style.marginTop = c.override.mt + 'px';
         if (c.override.padx != null) { wrap.style.paddingLeft = c.override.padx + 'px'; wrap.style.paddingRight = c.override.padx + 'px'; }
       }
+      applyPos(wrap, c.override || {}, isPinned);
       if (mode === 'edit') {
         if (c.id === S.selComp) wrap.classList.add('sel');
         const tools = el('<div class="bxcomptools"></div>');
@@ -112,6 +113,40 @@
     const j = i + d; if (j < 0 || j >= screen.comps.length) return;
     [screen.comps[i], screen.comps[j]] = [screen.comps[j], screen.comps[i]];
     render();
+  }
+
+  /* apply position/alignment overrides to a component wrap (fully idempotent —
+     resets every prop it owns each call so live edits & clears behave). */
+  function applyPos(wrap, ov, pinned) {
+    const po = ov.pos || {};
+    wrap.style.transform = ''; wrap.style.textAlign = '';
+    wrap.style.display = ''; wrap.style.flexDirection = ''; wrap.style.alignItems = '';
+    wrap.style.marginTop = ''; wrap.style.marginBottom = '';
+    // vertical placement — flex auto-margins win over the spacing "margin above" token
+    if (!pinned && (po.ay === 'bottom' || po.ay === 'middle')) {
+      wrap.style.marginTop = 'auto';
+      if (po.ay === 'middle') wrap.style.marginBottom = 'auto';
+    } else if (ov.mt != null) {
+      wrap.style.marginTop = ov.mt + 'px';
+    }
+    // horizontal alignment — box becomes a column so intrinsic-width content aligns
+    if (po.ax) {
+      wrap.style.display = 'flex'; wrap.style.flexDirection = 'column';
+      wrap.style.alignItems = po.ax === 'center' ? 'center' : po.ax === 'right' ? 'flex-end' : 'flex-start';
+      wrap.style.textAlign = po.ax;
+    }
+    // free nudge + rotation + flips
+    const tf = [];
+    if (po.x) tf.push(`translateX(${po.x}px)`);
+    if (po.y) tf.push(`translateY(${po.y}px)`);
+    if (po.rot) tf.push(`rotate(${po.rot}deg)`);
+    if (po.flipH) tf.push('scaleX(-1)');
+    if (po.flipV) tf.push('scaleY(-1)');
+    wrap.style.transform = tf.join(' ');
+  }
+  // live-apply to the on-canvas wrap without a full re-render (keeps input focus)
+  function livePos(comp, pinned) {
+    document.querySelectorAll(`.bxcomp[data-cid="${comp.id}"]`).forEach((w) => applyPos(w, comp.override, pinned));
   }
 
   function phone(screen, { wf, styled, cap }) {
@@ -435,6 +470,75 @@
   }
 
   /* ══ INSPECTOR (component customization) ══════════════════════════════ */
+  /* ── Position / Alignment (Figma-style) ─────────────────────────────── */
+  const POS_ICON = {
+    left:   '<svg viewBox="0 0 24 24"><path d="M4 3v18"/><rect x="8" y="6" width="11" height="4.6" rx="1.2"/><rect x="8" y="13.4" width="7" height="4.6" rx="1.2"/></svg>',
+    center: '<svg viewBox="0 0 24 24"><path d="M12 3v18"/><rect x="6.5" y="6" width="11" height="4.6" rx="1.2"/><rect x="8.5" y="13.4" width="7" height="4.6" rx="1.2"/></svg>',
+    right:  '<svg viewBox="0 0 24 24"><path d="M20 3v18"/><rect x="5" y="6" width="11" height="4.6" rx="1.2"/><rect x="9" y="13.4" width="7" height="4.6" rx="1.2"/></svg>',
+    top:    '<svg viewBox="0 0 24 24"><path d="M3 4h18"/><rect x="6" y="8" width="4.6" height="11" rx="1.2"/><rect x="13.4" y="8" width="4.6" height="7" rx="1.2"/></svg>',
+    middle: '<svg viewBox="0 0 24 24"><path d="M3 12h18"/><rect x="6" y="6.5" width="4.6" height="11" rx="1.2"/><rect x="13.4" y="8.5" width="4.6" height="7" rx="1.2"/></svg>',
+    bottom: '<svg viewBox="0 0 24 24"><path d="M3 20h18"/><rect x="6" y="5" width="4.6" height="11" rx="1.2"/><rect x="13.4" y="9" width="4.6" height="7" rx="1.2"/></svg>',
+    flipH:  '<svg viewBox="0 0 24 24"><path d="M12 3v18" stroke-dasharray="2 2.4"/><path d="M9.5 7.5 5 12l4.5 4.5z" style="fill:currentColor"/><path d="M14.5 7.5 19 12l-4.5 4.5"/></svg>',
+    flipV:  '<svg viewBox="0 0 24 24"><path d="M3 12h18" stroke-dasharray="2 2.4"/><path d="M7.5 9.5 12 5l4.5 4.5z" style="fill:currentColor"/><path d="M7.5 14.5 12 19l4.5-4.5"/></svg>',
+    rot:    '<svg viewBox="0 0 24 24"><path d="M5 20v-6"/><path d="M5 14 20 20"/></svg>',
+  };
+  function positionPanel(comp, pinned) {
+    comp.override.pos = comp.override.pos || {};
+    const po = comp.override.pos;
+    const sec = el('<div class="pos-sec"></div>');
+    sec.innerHTML = '<div class="pos-head"><span class="sg-label" style="margin:0;color:var(--e-fg)">Position</span><button class="pos-reset">Reset</button></div>';
+    sec.querySelector('.pos-reset').onclick = () => { comp.override.pos = {}; render(); };
+
+    // alignment groups
+    const aln = el('<div class="pos-aln"></div>');
+    const grp = (items, key) => {
+      const g = el('<div class="pos-grp"></div>');
+      items.forEach(([val, title]) => {
+        const b = el(`<button class="pos-btn${po[key] === val ? ' on' : ''}" title="${title}">${POS_ICON[val]}</button>`);
+        b.onclick = () => { if (po[key] === val) delete po[key]; else po[key] = val; render(); };
+        g.appendChild(b);
+      });
+      return g;
+    };
+    aln.appendChild(grp([['left', 'Align left'], ['center', 'Align horizontal centre'], ['right', 'Align right']], 'ax'));
+    aln.appendChild(grp([['top', 'Align top'], ['middle', 'Align vertical centre'], ['bottom', 'Align bottom']], 'ay'));
+    sec.appendChild(aln);
+    if (pinned) sec.appendChild(el('<p class="pos-hint">This block is pinned to the screen edge — vertical alignment is limited; nudge & rotation still apply.</p>'));
+
+    // numeric field helper (live-applies, keeps focus)
+    const field = (k, prop, unit) => {
+      const f = el(`<label class="pos-field"><span class="k">${k}</span><input type="text" inputmode="numeric" value="${po[prop] || 0}">${unit ? `<span class="k">${unit}</span>` : ''}</label>`);
+      const inp = f.querySelector('input');
+      inp.addEventListener('input', () => {
+        const n = parseInt(inp.value, 10);
+        if (!n || isNaN(n)) delete po[prop]; else po[prop] = n;
+        livePos(comp, pinned);
+      });
+      return f;
+    };
+    const xy = el('<div class="pos-fields"></div>');
+    xy.appendChild(field('X', 'x')); xy.appendChild(field('Y', 'y'));
+    sec.appendChild(xy);
+
+    // rotation + flips
+    const rr = el('<div class="pos-rotrow"></div>');
+    const rf = el('<label class="pos-field" style="flex:0 0 42%"></label>');
+    rf.innerHTML = `<span class="k">${POS_ICON.rot}</span><input type="text" inputmode="numeric" value="${po.rot || 0}"><span class="k">°</span>`;
+    rf.querySelector('.k').classList.add('pos-k-ico');
+    const rinp = rf.querySelector('input');
+    rinp.addEventListener('input', () => { const n = parseInt(rinp.value, 10); if (!n || isNaN(n)) delete po.rot; else po.rot = n; livePos(comp, pinned); });
+    rr.appendChild(rf);
+    const fg = el('<div class="pos-grp"></div>');
+    const fh = el(`<button class="pos-btn${po.flipH ? ' on' : ''}" title="Flip horizontal">${POS_ICON.flipH}</button>`);
+    fh.onclick = () => { if (po.flipH) delete po.flipH; else po.flipH = true; render(); };
+    const fv = el(`<button class="pos-btn${po.flipV ? ' on' : ''}" title="Flip vertical">${POS_ICON.flipV}</button>`);
+    fv.onclick = () => { if (po.flipV) delete po.flipV; else po.flipV = true; render(); };
+    fg.appendChild(fh); fg.appendChild(fv);
+    rr.appendChild(fg);
+    sec.appendChild(rr);
+    return sec;
+  }
+
   function renderInspector() {
     const rp = $('#rightPanel');
     const comp = S.selComp && S.screens[S.selScreen] && S.screens[S.selScreen].comps.find((c) => c.id === S.selComp);
@@ -443,6 +547,8 @@
     const ps = el('<div class="panel-scroll"></div>');
     comp.override = comp.override || {};
     comp.props = comp.props || {};
+    const isPinned = comp.type === 'appbar' || comp.type === 'bottomnav';
+    ps.appendChild(positionPanel(comp, isPinned));
     // ── component variants (size / type / state / …) ──
     const vs = VARIANTS[comp.type] || [];
     if (vs.length) ps.appendChild(el('<div class="sg-label" style="margin:12px 0 2px;color:var(--e-fg)">Variants</div>'));
