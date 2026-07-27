@@ -9,6 +9,12 @@ Live site: https://mav-ver2.pages.dev · Builder: https://mav-ver2.pages.dev/bui
 
 ## 2026-07-27
 
+### 9 new builder components
+- Added to the palette (35 → 44 components): **Avatar Group, Stat Widget, Account Selector, Loader, Coachmark, Empty State** (real MaV classes) and **Chat Bubbles, Quick Actions, Date Picker** (compact hand-built, since those are JS-drawn in the design system).
+- Wired into DESC, sensible compose ORDER, inspector VARIANTS (Stat direction, Loader size, Empty-state illustration), and prompt cues so they can be generated from a prompt.
+- Verified: all 9 appear in the palette + hover preview; Chat, Date Picker, Account Selector, Quick Actions render correctly light & dark.
+- Commit `db1de3e` · v21
+
 ### Component hover preview (builder)
 - Hovering a component in the Wireframe palette **and** the "Add a Section" library now shows a floating card with the component's name, description, and a **live render of the real component** (actual render pipeline + current style tokens).
 - 110 ms hover-intent, positions beside the list, flips side when short on room, hides on scroll/leave.

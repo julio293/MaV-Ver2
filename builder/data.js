@@ -191,6 +191,59 @@ const CATALOG = {
   divider: { label: 'Divider', group: 'Content', render: () => `<div class="bld-divider"></div>` },
 
   spacer: { label: 'Spacer', group: 'Content', bleed: true, render: (p) => `<div class="bld-spacer" style="height:${p.size ?? 24}px"></div>` },
+
+  /* ── extra MaV components ── */
+  avatar: { label: 'Avatar Group', group: 'Content', render: (p) =>
+    `<div class="avatar-stack" style="--sz:44px">
+      <span class="avatar rounded avatar-primary"><span class="avatar-inner">JS</span></span>
+      <span class="avatar rounded avatar-grey"><span class="avatar-inner">M</span></span>
+      <span class="avatar rounded avatar-red"><span class="avatar-inner">A</span></span>
+      <span class="avatar-more">+${esc(p.more || '3')}</span></div>` },
+
+  stat: { label: 'Stat Widget', group: 'Finance', render: (p) => {
+    const down = p.dir === 'down';
+    const ic = down ? 'stat-icon-loss' : 'stat-icon-gain';
+    const vv = down ? 'stat-value-loss' : 'stat-value-gain';
+    const ch = down ? 'stat-change-down' : 'stat-change-up';
+    const path = down ? 'M4 7l5 5 4-4 5 7' : 'M4 16l5-5 4 4 5-7';
+    const col = down ? '--mav-danger' : '--mav-success';
+    return `<div class="stat-widget"><div class="stat-icon ${ic}"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="${path}" stroke="var(${col})" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div><div class="stat-label">${esc(p.label || (down ? 'Total Spent' : 'Total Income'))}</div><div class="stat-value ${vv}">${esc(p.value || (down ? '₦ 197K' : '₦ 482K'))}</div><div class="stat-change ${ch}">${down ? '▼' : '▲'} ${esc(p.change || (down ? '3.1% vs last month' : '12.4% vs last month'))}</div></div></div>`; } },
+
+  accountselect: { label: 'Account Selector', group: 'Finance', render: (p) => {
+    const rows = [['Mr. K', '฿ 10,000.00', true], ['Everyday Pot', '฿ 4,250.00', false], ['Holiday Fund', '฿ 82,000.00', false]];
+    const rowIc = '<svg class="row-ic" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></svg>';
+    return `<div style="display:flex;flex-direction:column;gap:8px">${rows.map(([n, b, sel]) =>
+      `<div class="acct-row${sel ? ' selected' : ''}">${rowIc}<div class="acct-info"><span class="acct-name">${esc(n)}</span><span class="acct-bal">${esc(b)}</span></div><span class="rdo${sel ? ' active' : ''}"></span></div>`).join('')}</div>`; } },
+
+  loader: { label: 'Loader', group: 'Feedback', render: (p) => {
+    const sz = p.size === 'sm' ? 'loader-sm' : p.size === 'md' ? 'loader-md' : 'loader-lg';
+    return `<div style="display:flex;justify-content:center;padding:18px 0"><span class="loader ${sz}"></span></div>`; } },
+
+  coachmark: { label: 'Coachmark', group: 'Feedback', render: (p) =>
+    `<div class="coach"><div class="coach-ptr"><svg width="12" height="40" viewBox="0 0 12 40"><path d="M6 38V4" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="4 4"/><circle cx="6" cy="38" r="5" fill="currentColor"/></svg></div>
+      <div class="coach-txt"><span class="coach-title">${esc(p.title || 'Coach Mark Title')}</span><span class="coach-desc">${esc(p.desc || 'A short tip explaining this part of the screen.')}</span><span class="coach-step">( 1 / 5 )</span></div></div>` },
+
+  emptystate: { label: 'Empty State', group: 'Feedback', render: (p) =>
+    `<div class="empty"><img class="empty-illus" src="../app/assets/illustrations/${esc(p.src || 'il-140.svg')}" alt="" loading="lazy"><span class="empty-title">${esc(p.title || 'No items were found')}</span><span class="empty-sub">${esc(p.sub || 'Please try adjusting your search.')}</span></div>` },
+
+  chat: { label: 'Chat Bubbles', group: 'Content', render: (p) =>
+    `<div class="bld-chat">
+      <div class="bld-msg in">Hey! Did the transfer go through?</div>
+      <div class="bld-msg out">Yes — just sent ₦20,000 ✅</div>
+      <div class="bld-msg in">Perfect, thank you 🙏</div>
+      <div class="bld-msg out">Anytime!</div></div>` },
+
+  quickactions: { label: 'Quick Actions', group: 'Finance', render: (p) => {
+    const items = [['Send', 'M5 12h14M13 6l6 6-6 6'], ['Request', 'M19 12H5M11 18l-6-6 6-6'], ['Top up', 'M12 5v14M5 12h14'], ['Scan', 'M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3']];
+    return `<div class="bld-qa">${items.map(([l, d]) => `<button class="bld-qa-item"><span class="bld-qa-ic"><svg viewBox="0 0 24 24"><path d="${d}"/></svg></span><span class="bld-qa-lbl">${l}</span></button>`).join('')}</div>`; } },
+
+  datepicker: { label: 'Date Picker', group: 'Inputs', render: (p) => {
+    const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+    let cells = '';
+    for (let d = 1; d <= 30; d++) cells += `<span class="bld-dp-day${d === 14 ? ' sel' : ''}${d <= 3 ? ' dim' : ''}">${d}</span>`;
+    return `<div class="bld-dp"><div class="bld-dp-head"><button class="bld-dp-nav">‹</button><span class="bld-dp-month">${esc(p.month || 'August 2026')}</span><button class="bld-dp-nav">›</button></div>
+      <div class="bld-dp-wd">${days.map((x) => `<span>${x}</span>`).join('')}</div><div class="bld-dp-grid">${cells}</div></div>`; } },
 };
 
 const GROUPS = ['Navigation', 'Content', 'Finance', 'Inputs', 'Actions', 'Feedback'];
@@ -210,6 +263,9 @@ const DESC = {
   transactions: 'Recent transaction list', contacts: 'Recipient / contact list', chips: 'Filter chips',
   alert: 'Inline alert banner', toast: 'Toast notification', success: 'Success confirmation state',
   bottomnav: 'Bottom tab navigation',
+  avatar: 'Stacked avatar group', stat: 'Income / spend stat card', accountselect: 'Choose an account',
+  loader: 'Loading spinner', coachmark: 'Onboarding coach tip', emptystate: 'Empty / no-results state',
+  chat: 'Chat message bubbles', quickactions: 'Quick action shortcuts', datepicker: 'Calendar date picker',
 };
 /* e-banking screens offered in the "Add a Page" library */
 const PAGE_LIBRARY = ['Onboarding', 'Login', 'Verify OTP', 'Dashboard', 'Transfer', 'Confirmation', 'Cards', 'Statements', 'Beneficiaries', 'Notifications', 'Settings', 'Profile'];
@@ -249,6 +305,9 @@ const VARIANTS = {
     { key: 'state', label: 'State', def: '', opts: [['Default', ''], ['Error', 'error']] },
   ],
   cashflow: [{ key: 'tab', label: 'Active tab', def: 'Main', opts: [['Main', 'Main'], ['Secondary', 'Secondary']] }],
+  stat: [{ key: 'dir', label: 'Direction', def: 'up', opts: [['Gain', 'up'], ['Loss', 'down']] }],
+  loader: [{ key: 'size', label: 'Size', def: 'lg', opts: [['sm', 'sm'], ['md', 'md'], ['lg', 'lg']] }],
+  emptystate: [{ key: 'src', label: 'Illustration', def: 'il-140.svg', opts: [['Option 1', 'il-140.svg'], ['Option 2', 'il-138.svg'], ['Option 3', 'il-166.svg'], ['Option 4', 'il-143.svg'], ['Option 5', 'il-152.svg']] }],
   bottomnav: [{ key: 'active', label: 'Active tab', def: 0, opts: [['Home', 0], ['Stats', 1], ['Cards', 2], ['Profile', 3]] }],
   tabs: [{ key: 'active', label: 'Active tab', def: 0, opts: [['1st', 0], ['2nd', 1], ['3rd', 2]] }],
   pilltabs: [{ key: 'active', label: 'Active', def: 0, opts: [['1st', 0], ['2nd', 1], ['3rd', 2]] }],
@@ -303,10 +362,11 @@ const PRESETS = [
 ];
 
 /* canonical top-to-bottom order for composed screens */
-const ORDER = ['appbar', 'stepper', 'tabs', 'pilltabs', 'illustration', 'success', 'title', 'subtitle',
-  'balance', 'cashflow', 'paycard', 'amount', 'chips', 'sectionheader', 'searchfield', 'textfield',
-  'phone', 'password', 'otp', 'radio', 'checkbox', 'toggleRow', 'transactions', 'contacts', 'badges',
-  'alert', 'toast', 'progress', 'divider', 'biometric', 'swipe', 'button', 'buttonSecondary', 'bottomnav'];
+const ORDER = ['appbar', 'stepper', 'tabs', 'pilltabs', 'illustration', 'success', 'title', 'subtitle', 'coachmark',
+  'balance', 'quickactions', 'stat', 'cashflow', 'paycard', 'amount', 'chips', 'sectionheader', 'emptystate',
+  'searchfield', 'textfield', 'phone', 'password', 'otp', 'datepicker', 'radio', 'checkbox', 'toggleRow',
+  'accountselect', 'transactions', 'contacts', 'avatar', 'chat', 'badges',
+  'alert', 'toast', 'progress', 'loader', 'divider', 'biometric', 'swipe', 'button', 'buttonSecondary', 'bottomnav'];
 
 function titleFrom(text) {
   const t = (text || '').replace(/[^a-z0-9 ]/gi, ' ')
@@ -360,6 +420,15 @@ function screenFromPrompt(text) {
     [/checkbox|terms|agree|consent|remember me|accept/, () => add('checkbox', {})],
     [/toggle|switch|preferences?|settings?/, () => add('toggleRow', {})],
     [/transactions?|activity|history/, () => { add('sectionheader', { title: 'Recent activity' }); add('transactions', {}); }],
+    [/quick actions?|shortcuts?/, () => add('quickactions', {})],
+    [/stat|statistic|income.*(spend|expense)|analytics/, () => add('stat', {})],
+    [/choose|select|pick.*account|account selector|from which account/, () => add('accountselect', {})],
+    [/avatars?|members?|participants?|group photo/, () => add('avatar', {})],
+    [/\bchat\b|messages?|conversation|inbox thread/, () => add('chat', {})],
+    [/calendar|date ?picker|pick a date|choose a date|schedule/, () => add('datepicker', {})],
+    [/coachmark|coach mark|tooltip|walkthrough|onboarding tip/, () => add('coachmark', {})],
+    [/empty state|no results|nothing here|no items/, () => add('emptystate', {})],
+    [/\bloading\b|loader|spinner|please wait/, () => add('loader', {})],
     [/contacts?|recipients?|beneficiar|payees?/, () => add('contacts', {})],
     [/badges?|status pills?/, () => add('badges', {})],
     [/\balert\b|notice|banner/, () => add('alert', {})],
