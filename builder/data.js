@@ -283,6 +283,18 @@ const CATALOG = {
       <div class="bld-upload-file"><span class="bld-upload-fic"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span>
         <div class="bld-upload-meta"><span class="bld-upload-fn">${esc(p.file || 'passport.pdf')}</span><span class="bld-upload-fs">2.4 MB · Uploaded</span></div>
         <span class="bld-upload-ok"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></span></div></div>` },
+
+  pagination: { label: 'Pagination', group: 'Navigation', render: (p) => {
+    const act = p.active == null ? 1 : p.active; const pages = [1, 2, 3, 4, 5];
+    return `<div class="bld-pg"><button class="bld-pg-nav">‹</button>${pages.map((n) => `<button class="bld-pg-n${n === act ? ' on' : ''}">${n}</button>`).join('')}<button class="bld-pg-nav">›</button></div>`; } },
+
+  buttondock: { label: 'Button Dock', group: 'Actions', bleed: true, cta: true, render: (p) => {
+    const sec = p.secondary ? `<button class="mav-btn mav-btn-secondary mav-btn-lg bld-full">${esc(p.secondaryLabel || 'Cancel')}</button>` : '';
+    return `<div class="dock"><div class="dock-inner" style="gap:12px"><button class="mav-btn mav-btn-primary mav-btn-lg bld-full" data-cta="1">${esc(p.label || 'Continue')}</button>${sec}</div><div class="home-ind"></div></div>`; } },
+
+  keypad: { label: 'Number Pad', group: 'Inputs', render: (p) => {
+    const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', '⌫'];
+    return `<div class="bld-keypad">${keys.map((k) => k === '' ? '<span class="bld-key ghost"></span>' : `<button class="bld-key${k === '⌫' ? ' fn' : ''}">${k}</button>`).join('')}</div>`; } },
 };
 
 const GROUPS = ['Navigation', 'Content', 'Finance', 'Inputs', 'Actions', 'Feedback'];
@@ -307,6 +319,7 @@ const DESC = {
   chat: 'Chat message bubbles', quickactions: 'Quick action shortcuts', datepicker: 'Calendar date picker',
   chart: 'Bar chart / spending graph', list: 'Menu / settings list', blog: 'Article / blog card',
   bottomsheet: 'Bottom sheet dialog', upload: 'File upload / dropzone',
+  pagination: 'Page indicator / pager', buttondock: 'Docked CTA bar', keypad: 'Numeric PIN / amount pad',
 };
 /* e-banking screens offered in the "Add a Page" library */
 const PAGE_LIBRARY = ['Onboarding', 'Login', 'Verify OTP', 'Dashboard', 'Transfer', 'Confirmation', 'Cards', 'Statements', 'Beneficiaries', 'Notifications', 'Settings', 'Profile'];
@@ -349,6 +362,11 @@ const VARIANTS = {
   stat: [{ key: 'dir', label: 'Direction', def: 'up', opts: [['Gain', 'up'], ['Loss', 'down']] }],
   loader: [{ key: 'size', label: 'Size', def: 'lg', opts: [['sm', 'sm'], ['md', 'md'], ['lg', 'lg']] }],
   emptystate: [{ key: 'src', label: 'Illustration', def: 'il-140.svg', opts: [['Option 1', 'il-140.svg'], ['Option 2', 'il-138.svg'], ['Option 3', 'il-166.svg'], ['Option 4', 'il-143.svg'], ['Option 5', 'il-152.svg']] }],
+  pagination: [{ key: 'active', label: 'Active page', def: 1, opts: [['1', 1], ['2', 2], ['3', 3], ['4', 4], ['5', 5]] }],
+  buttondock: [
+    { key: 'label', label: 'Content', def: 'Continue', ctrl: 'text' },
+    { key: 'secondary', label: 'Secondary button', def: false, ctrl: 'toggle' },
+  ],
   bottomnav: [{ key: 'active', label: 'Active tab', def: 0, opts: [['Home', 0], ['Stats', 1], ['Cards', 2], ['Profile', 3]] }],
   tabs: [{ key: 'active', label: 'Active tab', def: 0, opts: [['1st', 0], ['2nd', 1], ['3rd', 2]] }],
   pilltabs: [{ key: 'active', label: 'Active', def: 0, opts: [['1st', 0], ['2nd', 1], ['3rd', 2]] }],
@@ -405,9 +423,9 @@ const PRESETS = [
 /* canonical top-to-bottom order for composed screens */
 const ORDER = ['appbar', 'stepper', 'tabs', 'pilltabs', 'illustration', 'success', 'title', 'subtitle', 'coachmark',
   'balance', 'quickactions', 'stat', 'chart', 'cashflow', 'paycard', 'amount', 'chips', 'sectionheader', 'emptystate',
-  'searchfield', 'textfield', 'phone', 'password', 'otp', 'datepicker', 'upload', 'radio', 'checkbox', 'toggleRow',
-  'accountselect', 'list', 'transactions', 'contacts', 'avatar', 'blog', 'chat', 'badges',
-  'alert', 'toast', 'progress', 'loader', 'divider', 'biometric', 'swipe', 'bottomsheet', 'button', 'buttonSecondary', 'bottomnav'];
+  'searchfield', 'textfield', 'phone', 'password', 'otp', 'keypad', 'datepicker', 'upload', 'radio', 'checkbox', 'toggleRow',
+  'accountselect', 'list', 'transactions', 'contacts', 'avatar', 'blog', 'chat', 'badges', 'pagination',
+  'alert', 'toast', 'progress', 'loader', 'divider', 'biometric', 'swipe', 'bottomsheet', 'button', 'buttonSecondary', 'buttondock', 'bottomnav'];
 
 function titleFrom(text) {
   const t = (text || '').replace(/[^a-z0-9 ]/gi, ' ')
@@ -468,6 +486,9 @@ function screenFromPrompt(text) {
     [/blog|article|news|read more|feed/, () => add('blog', {})],
     [/upload|dropzone|attach|document upload|\bkyc\b.*document|file picker|choose a file/, () => add('upload', {})],
     [/bottom sheet|action sheet|confirm(?:ation)? sheet|slide.?up (?:panel|sheet)/, () => add('bottomsheet', {})],
+    [/pagination|pager|page indicator|carousel dots|onboarding dots/, () => add('pagination', {})],
+    [/keypad|number ?pad|pin ?pad|numeric (?:pad|keyboard)|enter (?:your )?pin/, () => add('keypad', {})],
+    [/button dock|docked (?:button|cta)|sticky (?:cta|button)|footer button/, () => add('buttondock', {})],
     [/choose|select|pick.*account|account selector|from which account/, () => add('accountselect', {})],
     [/avatars?|members?|participants?|group photo/, () => add('avatar', {})],
     [/\bchat\b|messages?|conversation|inbox thread/, () => add('chat', {})],
