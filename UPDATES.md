@@ -9,6 +9,10 @@ Live site: https://mav-ver2.pages.dev · Builder: https://mav-ver2.pages.dev/bui
 
 ## 2026-07-28
 
+### Splash fills the whole screen (fix)
+- Splash now renders as a full-screen `inset:0` layer (new `fullscreen` catalog flag routed in buildScreen like the app-bar/nav pinning) so it fits any device frame edge-to-edge instead of sitting in the padded body.
+- Commit `1c3f177` · Deploy `4646ad0c` · v25
+
 ### Splash / Opening component
 - Added the **Splash / Opening** screen to the builder (palette 52 → 53) — real exported background SVGs (squares / brand gradient / beam), centred Fyscal logomark, 2-line footer, and the full drift/sheen/glow/mark-in/breathe animation set (reduced-motion gated).
 - Background variant selectable in the inspector; wired into DESC, ORDER (first), and prompt cues. Verified render.
