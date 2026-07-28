@@ -439,6 +439,93 @@ const VARIANTS = {
   pilltabs: [{ key: 'active', label: 'Active', def: 0, opts: [['1st', 0], ['2nd', 1], ['3rd', 2]] }],
   progress: [{ key: 'value', label: 'Progress', def: 68, opts: [['25%', 25], ['50%', 50], ['75%', 75], ['100%', 100]] }],
   illustration: [{ key: 'src', label: 'Illustration', def: 'il-138.svg', opts: [['Option 1', 'il-138.svg'], ['Option 2', 'il-140.svg'], ['Option 3', 'il-166.svg'], ['Option 4', 'il-143.svg'], ['Option 5', 'il-152.svg']] }],
+
+  /* ── content / text-driven components ── */
+  title: [{ key: 'text', label: 'Content', def: 'Welcome back', ctrl: 'text' }],
+  subtitle: [{ key: 'text', label: 'Content', def: 'Sign in to continue to your account', ctrl: 'text' }],
+  sectionheader: [{ key: 'title', label: 'Title', def: 'Recent activity', ctrl: 'text' }],
+  success: [
+    { key: 'title', label: 'Title', def: 'Successful!', ctrl: 'text' },
+    { key: 'sub', label: 'Subtitle', def: 'Your transfer has been completed', ctrl: 'text' },
+  ],
+  coachmark: [
+    { key: 'title', label: 'Title', def: 'Coach Mark Title', ctrl: 'text' },
+    { key: 'desc', label: 'Description', def: 'A short tip explaining this part of the screen.', ctrl: 'text' },
+  ],
+  avatar: [{ key: 'more', label: 'Overflow count', def: '3', ctrl: 'text' }],
+  blog: [
+    { key: 'badge', label: 'Badge', def: 'Blog', ctrl: 'text' },
+    { key: 'title', label: 'Title', def: 'AI-driven fraud detection in modern banking', ctrl: 'text' },
+    { key: 'meta', label: 'Meta', def: '4 min read', ctrl: 'text' },
+    { key: 'src', label: 'Thumbnail', def: 'il-166.svg', opts: [['Option 1', 'il-166.svg'], ['Option 2', 'il-138.svg'], ['Option 3', 'il-140.svg'], ['Option 4', 'il-143.svg'], ['Option 5', 'il-152.svg']] },
+  ],
+
+  /* ── finance ── */
+  balance: [
+    { key: 'label', label: 'Label', def: 'Available balance', ctrl: 'text' },
+    { key: 'amount', label: 'Amount', def: '$82,758.10', ctrl: 'text' },
+    { key: 'trend', label: 'Trend', def: '+24% this month', ctrl: 'text' },
+  ],
+  amount: [
+    { key: 'cur', label: 'Currency', def: '$', ctrl: 'text' },
+    { key: 'value', label: 'Value', def: '250.00', ctrl: 'text' },
+    { key: 'caption', label: 'Caption', def: 'Enter amount to send', ctrl: 'text' },
+  ],
+  paycard: [
+    { key: 'number', label: 'Card number', def: '4539 1488 0343 6467', ctrl: 'text' },
+    { key: 'holder', label: 'Card holder', def: 'JULIO SANTOS', ctrl: 'text' },
+    { key: 'exp', label: 'Expiry', def: '09/27', ctrl: 'text' },
+  ],
+  qr: [
+    { key: 'label', label: 'Caption', def: 'Scan to pay', ctrl: 'text' },
+    { key: 'sub', label: 'Sub-caption', def: 'Show this code at the merchant terminal', ctrl: 'text' },
+  ],
+  donut: [{ key: 'total', label: 'Centre total', def: '$1,248', ctrl: 'text' }],
+  linechart: [
+    { key: 'label', label: 'Label', def: 'Balance trend', ctrl: 'text' },
+    { key: 'amount', label: 'Amount', def: '$82,758.10', ctrl: 'text' },
+    { key: 'trend', label: 'Trend', def: '▲ 12.4%', ctrl: 'text' },
+  ],
+  map: [
+    { key: 'name', label: 'Place', def: 'Fyscal Branch — Downtown', ctrl: 'text' },
+    { key: 'sub', label: 'Detail', def: '0.4 km away · Open until 6:00 PM', ctrl: 'text' },
+  ],
+
+  /* ── inputs ── */
+  password: [{ key: 'label', label: 'Label', def: 'Password', ctrl: 'text' }],
+  searchfield: [{ key: 'placeholder', label: 'Placeholder', def: 'Search…', ctrl: 'text' }],
+  phone: [
+    { key: 'label', label: 'Label', def: 'Phone number', ctrl: 'text' },
+    { key: 'code', label: 'Country code', def: '🇳🇬 +234', ctrl: 'text' },
+    { key: 'placeholder', label: 'Placeholder', def: '801 234 5678', ctrl: 'text' },
+  ],
+  datepicker: [{ key: 'month', label: 'Month', def: 'August 2026', ctrl: 'text' }],
+  toggleRow: [
+    { key: 'label', label: 'Label', def: 'Enable notifications', ctrl: 'text' },
+    { key: 'on', label: 'On', def: true, ctrl: 'toggle' },
+  ],
+  checkbox: [
+    { key: 'label', label: 'Label', def: 'I agree to the terms & conditions', ctrl: 'text' },
+    { key: 'checked', label: 'Checked', def: true, ctrl: 'toggle' },
+  ],
+  radio: [
+    { key: 'a', label: 'Option 1', def: 'Standard account', ctrl: 'text' },
+    { key: 'b', label: 'Option 2', def: 'Savings account', ctrl: 'text' },
+  ],
+  upload: [
+    { key: 'title', label: 'Title', def: 'Upload your document', ctrl: 'text' },
+    { key: 'hint', label: 'Hint', def: 'Drag & drop or tap to browse · PDF, JPG up to 10MB', ctrl: 'text' },
+    { key: 'file', label: 'File name', def: 'passport.pdf', ctrl: 'text' },
+  ],
+
+  /* ── actions ── */
+  biometric: [{ key: 'label', label: 'Content', def: 'Sign in with Face ID', ctrl: 'text' }],
+  swipe: [{ key: 'label', label: 'Content', def: 'Swipe up to complete', ctrl: 'text' }],
+  bottomsheet: [
+    { key: 'title', label: 'Title', def: 'Confirm payment', ctrl: 'text' },
+    { key: 'cta', label: 'Button', def: 'Confirm', ctrl: 'text' },
+  ],
+  spacer: [{ key: 'size', label: 'Height', def: 24, opts: [['S', 12], ['M', 24], ['L', 40], ['XL', 64]] }],
 };
 
 /* ── Screen presets (prompt keyword → component list) ────────────────────── */
