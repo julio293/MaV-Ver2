@@ -9,6 +9,11 @@ Live site: https://mav-ver2.pages.dev · Builder: https://mav-ver2.pages.dev/bui
 
 ## 2026-07-28
 
+### Finance Widgets — design-system page
+- New `components/finance-widgets.html` documents the 7 new finance widgets (QR, Transaction Detail, Donut, Line Chart, PIN Dots, Amount Slider, Map) in the design system, each in light + dark.
+- Renders live from the builder catalog (`builder/data.js`) so docs stay 1:1 with the builder; added to the sidebar NAV and the homepage grid.
+- Commit `becb8fb`
+
 ### 7 finance UI components
 - Added **QR / Scan-to-Pay**, **Transaction Detail**, **Donut Chart**, **Line Chart**, **PIN Dots**, **Amount Slider**, and **Map / Branch Locator** — palette 53 → 60.
 - Hand-built on MaV tokens with scoped light/dark CSS; wired into DESC, compose ORDER, VARIANTS (txn direction, PIN digits, slider position), and prompt cues. All 7 verified light & dark.

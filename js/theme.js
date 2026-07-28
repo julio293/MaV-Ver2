@@ -91,6 +91,7 @@
     { href: 'components/chat.html',          label: 'Chat Bubbles',      ic: 'chat' },
     { href: 'components/message-chat.html',  label: 'Message Chat',      ic: 'messages' },
     { href: 'components/finance.html',       label: 'Finance Modules',   ic: 'chart' },
+    { href: 'components/finance-widgets.html', label: 'Finance Widgets', ic: 'linechart' },
     { href: 'components/chart.html',         label: 'Chart',             ic: 'linechart' },
     { href: 'components/blog.html',          label: 'Blog',              ic: 'blog' },
     { href: 'components/bottom-sheet.html',  label: 'Bottom Sheet',      ic: 'sheet' },
