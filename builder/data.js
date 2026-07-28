@@ -302,6 +302,58 @@ const CATALOG = {
     `<div class="bld-splash bld-sp-${p.bg || 'a'}"><div class="bld-sp-bg"></div><div class="bld-sp-sheen"></div>
       <div class="bld-sp-mid"><span class="bld-sp-glow"></span><span class="bld-sp-mark">${MARK}</span></div>
       <div class="bld-sp-foot">${esc(p.foot || '© 2025 Fyscal Technologies PTE LTD.')}<br>All rights reserved.</div></div>` },
+
+  qr: { label: 'QR / Scan to Pay', group: 'Finance', render: (p) => {
+    const N = 21, c = 7; const size = N * c; let mod = '';
+    const finder = (x, y) => `<rect x="${x * c}" y="${y * c}" width="${c * 7}" height="${c * 7}" rx="4"/><rect x="${(x + 1) * c}" y="${(y + 1) * c}" width="${c * 5}" height="${c * 5}" rx="3" fill="#fff"/><rect x="${(x + 2) * c}" y="${(y + 2) * c}" width="${c * 3}" height="${c * 3}" rx="2"/>`;
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+      if ((x < 7 && y < 7) || (x > N - 8 && y < 7) || (x < 7 && y > N - 8)) continue;
+      if (((x * 7 + y * 13 + (x & y) + x) % 3) === 0) mod += `<rect x="${x * c}" y="${y * c}" width="${c}" height="${c}"/>`;
+    }
+    return `<div class="bld-qr"><div class="bld-qr-card"><svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">${mod}${finder(0, 0)}${finder(N - 7, 0)}${finder(0, N - 7)}</svg></div>
+      <div class="bld-qr-cap">${esc(p.label || 'Scan to pay')}</div><div class="bld-qr-sub">${esc(p.sub || 'Show this code at the merchant terminal')}</div></div>`; } },
+
+  txndetail: { label: 'Transaction Detail', group: 'Finance', render: (p) => {
+    const rec = p.dir === 'in';
+    const rows = [['To', 'James K. · •••• 8891'], ['Reference', 'TRX-9F2A81C4'], ['Date', '27 Jul 2026, 14:33'], ['Fee', '₦0.00'], ['Method', 'Instant transfer']];
+    return `<div class="bld-txnd"><div class="bld-txnd-top">
+        <span class="bld-txnd-ic ${rec ? 'in' : 'out'}"><svg viewBox="0 0 24 24">${rec ? '<path d="M17 10H3M10 3L3 10l7 7"/>' : '<path d="M3 10h14M10 3l7 7-7 7"/>'}</svg></span>
+        <div class="bld-txnd-amt ${rec ? 'in' : ''}">${esc(p.amount || (rec ? '+₦350,000' : '−₦20,000'))}</div>
+        <div class="bld-txnd-name">${esc(p.name || 'James K.')}</div><span class="bld-txnd-badge">Completed</span></div>
+      <div class="bld-txnd-rows">${rows.map(([k, v]) => `<div class="bld-txnd-row"><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join('')}</div></div>`; } },
+
+  donut: { label: 'Donut Chart', group: 'Finance', render: (p) => {
+    const C = 326.726; const data = [['Bills', 38], ['Food', 27], ['Shopping', 20], ['Other', 15]]; let off = 0, segs = '';
+    data.forEach((d, i) => { const len = d[1] / 100 * C; segs += `<circle class="bld-dn-seg s${i}" cx="60" cy="60" r="52" fill="none" stroke-width="16" stroke-dasharray="${len.toFixed(1)} ${(C - len).toFixed(1)}" stroke-dashoffset="${(-off).toFixed(1)}"/>`; off += len; });
+    const legend = data.map((d, i) => `<div class="bld-dn-li"><span class="bld-dn-dot s${i}"></span><span class="bld-dn-name">${d[0]}</span><span class="bld-dn-pct">${d[1]}%</span></div>`).join('');
+    return `<div class="bld-donut"><div class="bld-dn-chart"><svg viewBox="0 0 120 120"><circle class="bld-dn-track" cx="60" cy="60" r="52" fill="none" stroke-width="16"/>${segs}</svg><div class="bld-dn-center"><span class="v">${esc(p.total || '$1,248')}</span><span class="k">spent</span></div></div><div class="bld-dn-legend">${legend}</div></div>`; } },
+
+  linechart: { label: 'Line Chart', group: 'Finance', render: (p) => {
+    const line = 'M0,88 L50,70 L100,78 L150,46 L200,54 L250,26 L300,34';
+    return `<div class="bld-line"><div class="bld-line-hd"><div><div class="bld-line-lbl">${esc(p.label || 'Balance trend')}</div><div class="bld-line-amt">${esc(p.amount || '$82,758.10')}</div></div><span class="b b-green">${esc(p.trend || '▲ 12.4%')}</span></div>
+      <svg class="bld-line-svg" viewBox="0 0 300 110" preserveAspectRatio="none"><defs><linearGradient id="bldLineG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="bld-line-g0"/><stop offset="1" class="bld-line-g1"/></linearGradient></defs>
+        <path class="bld-line-area" d="${line} L300,110 L0,110 Z"/><path class="bld-line-path" d="${line}"/></svg>
+      <div class="bld-line-x"><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span></div></div>`; } },
+
+  pindots: { label: 'PIN Dots', group: 'Inputs', render: (p) => {
+    const n = 6, f = p.filled == null ? 3 : p.filled;
+    let dots = ''; for (let i = 0; i < n; i++) dots += `<span class="bld-pin-dot${i < f ? ' on' : ''}"></span>`;
+    return `<div class="bld-pin"><div class="bld-pin-label">${esc(p.label || 'Enter your PIN')}</div><div class="bld-pin-dots">${dots}</div></div>`; } },
+
+  slider: { label: 'Amount Slider', group: 'Inputs', render: (p) => {
+    const pct = p.value == null ? 62 : p.value;
+    return `<div class="bld-slider"><div class="bld-slider-top"><span class="bld-slider-lbl">${esc(p.label || 'Loan amount')}</span><b class="bld-slider-val">${esc(p.amount || '$3,100')}</b></div>
+      <div class="bld-slider-track"><div class="bld-slider-fill" style="width:${pct}%"></div><span class="bld-slider-knob" style="left:${pct}%"></span></div>
+      <div class="bld-slider-ends"><span>${esc(p.min || '$0')}</span><span>${esc(p.max || '$5,000')}</span></div></div>`; } },
+
+  map: { label: 'Map / Locator', group: 'Content', render: (p) =>
+    `<div class="bld-map"><div class="bld-map-canvas">
+        <svg class="bld-map-roads" viewBox="0 0 300 160" preserveAspectRatio="none"><path d="M-10 40 H310"/><path d="M-10 110 H310"/><path d="M70 -10 V170"/><path d="M200 -10 V170"/><path d="M0 130 L120 60 L300 90"/></svg>
+        <span class="bld-map-pin main"><svg viewBox="0 0 24 24"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5" fill="#fff"/></svg></span>
+        <span class="bld-map-dot d1"></span><span class="bld-map-dot d2"></span></div>
+      <div class="bld-map-card"><span class="bld-map-ic"><svg viewBox="0 0 24 24"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
+        <div class="bld-map-meta"><span class="bld-map-name">${esc(p.name || 'Fyscal Branch — Downtown')}</span><span class="bld-map-sub">${esc(p.sub || '0.4 km away · Open until 6:00 PM')}</span></div>
+        <span class="bld-map-go">›</span></div></div>` },
 };
 
 const GROUPS = ['Navigation', 'Content', 'Finance', 'Inputs', 'Actions', 'Feedback'];
@@ -328,6 +380,9 @@ const DESC = {
   bottomsheet: 'Bottom sheet dialog', upload: 'File upload / dropzone',
   pagination: 'Page indicator / pager', buttondock: 'Docked CTA bar', keypad: 'Numeric PIN / amount pad',
   splash: 'App launch / opening screen',
+  qr: 'QR code / scan to pay', txndetail: 'Transaction detail / receipt', donut: 'Spend-by-category donut',
+  linechart: 'Balance-over-time line chart', pindots: 'PIN entry indicator', slider: 'Amount / range slider',
+  map: 'Map / branch & ATM locator',
 };
 /* e-banking screens offered in the "Add a Page" library */
 const PAGE_LIBRARY = ['Onboarding', 'Login', 'Verify OTP', 'Dashboard', 'Transfer', 'Confirmation', 'Cards', 'Statements', 'Beneficiaries', 'Notifications', 'Settings', 'Profile'];
@@ -372,6 +427,9 @@ const VARIANTS = {
   emptystate: [{ key: 'src', label: 'Illustration', def: 'il-140.svg', opts: [['Option 1', 'il-140.svg'], ['Option 2', 'il-138.svg'], ['Option 3', 'il-166.svg'], ['Option 4', 'il-143.svg'], ['Option 5', 'il-152.svg']] }],
   pagination: [{ key: 'active', label: 'Active page', def: 1, opts: [['1', 1], ['2', 2], ['3', 3], ['4', 4], ['5', 5]] }],
   splash: [{ key: 'bg', label: 'Background', def: 'a', opts: [['Squares', 'a'], ['Brand gradient', 'b'], ['Beam', 'c']] }],
+  txndetail: [{ key: 'dir', label: 'Direction', def: 'out', opts: [['Sent', 'out'], ['Received', 'in']] }],
+  pindots: [{ key: 'filled', label: 'Digits entered', def: 3, opts: [['0', 0], ['2', 2], ['4', 4], ['6', 6]] }],
+  slider: [{ key: 'value', label: 'Position', def: 62, opts: [['25%', 25], ['50%', 50], ['75%', 75], ['100%', 100]] }],
   buttondock: [
     { key: 'label', label: 'Content', def: 'Continue', ctrl: 'text' },
     { key: 'secondary', label: 'Secondary button', def: false, ctrl: 'toggle' },
@@ -431,9 +489,9 @@ const PRESETS = [
 
 /* canonical top-to-bottom order for composed screens */
 const ORDER = ['splash', 'appbar', 'stepper', 'tabs', 'pilltabs', 'illustration', 'success', 'title', 'subtitle', 'coachmark',
-  'balance', 'quickactions', 'stat', 'chart', 'cashflow', 'paycard', 'amount', 'chips', 'sectionheader', 'emptystate',
-  'searchfield', 'textfield', 'phone', 'password', 'otp', 'keypad', 'datepicker', 'upload', 'radio', 'checkbox', 'toggleRow',
-  'accountselect', 'list', 'transactions', 'contacts', 'avatar', 'blog', 'chat', 'badges', 'pagination',
+  'balance', 'quickactions', 'stat', 'chart', 'donut', 'linechart', 'cashflow', 'paycard', 'qr', 'amount', 'slider', 'chips', 'sectionheader', 'emptystate',
+  'searchfield', 'textfield', 'phone', 'password', 'otp', 'pindots', 'keypad', 'datepicker', 'upload', 'radio', 'checkbox', 'toggleRow',
+  'accountselect', 'list', 'transactions', 'txndetail', 'contacts', 'avatar', 'map', 'blog', 'chat', 'badges', 'pagination',
   'alert', 'toast', 'progress', 'loader', 'divider', 'biometric', 'swipe', 'bottomsheet', 'button', 'buttonSecondary', 'buttondock', 'bottomnav'];
 
 function titleFrom(text) {
@@ -490,7 +548,14 @@ function screenFromPrompt(text) {
     [/toggle|switch|preferences?|settings?/, () => add('toggleRow', {})],
     [/transactions?|activity|history/, () => { add('sectionheader', { title: 'Recent activity' }); add('transactions', {}); }],
     [/quick actions?|shortcuts?/, () => add('quickactions', {})],
-    [/chart|graph|spending (?:graph|trend)|bar chart/, () => add('chart', {})],
+    [/donut|pie chart|by category|spending breakdown|category breakdown/, () => add('donut', {})],
+    [/line chart|balance (?:over time|trend)|trend line|growth chart/, () => add('linechart', {})],
+    [/\bchart\b|graph|spending (?:graph|trend)|bar chart/, () => add('chart', {})],
+    [/\bqr\b|scan to pay|scan code|qr code|show.*code/, () => add('qr', {})],
+    [/transaction detail|receipt detail|payment detail|transfer receipt/, () => add('txndetail', {})],
+    [/pin dots|pin indicator|enter (?:your )?pin/, () => add('pindots', {})],
+    [/slider|range|adjust amount|loan amount|choose amount/, () => add('slider', {})],
+    [/\bmap\b|branch|atm|locator|nearby|find.*branch/, () => add('map', {})],
     [/stat|statistic|income.*(spend|expense)|analytics/, () => add('stat', {})],
     [/menu list|settings? list|list of options|options list|preferences list/, () => add('list', {})],
     [/blog|article|news|read more|feed/, () => add('blog', {})],
