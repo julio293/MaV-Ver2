@@ -260,6 +260,37 @@ button{font-family:inherit}
 [data-theme=dark].bxscreen .bld-key{background:#1f1f1f;color:#ededed}
 [data-theme=dark].bxscreen .bld-key.fn{background:transparent}
 
+/* ── splash / opening screen (real exported backgrounds + animation) ──── */
+.bxscreen .bld-splash{position:relative;flex:1;min-height:540px;display:flex;flex-direction:column;overflow:hidden;margin:calc(-1*var(--bld-space,14px)) 0 -16px}
+.bxscreen .bld-sp-bg{position:absolute;inset:0;background-position:center;background-size:cover;background-repeat:no-repeat;transform-origin:center;z-index:0;transform:scale(1.06)}
+.bxscreen .bld-sp-sheen{position:absolute;inset:-40%;z-index:1;pointer-events:none;background:linear-gradient(115deg,transparent 34%,rgba(255,255,255,.22) 49%,transparent 64%);transform:translateX(-65%)}
+.bxscreen .bld-sp-mid{flex:1;display:flex;align-items:center;justify-content:center;position:relative;z-index:2}
+.bxscreen .bld-sp-glow{position:absolute;left:50%;top:50%;width:220px;height:220px;transform:translate(-50%,-50%);z-index:1;border-radius:50%;background:radial-gradient(circle,var(--sp-glow,rgba(53,46,255,.2)),transparent 68%);filter:blur(6px)}
+.bxscreen .bld-sp-mark{width:62px;height:62px;position:relative;z-index:2}
+.bxscreen .bld-sp-mark svg{width:100%;height:100%;fill:currentColor}
+.bxscreen .bld-sp-foot{position:relative;z-index:3;padding:0 28px 30px;text-align:center;font-size:9.5px;line-height:1.5}
+.bxscreen .bld-sp-a{color:#171717;--sp-glow:rgba(53,46,255,.16)}
+.bxscreen .bld-sp-a .bld-sp-bg{background-image:url(../app/assets/brand/splash/opening-1.svg)}
+.bxscreen .bld-sp-a .bld-sp-foot{color:#7f7f7f}
+.bxscreen .bld-sp-b{color:#fff;--sp-glow:rgba(255,255,255,.34)}
+.bxscreen .bld-sp-b .bld-sp-bg{background-image:url(../app/assets/brand/splash/opening-2.svg)}
+.bxscreen .bld-sp-b .bld-sp-foot{color:rgba(255,255,255,.66)}
+.bxscreen .bld-sp-c{color:#171717;--sp-glow:rgba(53,46,255,.2)}
+.bxscreen .bld-sp-c .bld-sp-bg{background-image:url(../app/assets/brand/splash/opening-3.svg)}
+.bxscreen .bld-sp-c .bld-sp-foot{color:#7f7f7f}
+@media (prefers-reduced-motion:no-preference){
+  .bxscreen .bld-sp-bg{animation:bspDrift 16s ease-in-out infinite}
+  .bxscreen .bld-sp-sheen{animation:bspSheen 7.5s ease-in-out infinite}
+  .bxscreen .bld-sp-glow{animation:bspGlow 3.6s ease-in-out infinite}
+  .bxscreen .bld-sp-mark{animation:bspMarkIn .85s cubic-bezier(.34,1.45,.4,1) both}
+  .bxscreen .bld-sp-mark svg{animation:bspBreathe 4.2s ease-in-out 1s infinite}
+  @keyframes bspDrift{0%,100%{transform:scale(1.06)}50%{transform:scale(1.14) translateY(-1.5%)}}
+  @keyframes bspSheen{0%,100%{transform:translateX(-65%)}52%{transform:translateX(65%)}}
+  @keyframes bspGlow{0%,100%{opacity:.55;transform:translate(-50%,-50%) scale(.9)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.12)}}
+  @keyframes bspMarkIn{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
+  @keyframes bspBreathe{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+}
+
 /* ── WIREFRAME mode: low-fidelity ─────────────────────────────────────── */
 .bxphone.wf .bxscreen{filter:grayscale(1) contrast(.96)}
 .bxphone.wf .bxscreen .bld-check,.bxphone.wf .bxscreen .pcard{filter:grayscale(1)}

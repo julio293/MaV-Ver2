@@ -9,6 +9,11 @@ Live site: https://mav-ver2.pages.dev · Builder: https://mav-ver2.pages.dev/bui
 
 ## 2026-07-28
 
+### Splash / Opening component
+- Added the **Splash / Opening** screen to the builder (palette 52 → 53) — real exported background SVGs (squares / brand gradient / beam), centred Fyscal logomark, 2-line footer, and the full drift/sheen/glow/mark-in/breathe animation set (reduced-motion gated).
+- Background variant selectable in the inspector; wired into DESC, ORDER (first), and prompt cues. Verified render.
+- Commit `0a88054` · v24
+
 ### 3 more builder components
 - Added **Pagination**, **Button Dock** (reuses real `.dock` classes), and **Number Pad** (numeric PIN/amount pad) — palette 49 → 52.
 - Wired into DESC, compose ORDER, prompt cues, and VARIANTS (pagination active page; dock content + secondary-button toggle). Verified all 3 render light & dark.

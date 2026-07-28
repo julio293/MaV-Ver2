@@ -18,6 +18,8 @@ const IC = {
   arrowR: '<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
   chevD:  '<svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>',
 };
+/* Fyscal Technologies logomark (currentColor, 3 paths) */
+const MARK = '<svg viewBox="0 0 1024 1024"><path d="M857.946 258.305L831.569 412.58H226.896L253.468 258.305H857.946Z"/><path d="M680.165 765.692H517.289L570.089 456.822H733.08L680.165 765.692Z"/><path d="M492.872 611.911L217.705 611.202L351.506 633.936L328.929 765.695H166.053L219.277 456.824L519.444 456.493L492.872 611.911Z"/></svg>';
 const STATUS = '<span class="ab-time">9:41</span><span class="ab-levels"><svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx=".5"/><rect x="5" y="5" width="3" height="7" rx=".5"/><rect x="10" y="2.5" width="3" height="9.5" rx=".5"/><rect x="15" y="0" width="3" height="12" rx=".5"/></svg><svg width="26" height="12" viewBox="0 0 26 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3" fill="none" stroke="currentColor" stroke-opacity=".35"/><rect x="2" y="2" width="18" height="8" rx="1.5"/><rect x="23" y="4" width="1.6" height="4" rx=".8"/></svg></span>';
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
@@ -295,6 +297,11 @@ const CATALOG = {
   keypad: { label: 'Number Pad', group: 'Inputs', render: (p) => {
     const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', '⌫'];
     return `<div class="bld-keypad">${keys.map((k) => k === '' ? '<span class="bld-key ghost"></span>' : `<button class="bld-key${k === '⌫' ? ' fn' : ''}">${k}</button>`).join('')}</div>`; } },
+
+  splash: { label: 'Splash / Opening', group: 'Navigation', bleed: true, render: (p) =>
+    `<div class="bld-splash bld-sp-${p.bg || 'a'}"><div class="bld-sp-bg"></div><div class="bld-sp-sheen"></div>
+      <div class="bld-sp-mid"><span class="bld-sp-glow"></span><span class="bld-sp-mark">${MARK}</span></div>
+      <div class="bld-sp-foot">${esc(p.foot || '© 2025 Fyscal Technologies PTE LTD.')}<br>All rights reserved.</div></div>` },
 };
 
 const GROUPS = ['Navigation', 'Content', 'Finance', 'Inputs', 'Actions', 'Feedback'];
@@ -320,6 +327,7 @@ const DESC = {
   chart: 'Bar chart / spending graph', list: 'Menu / settings list', blog: 'Article / blog card',
   bottomsheet: 'Bottom sheet dialog', upload: 'File upload / dropzone',
   pagination: 'Page indicator / pager', buttondock: 'Docked CTA bar', keypad: 'Numeric PIN / amount pad',
+  splash: 'App launch / opening screen',
 };
 /* e-banking screens offered in the "Add a Page" library */
 const PAGE_LIBRARY = ['Onboarding', 'Login', 'Verify OTP', 'Dashboard', 'Transfer', 'Confirmation', 'Cards', 'Statements', 'Beneficiaries', 'Notifications', 'Settings', 'Profile'];
@@ -363,6 +371,7 @@ const VARIANTS = {
   loader: [{ key: 'size', label: 'Size', def: 'lg', opts: [['sm', 'sm'], ['md', 'md'], ['lg', 'lg']] }],
   emptystate: [{ key: 'src', label: 'Illustration', def: 'il-140.svg', opts: [['Option 1', 'il-140.svg'], ['Option 2', 'il-138.svg'], ['Option 3', 'il-166.svg'], ['Option 4', 'il-143.svg'], ['Option 5', 'il-152.svg']] }],
   pagination: [{ key: 'active', label: 'Active page', def: 1, opts: [['1', 1], ['2', 2], ['3', 3], ['4', 4], ['5', 5]] }],
+  splash: [{ key: 'bg', label: 'Background', def: 'a', opts: [['Squares', 'a'], ['Brand gradient', 'b'], ['Beam', 'c']] }],
   buttondock: [
     { key: 'label', label: 'Content', def: 'Continue', ctrl: 'text' },
     { key: 'secondary', label: 'Secondary button', def: false, ctrl: 'toggle' },
@@ -421,7 +430,7 @@ const PRESETS = [
 ];
 
 /* canonical top-to-bottom order for composed screens */
-const ORDER = ['appbar', 'stepper', 'tabs', 'pilltabs', 'illustration', 'success', 'title', 'subtitle', 'coachmark',
+const ORDER = ['splash', 'appbar', 'stepper', 'tabs', 'pilltabs', 'illustration', 'success', 'title', 'subtitle', 'coachmark',
   'balance', 'quickactions', 'stat', 'chart', 'cashflow', 'paycard', 'amount', 'chips', 'sectionheader', 'emptystate',
   'searchfield', 'textfield', 'phone', 'password', 'otp', 'keypad', 'datepicker', 'upload', 'radio', 'checkbox', 'toggleRow',
   'accountselect', 'list', 'transactions', 'contacts', 'avatar', 'blog', 'chat', 'badges', 'pagination',
@@ -456,6 +465,7 @@ function screenFromPrompt(text) {
   const add = (type, props) => { if (!have.has(type)) { comps.push(comp(type, props)); have.add(type); } };
 
   const CUES = [
+    [/splash|opening screen|launch screen|loading screen|brand intro/, () => add('splash', {})],
     [/app ?bar|top bar|nav header|header bar/, () => add('appbar', { title: titleFrom(text) })],
     [/stepper|kyc|multi[- ]?step|progress steps?|wizard/, () => add('stepper', {})],
     [/pill tabs|segmented/, () => add('pilltabs', {})],
