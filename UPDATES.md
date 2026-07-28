@@ -9,6 +9,11 @@ Live site: https://mav-ver2.pages.dev · Builder: https://mav-ver2.pages.dev/bui
 
 ## 2026-07-28
 
+### 7 finance UI components
+- Added **QR / Scan-to-Pay**, **Transaction Detail**, **Donut Chart**, **Line Chart**, **PIN Dots**, **Amount Slider**, and **Map / Branch Locator** — palette 53 → 60.
+- Hand-built on MaV tokens with scoped light/dark CSS; wired into DESC, compose ORDER, VARIANTS (txn direction, PIN digits, slider position), and prompt cues. All 7 verified light & dark.
+- Commit `b019406` · Deploy `0258488b` · v26
+
 ### Splash fills the whole screen (fix)
 - Splash now renders as a full-screen `inset:0` layer (new `fullscreen` catalog flag routed in buildScreen like the app-bar/nav pinning) so it fits any device frame edge-to-edge instead of sitting in the padded body.
 - Commit `1c3f177` · Deploy `4646ad0c` · v25
