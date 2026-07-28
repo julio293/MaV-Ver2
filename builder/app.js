@@ -102,6 +102,7 @@
       }
       if (c.type === 'appbar') { wrap.classList.add('bxpin'); scr.appendChild(wrap); }        // pinned top
       else if (c.type === 'bottomnav') { wrap.classList.add('bxpin'); bottomWrap = wrap; }      // pinned bottom
+      else if (cat.fullscreen) { wrap.classList.add('bxfull'); scr.appendChild(wrap); }         // fills the whole screen
       else body.appendChild(wrap);
     });
     scr.appendChild(body);

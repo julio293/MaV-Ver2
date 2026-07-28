@@ -298,7 +298,7 @@ const CATALOG = {
     const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', '⌫'];
     return `<div class="bld-keypad">${keys.map((k) => k === '' ? '<span class="bld-key ghost"></span>' : `<button class="bld-key${k === '⌫' ? ' fn' : ''}">${k}</button>`).join('')}</div>`; } },
 
-  splash: { label: 'Splash / Opening', group: 'Navigation', bleed: true, render: (p) =>
+  splash: { label: 'Splash / Opening', group: 'Navigation', bleed: true, fullscreen: true, render: (p) =>
     `<div class="bld-splash bld-sp-${p.bg || 'a'}"><div class="bld-sp-bg"></div><div class="bld-sp-sheen"></div>
       <div class="bld-sp-mid"><span class="bld-sp-glow"></span><span class="bld-sp-mark">${MARK}</span></div>
       <div class="bld-sp-foot">${esc(p.foot || '© 2025 Fyscal Technologies PTE LTD.')}<br>All rights reserved.</div></div>` },

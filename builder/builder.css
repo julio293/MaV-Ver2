@@ -261,7 +261,8 @@ button{font-family:inherit}
 [data-theme=dark].bxscreen .bld-key.fn{background:transparent}
 
 /* ── splash / opening screen (real exported backgrounds + animation) ──── */
-.bxscreen .bld-splash{position:relative;flex:1;min-height:540px;display:flex;flex-direction:column;overflow:hidden;margin:calc(-1*var(--bld-space,14px)) 0 -16px}
+.bxscreen>.bxcomp.bxfull{position:absolute;inset:0;z-index:2;padding:0}
+.bxscreen .bld-splash{position:absolute;inset:0;display:flex;flex-direction:column;overflow:hidden}
 .bxscreen .bld-sp-bg{position:absolute;inset:0;background-position:center;background-size:cover;background-repeat:no-repeat;transform-origin:center;z-index:0;transform:scale(1.06)}
 .bxscreen .bld-sp-sheen{position:absolute;inset:-40%;z-index:1;pointer-events:none;background:linear-gradient(115deg,transparent 34%,rgba(255,255,255,.22) 49%,transparent 64%);transform:translateX(-65%)}
 .bxscreen .bld-sp-mid{flex:1;display:flex;align-items:center;justify-content:center;position:relative;z-index:2}
