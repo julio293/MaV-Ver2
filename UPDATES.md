@@ -12,7 +12,7 @@ Live site: https://mav-ver2.pages.dev · Builder: https://mav-ver2.pages.dev/bui
 ### Variant controls on every component with variants
 - Extended the inspector's Figma-style controls (already generic for the 22 components that had variant schemas) to **48 components** by adding variant definitions to the ~26 that lacked them — headings, balance, payment card, amount, charts, map, inputs, receipts, toggles, etc.
 - Each now exposes its editable content as **text fields / dropdowns / toggles** (Content, Label, Amount, etc.), matching the button. Text edits apply live.
-- Commit `96a9113` · v27
+- Commit `6fb9c35` · Deploy `8e2d2032` · v27
 
 
 
