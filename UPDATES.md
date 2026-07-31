@@ -11,7 +11,7 @@ Live site: https://mav-ver2.pages.dev · Builder: https://mav-ver2.pages.dev/bui
 
 ### Homepage embed shows the prompt
 - The App Builder embedded on the design-system homepage now shows the **hero prompt** ("Describe your fintech app") instead of the live builder UI — users can't build from the preview, so it presents the prompt; "Open full screen" opens the real builder. (Removed the earlier iframe-silence gate.)
-- Commit `1975745` · v35
+- Commit `1975745` · Deploy `99da08b3` · v35
 
 ### Payment Card design/skin variants
 - The Payment Card now exposes a **Card design** dropdown in the inspector — the 16 real Figma card faces (`app/assets/cards/skins/skin-*.png`) plus a plain Gradient — with the number/holder/expiry data layer riding over a legibility scrim, exactly like the design system.
