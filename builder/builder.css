@@ -556,22 +556,49 @@ input.vc-text:focus{border-color:var(--e-accent)}
 .gm-actions .hbtn{padding:10px 18px}
 .wc-err{display:none;margin-top:10px;color:#ff8a8a;font-size:12.5px;font-weight:600;line-height:1.45}
 .wc-err.on{display:block}
-
-/* ── Welcome gate (fintech project prompt on builder open) ────────────── */
-.wc-back{position:fixed;inset:0;z-index:500;background:radial-gradient(120% 120% at 50% 0,rgba(20,24,33,.86),rgba(8,9,13,.95));backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:24px;animation:gmFade .2s ease}
-.wc{width:600px;max-width:100%;box-sizing:border-box;background:linear-gradient(var(--e-panel),color-mix(in srgb,var(--e-panel) 88%,#000));border:1px solid var(--e-line);border-radius:20px;padding:30px;box-shadow:0 50px 110px -30px rgba(0,0,0,.85);animation:gmPop .26s cubic-bezier(.32,1.2,.4,1)}
-.wc-brand{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:700;color:var(--e-muted);margin-bottom:18px}
-.wc-mark{width:26px;height:26px;border-radius:8px;background:var(--e-accent);color:#fff;display:grid;place-items:center;flex-shrink:0}
-.wc-mark svg{width:15px;height:15px;fill:currentColor}
-.wc-title{font-size:24px;font-weight:800;letter-spacing:-.02em}
-.wc-sub{font-size:13.5px;color:var(--e-muted);margin:8px 0 18px;line-height:1.5}
-.wc-ta{width:100%;box-sizing:border-box;background:var(--e-bg);border:1px solid var(--e-line);border-radius:12px;padding:14px 16px;color:var(--e-fg);font:inherit;font-size:14.5px;line-height:1.5;resize:vertical;outline:none;min-height:84px}
-.wc-ta:focus{border-color:var(--e-accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--e-accent) 22%,transparent)}
-.wc-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:22px}
-.wc-skip{border:0;background:transparent;color:var(--e-muted);font-size:13px;font-weight:600;cursor:pointer;padding:6px 2px}
-.wc-skip:hover{color:var(--e-fg);text-decoration:underline}
-.wc.shake{animation:wcShake .42s}
 @keyframes wcShake{10%,90%{transform:translateX(-1px)}20%,80%{transform:translateX(2px)}30%,50%,70%{transform:translateX(-4px)}40%,60%{transform:translateX(4px)}}
+
+/* ── Standalone hero landing (fintech prompt on builder open) ─────────── */
+.hero-back{position:fixed;inset:0;z-index:600;display:flex;align-items:center;justify-content:center;padding:32px;overflow:auto;
+  background:radial-gradient(120% 90% at 50% -10%, #f4f2ef, #eae8e4);animation:gmFade .25s ease;
+  font-family:'Plus Jakarta Sans',system-ui,sans-serif}
+.hero{width:760px;max-width:100%;text-align:center}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;color:#6b7280;letter-spacing:.02em;margin-bottom:20px}
+.hero-mark{width:24px;height:24px;border-radius:7px;background:var(--mav-primary,#352eff);color:#fff;display:grid;place-items:center;flex-shrink:0}
+.hero-mark svg{width:14px;height:14px;fill:currentColor}
+.hero-title{font-size:clamp(30px,5vw,44px);line-height:1.08;font-weight:800;letter-spacing:-.02em;color:#171717;margin:0 0 14px}
+.hero-sub{font-size:15.5px;line-height:1.6;color:#6b7280;max-width:560px;margin:0 auto 30px}
+.hero-bar-wrap{padding:3px;border-radius:20px;background:linear-gradient(95deg,#ff6a3d,#f0417f 42%,#8b3ff0 72%,#4b3bff);background-size:220% 100%;
+  box-shadow:0 24px 60px -26px rgba(90,70,255,.55);transition:box-shadow .2s}
+.hero-bar-wrap:focus-within{box-shadow:0 28px 72px -24px rgba(90,70,255,.72)}
+.hero-bar{display:flex;align-items:center;gap:12px;background:#fff;border-radius:17px;padding:9px 9px 9px 22px}
+.hero-input{flex:1;min-width:0;border:0;background:transparent;font:inherit;font-size:19px;color:#171717;outline:none;padding:11px 0}
+.hero-input::placeholder{color:#9aa0aa}
+.hero-go{display:inline-flex;align-items:center;gap:8px;flex-shrink:0;border:0;cursor:pointer;background:var(--mav-primary,#352eff);color:#fff;font:inherit;font-weight:700;font-size:16px;padding:14px 22px;border-radius:13px;transition:filter .15s,transform .1s}
+.hero-go:hover{filter:brightness(1.09)} .hero-go:active{transform:scale(.98)}
+.hero-go svg{width:18px;height:18px;fill:currentColor;flex-shrink:0}
+.hero-belowbar{display:flex;align-items:center;gap:12px;margin-top:12px;min-height:20px}
+.hero-err{display:none;text-align:left;color:#d1453b;font-size:12.5px;font-weight:600;line-height:1.4}
+.hero-err.on{display:block}
+.hero-example{margin-left:auto;border:0;background:transparent;cursor:pointer;font:inherit;font-size:14px;color:#6b7280;white-space:nowrap}
+.hero-example b{color:#171717;text-decoration:underline;text-underline-offset:3px}
+.hero-example:hover b{color:var(--mav-primary,#352eff)}
+.hero-reco-label{margin:34px 0 12px;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#9aa0aa}
+.hero-recos{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.hero-reco{border:1px solid #e2e0dc;background:#fff;color:#374151;font:inherit;font-size:13.5px;font-weight:600;padding:9px 15px;border-radius:999px;cursor:pointer;transition:.15s}
+.hero-reco:hover{border-color:var(--mav-primary,#352eff);color:var(--mav-primary,#352eff);transform:translateY(-1px)}
+.hero-opts{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:32px}
+.hero-opt{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:#6b7280}
+.hero-opt input,.hero-opt select{height:36px;box-sizing:border-box;border:1px solid #e2e0dc;border-radius:10px;background:#fff;color:#171717;font:inherit;font-size:13px;padding:0 12px;outline:none}
+.hero-opt input:focus,.hero-opt select:focus{border-color:var(--mav-primary,#352eff)}
+.hero-opt select{-webkit-appearance:none;appearance:none;cursor:pointer;padding-right:28px;background-repeat:no-repeat;background-position:right 9px center;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%239aa0aa' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>")}
+.hero-skip{border:0;background:transparent;color:#9aa0aa;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.hero-skip:hover{color:#374151}
+.hero-bar-wrap.shake{animation:wcShake .42s}
+@media (prefers-reduced-motion:no-preference){
+  .hero-bar-wrap{animation:heroGrad 7s linear infinite}
+  @keyframes heroGrad{0%{background-position:0% 50%}100%{background-position:220% 50%}}
+}
 
 /* ── SAVE / EXPORT modal ──────────────────────────────────────────────── */
 .exp-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:4px 0 4px}

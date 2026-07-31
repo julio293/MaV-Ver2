@@ -9,6 +9,11 @@ Live site: https://mav-ver2.pages.dev · Builder: https://mav-ver2.pages.dev/bui
 
 ## 2026-07-31
 
+### Standalone hero landing for the builder
+- Replaced the welcome modal with a **standalone hero** (Relume-style): a soft light landing with an **animated gradient-border prompt bar** + **Generate**, a **"Take it for a spin with an example"** link, and **6 fintech recommendation chips** — all on MaV tokens (mav-primary, Plus Jakarta).
+- Fintech-only guard + audience/pages controls + "skip — use a sample" retained. Generate → sitemap → flow. Stays silent in the homepage iframe preview.
+- Commit `1da5d30` · v30
+
 ### Fintech welcome gate on builder open
 - Opening the builder as its own page (via **Open Builder** from the design system) now greets the user with **"What fintech app are you building?"** — a describe-your-project prompt (brief + audience + page count) that generates the sitemap and drops them into the flow.
 - **Fintech-only:** prompts are validated (`isFintech`); non-finance ideas are rejected with a nudge. The same guard applies to the in-app "Describe your project" modal.

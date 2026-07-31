@@ -232,40 +232,43 @@
     panel.appendChild(ps);
   }
 
-  /* ══ Welcome gate — ask what fintech app they're building, then generate ═ */
+  /* ══ Standalone hero landing — describe your fintech app, then generate ═ */
+  const SPARK = '<svg viewBox="0 0 24 24"><path d="M12 2.5l1.9 5.4L19 9.8l-5.1 1.9L12 17l-1.9-5.3L5 9.8l5.1-1.9z"/><path d="M18.5 14.5l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/></svg>';
   function openWelcome() {
-    document.querySelectorAll('.wc-back').forEach((n) => n.remove());
-    const back = el('<div class="wc-back"></div>');
-    const m = el('<div class="wc"></div>');
-    m.innerHTML =
-      '<div class="wc-brand"><span class="wc-mark">' + MARK + '</span> MaV App Builder</div>' +
-      '<div class="wc-title">What fintech app are you building?</div>' +
-      '<div class="wc-sub">Describe your product — the builder maps out the pages and the sections each one needs, from your MaV components. Built for <strong>fintech &amp; e-banking</strong> apps.</div>' +
-      '<textarea class="wc-ta" rows="3" placeholder="e.g. A mobile bank with cards, instant transfers, spending insights and bill payments"></textarea>' +
-      '<div class="wc-err">The builder specialises in <strong>fintech &amp; e-banking</strong> apps — try a banking, payments, wallet, cards, savings or investing product.</div>' +
-      '<div class="gm-eglabel">Try one of these</div><div class="gm-chips"></div>' +
-      '<div class="gm-row2">' +
-        '<label class="gm-field"><span class="gm-k">Target audience</span><input class="gm-aud" placeholder="e.g. young professionals" spellcheck="false"></label>' +
-        '<label class="gm-field gm-field-sm"><span class="gm-k">Pages</span><select class="gm-count"></select></label>' +
-      '</div>' +
-      '<div class="wc-actions"><button class="wc-skip">Start from a sample instead</button><button class="hbtn primary wc-go">Generate sitemap →</button></div>';
-    const chips = ['Mobile bank with cards & transfers', 'Digital wallet with QR pay', 'Neobank onboarding + KYC', 'Savings app with goals & insights'];
-    const cw = m.querySelector('.gm-chips'), ta = m.querySelector('.wc-ta'), err = m.querySelector('.wc-err');
-    chips.forEach((c) => { const b = el('<button class="gm-chip"></button>'); b.textContent = c; b.onclick = () => { ta.value = c; ta.focus(); err.classList.remove('on'); }; cw.appendChild(b); });
-    const sel = m.querySelector('.gm-count');
+    document.querySelectorAll('.hero-back, .wc-back').forEach((n) => n.remove());
+    const recos = ['Mobile bank with cards & instant transfers', 'Digital wallet with QR payments', 'Neobank onboarding with KYC', 'Savings app with goals & insights', 'Credit & debit card management', 'Peer-to-peer payments & split bills'];
+    const example = 'A mobile banking app for young professionals — debit & credit cards, instant transfers, spending insights and bill payments.';
+    const back = el('<div class="hero-back"></div>');
+    const h = el('<div class="hero"></div>');
+    h.innerHTML =
+      '<div class="hero-eyebrow"><span class="hero-mark">' + MARK + '</span> MaV App Builder · Fintech</div>' +
+      '<h1 class="hero-title">Describe your fintech app<br>and watch it take shape</h1>' +
+      '<p class="hero-sub">One sentence is enough — the builder maps out the pages and the sections each one needs, from your MaV design-system components.</p>' +
+      '<div class="hero-bar-wrap"><div class="hero-bar"><input class="hero-input" placeholder="Describe your fintech app in a sentence or two…" spellcheck="false"><button class="hero-go">' + SPARK + 'Generate</button></div></div>' +
+      '<div class="hero-belowbar"><span class="hero-err">The builder specialises in <strong>fintech &amp; e-banking</strong> apps — try a banking, payments, wallet, cards, savings or investing product.</span>' +
+        '<button class="hero-example">Take it for a spin with an <b>example</b></button></div>' +
+      '<div class="hero-reco-label">Or start from a recommendation</div><div class="hero-recos"></div>' +
+      '<div class="hero-opts"><label class="hero-opt"><span>Audience</span><input class="gm-aud" placeholder="e.g. young professionals" spellcheck="false"></label>' +
+        '<label class="hero-opt"><span>Pages</span><select class="gm-count"></select></label>' +
+        '<button class="hero-skip">Skip — use a sample</button></div>';
+    back.appendChild(h); document.body.appendChild(back);
+    const inp = h.querySelector('.hero-input'), err = h.querySelector('.hero-err'), wrap = h.querySelector('.hero-bar-wrap');
+    const rw = h.querySelector('.hero-recos');
+    recos.forEach((r) => { const b = el('<button class="hero-reco"></button>'); b.textContent = r; b.onclick = () => { inp.value = r; inp.focus(); err.classList.remove('on'); }; rw.appendChild(b); });
+    const sel = h.querySelector('.gm-count');
     [3, 4, 5, 6, 7, 8, 10].forEach((nn) => { const o = document.createElement('option'); o.value = nn; o.textContent = nn + ' pages'; if (nn === 6) o.selected = true; sel.appendChild(o); });
     const close = () => back.remove();
     const go = () => {
-      const v = ta.value.trim(); if (!v) { ta.focus(); return; }
-      if (!isFintech(v)) { err.classList.add('on'); m.classList.add('shake'); setTimeout(() => m.classList.remove('shake'), 450); ta.focus(); return; }
-      close(); generateProject(v, m.querySelector('.gm-aud').value.trim(), parseInt(sel.value, 10) || 6);
+      const v = inp.value.trim(); if (!v) { inp.focus(); return; }
+      if (!isFintech(v)) { err.classList.add('on'); wrap.classList.add('shake'); setTimeout(() => wrap.classList.remove('shake'), 450); inp.focus(); return; }
+      close(); generateProject(v, h.querySelector('.gm-aud').value.trim(), parseInt(sel.value, 10) || 6);
     };
-    m.querySelector('.wc-go').onclick = go;
-    m.querySelector('.wc-skip').onclick = close;
-    ta.addEventListener('input', () => err.classList.remove('on'));
-    ta.addEventListener('keydown', (e) => { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') go(); });
-    back.appendChild(m); document.body.appendChild(back);
-    setTimeout(() => ta.focus(), 40);
+    h.querySelector('.hero-go').onclick = go;
+    h.querySelector('.hero-example').onclick = () => { inp.value = example; inp.focus(); err.classList.remove('on'); };
+    h.querySelector('.hero-skip').onclick = close;
+    inp.addEventListener('input', () => err.classList.remove('on'));
+    inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); });
+    setTimeout(() => inp.focus(), 40);
   }
 
   /* ══ Project prompt → full sitemap (modal) ═══════════════════════════ */
