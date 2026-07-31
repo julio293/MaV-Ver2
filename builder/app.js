@@ -73,6 +73,10 @@
   /* ── helpers ─────────────────────────────────────────────────────────── */
   const el = (html) => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild; };
   const $ = (s, r = document) => r.querySelector(s);
+  /* the builder is fintech-only — accept a prompt only if it reads like a finance product */
+  function isFintech(t) {
+    return /\b(fintech|bank|banking|e-?bank|neobank|wallet|pay|payment|payments|card|cards|debit|credit|transfer|transfers|remit|money|finance|financial|loan|loans|lend|lending|invest|investing|trading|stock|stocks|crypto|bitcoin|saving|savings|budget|insurance|account|accounts|transaction|transactions|billing|invoice|expense|expenses|cashflow|currency|forex|mortgage|pension|payroll|checkout|p2p|kyc|atm|deposit|withdraw|ledger|super ?app)\b/i.test(t || '');
+  }
 
   function applyVars(node, style, opts = {}) {
     node.style.setProperty('--btn/primary/default', style.accent);
@@ -228,6 +232,42 @@
     panel.appendChild(ps);
   }
 
+  /* ══ Welcome gate — ask what fintech app they're building, then generate ═ */
+  function openWelcome() {
+    document.querySelectorAll('.wc-back').forEach((n) => n.remove());
+    const back = el('<div class="wc-back"></div>');
+    const m = el('<div class="wc"></div>');
+    m.innerHTML =
+      '<div class="wc-brand"><span class="wc-mark">' + MARK + '</span> MaV App Builder</div>' +
+      '<div class="wc-title">What fintech app are you building?</div>' +
+      '<div class="wc-sub">Describe your product — the builder maps out the pages and the sections each one needs, from your MaV components. Built for <strong>fintech &amp; e-banking</strong> apps.</div>' +
+      '<textarea class="wc-ta" rows="3" placeholder="e.g. A mobile bank with cards, instant transfers, spending insights and bill payments"></textarea>' +
+      '<div class="wc-err">The builder specialises in <strong>fintech &amp; e-banking</strong> apps — try a banking, payments, wallet, cards, savings or investing product.</div>' +
+      '<div class="gm-eglabel">Try one of these</div><div class="gm-chips"></div>' +
+      '<div class="gm-row2">' +
+        '<label class="gm-field"><span class="gm-k">Target audience</span><input class="gm-aud" placeholder="e.g. young professionals" spellcheck="false"></label>' +
+        '<label class="gm-field gm-field-sm"><span class="gm-k">Pages</span><select class="gm-count"></select></label>' +
+      '</div>' +
+      '<div class="wc-actions"><button class="wc-skip">Start from a sample instead</button><button class="hbtn primary wc-go">Generate sitemap →</button></div>';
+    const chips = ['Mobile bank with cards & transfers', 'Digital wallet with QR pay', 'Neobank onboarding + KYC', 'Savings app with goals & insights'];
+    const cw = m.querySelector('.gm-chips'), ta = m.querySelector('.wc-ta'), err = m.querySelector('.wc-err');
+    chips.forEach((c) => { const b = el('<button class="gm-chip"></button>'); b.textContent = c; b.onclick = () => { ta.value = c; ta.focus(); err.classList.remove('on'); }; cw.appendChild(b); });
+    const sel = m.querySelector('.gm-count');
+    [3, 4, 5, 6, 7, 8, 10].forEach((nn) => { const o = document.createElement('option'); o.value = nn; o.textContent = nn + ' pages'; if (nn === 6) o.selected = true; sel.appendChild(o); });
+    const close = () => back.remove();
+    const go = () => {
+      const v = ta.value.trim(); if (!v) { ta.focus(); return; }
+      if (!isFintech(v)) { err.classList.add('on'); m.classList.add('shake'); setTimeout(() => m.classList.remove('shake'), 450); ta.focus(); return; }
+      close(); generateProject(v, m.querySelector('.gm-aud').value.trim(), parseInt(sel.value, 10) || 6);
+    };
+    m.querySelector('.wc-go').onclick = go;
+    m.querySelector('.wc-skip').onclick = close;
+    ta.addEventListener('input', () => err.classList.remove('on'));
+    ta.addEventListener('keydown', (e) => { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') go(); });
+    back.appendChild(m); document.body.appendChild(back);
+    setTimeout(() => ta.focus(), 40);
+  }
+
   /* ══ Project prompt → full sitemap (modal) ═══════════════════════════ */
   function openGenModal() {
     document.querySelectorAll('.genmodal-back').forEach((n) => n.remove());
@@ -237,6 +277,7 @@
       '<div class="gm-title">✨ Describe your project</div>' +
       '<div class="gm-sub">Tell the builder what you\'re making. It generates a structured sitemap — the key pages and the sections each one needs — from your MaV components.</div>' +
       '<textarea class="gm-ta" rows="3" placeholder="e.g. An e-banking app with standard features plus debit &amp; credit card management"></textarea>' +
+      '<div class="wc-err gm-err">The builder specialises in <strong>fintech &amp; e-banking</strong> apps — try a banking, payments, wallet, cards, savings or investing product.</div>' +
       '<div class="gm-eglabel">Try one of these</div><div class="gm-chips"></div>' +
       '<div class="gm-row2">' +
         '<label class="gm-field"><span class="gm-k">Target audience</span><input class="gm-aud" placeholder="e.g. young professionals" spellcheck="false"></label>' +
@@ -247,14 +288,17 @@
       'Neobank: onboarding, KYC & dashboard', 'Savings app with goals & statements'];
     const cw = m.querySelector('.gm-chips');
     const ta = m.querySelector('.gm-ta');
-    chips.forEach((c) => { const b = el('<button class="gm-chip"></button>'); b.textContent = c; b.onclick = () => { ta.value = c; ta.focus(); }; cw.appendChild(b); });
+    const err = m.querySelector('.gm-err');
+    chips.forEach((c) => { const b = el('<button class="gm-chip"></button>'); b.textContent = c; b.onclick = () => { ta.value = c; ta.focus(); err.classList.remove('on'); }; cw.appendChild(b); });
     const sel = m.querySelector('.gm-count');
     [3, 4, 5, 6, 7, 8, 10].forEach((nn) => { const o = document.createElement('option'); o.value = nn; o.textContent = nn + ' pages'; if (nn === 6) o.selected = true; sel.appendChild(o); });
     const close = () => back.remove();
     const go = () => {
       const v = ta.value.trim(); if (!v) { ta.focus(); return; }
+      if (!isFintech(v)) { err.classList.add('on'); m.classList.add('shake'); setTimeout(() => m.classList.remove('shake'), 450); ta.focus(); return; }
       close(); generateProject(v, m.querySelector('.gm-aud').value.trim(), parseInt(sel.value, 10) || 6);
     };
+    ta.addEventListener('input', () => err.classList.remove('on'));
     m.querySelector('.gm-go').onclick = go;
     m.querySelector('.gm-cancel').onclick = close;
     ta.addEventListener('keydown', (e) => { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') go(); if (e.key === 'Escape') close(); });
@@ -1240,5 +1284,9 @@ function Placeholder({ name }) {
     $('#pvClose').onclick = closePreview;
     const sb = $('#saveBtn'); if (sb) sb.onclick = openExportModal;
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { if (S.pv) closePreview(); document.querySelectorAll('.genmodal-back').forEach((n) => n.remove()); } });
+    // opened as its own page (via "Open Builder" from the design system) → ask what to build.
+    // when embedded as a homepage preview (in an iframe) stay silent and just show the sample.
+    let topLevel = true; try { topLevel = window.self === window.top; } catch (e) { topLevel = false; }
+    if (topLevel) openWelcome();
   });
 })();

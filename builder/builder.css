@@ -554,6 +554,24 @@ input.vc-text:focus{border-color:var(--e-accent)}
 .gm-chip:hover{border-color:var(--e-accent);background:var(--e-panel2)}
 .gm-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
 .gm-actions .hbtn{padding:10px 18px}
+.wc-err{display:none;margin-top:10px;color:#ff8a8a;font-size:12.5px;font-weight:600;line-height:1.45}
+.wc-err.on{display:block}
+
+/* ── Welcome gate (fintech project prompt on builder open) ────────────── */
+.wc-back{position:fixed;inset:0;z-index:500;background:radial-gradient(120% 120% at 50% 0,rgba(20,24,33,.86),rgba(8,9,13,.95));backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:24px;animation:gmFade .2s ease}
+.wc{width:600px;max-width:100%;box-sizing:border-box;background:linear-gradient(var(--e-panel),color-mix(in srgb,var(--e-panel) 88%,#000));border:1px solid var(--e-line);border-radius:20px;padding:30px;box-shadow:0 50px 110px -30px rgba(0,0,0,.85);animation:gmPop .26s cubic-bezier(.32,1.2,.4,1)}
+.wc-brand{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:700;color:var(--e-muted);margin-bottom:18px}
+.wc-mark{width:26px;height:26px;border-radius:8px;background:var(--e-accent);color:#fff;display:grid;place-items:center;flex-shrink:0}
+.wc-mark svg{width:15px;height:15px;fill:currentColor}
+.wc-title{font-size:24px;font-weight:800;letter-spacing:-.02em}
+.wc-sub{font-size:13.5px;color:var(--e-muted);margin:8px 0 18px;line-height:1.5}
+.wc-ta{width:100%;box-sizing:border-box;background:var(--e-bg);border:1px solid var(--e-line);border-radius:12px;padding:14px 16px;color:var(--e-fg);font:inherit;font-size:14.5px;line-height:1.5;resize:vertical;outline:none;min-height:84px}
+.wc-ta:focus{border-color:var(--e-accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--e-accent) 22%,transparent)}
+.wc-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:22px}
+.wc-skip{border:0;background:transparent;color:var(--e-muted);font-size:13px;font-weight:600;cursor:pointer;padding:6px 2px}
+.wc-skip:hover{color:var(--e-fg);text-decoration:underline}
+.wc.shake{animation:wcShake .42s}
+@keyframes wcShake{10%,90%{transform:translateX(-1px)}20%,80%{transform:translateX(2px)}30%,50%,70%{transform:translateX(-4px)}40%,60%{transform:translateX(4px)}}
 
 /* ── SAVE / EXPORT modal ──────────────────────────────────────────────── */
 .exp-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:4px 0 4px}
