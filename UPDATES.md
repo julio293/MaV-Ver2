@@ -14,7 +14,7 @@ Live site: https://mav-ver2.pages.dev · Builder: https://mav-ver2.pages.dev/bui
 - **Building animation:** Generate now shows a "Building your app…" loader — the user's exact brief quoted, an animated step checklist (read → map → compose → apply → finish) and a gradient progress bar — then fades out and the sitemap reveals with a transition.
 - **Exact input:** the typed brief is stored (`S.brief`) and shown verbatim as the sitemap root label (+ audience in the tooltip); feature words drive which pages appear.
 - Applies to both the hero and the in-app "Describe your project" modal.
-- Commit `8d68ae3` · v31
+- Commit `f3eb64d` · Deploy `98abafbc` · v31
 
 ### Standalone hero landing for the builder
 - Replaced the welcome modal with a **standalone hero** (Relume-style): a soft light landing with an **animated gradient-border prompt bar** + **Generate**, a **"Take it for a spin with an example"** link, and **6 fintech recommendation chips** — all on MaV tokens (mav-primary, Plus Jakarta).
