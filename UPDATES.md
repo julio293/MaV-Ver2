@@ -12,7 +12,7 @@ Live site: https://mav-ver2.pages.dev · Builder: https://mav-ver2.pages.dev/bui
 ### Floating prev / next stage control
 - Added a bottom-centre floating pill inside the builder — **‹ Prev · N/4 · Stage · Next ›** — to move through Sitemap → Wireframe → Style Guide → Visual.
 - Mirrors and stays in sync with the top stepper (both now route through `gotoStage`, which also plays the reveal transition); Prev disabled on the first stage, Next on the last.
-- Commit `0c53680` · v33
+- Commit `0c53680` · Deploy `094a32c3` · v33
 
 ### LLM sitemap generation (with rule-based fallback)
 - New Cloudflare **Pages Function** `functions/api/generate.js` calls the Anthropic API (key stays server-side) to compose the sitemap from the brief + audience, constrained to the real component catalog via a tool schema.
