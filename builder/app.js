@@ -1378,9 +1378,8 @@ function Placeholder({ name }) {
     $('#pvClose').onclick = closePreview;
     const sb = $('#saveBtn'); if (sb) sb.onclick = openExportModal;
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { if (S.pv) closePreview(); document.querySelectorAll('.genmodal-back').forEach((n) => n.remove()); } });
-    // opened as its own page (via "Open Builder" from the design system) → ask what to build.
-    // when embedded as a homepage preview (in an iframe) stay silent and just show the sample.
-    let topLevel = true; try { topLevel = window.self === window.top; } catch (e) { topLevel = false; }
-    if (topLevel) openWelcome();
+    // Always greet with the prompt — both when opened full-screen AND when embedded
+    // as the homepage preview (users can't build from the embed, so it shows the prompt).
+    openWelcome();
   });
 })();
