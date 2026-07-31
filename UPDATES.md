@@ -14,7 +14,7 @@ Live site: https://mav-ver2.pages.dev · Builder: https://mav-ver2.pages.dev/bui
 - **Fintech-only:** prompts are validated (`isFintech`); non-finance ideas are rejected with a nudge. The same guard applies to the in-app "Describe your project" modal.
 - Includes a "Start from a sample instead" escape. Stays **silent when embedded** as the homepage preview (iframe) via a `window.self===window.top` check.
 - Verified: welcome shows top-level, rejects non-fintech, generates on fintech, hidden in iframe.
-- Commit `0e66a34` · v29
+- Commit `cc6e5db` · Deploy `09fc0f55` · v29
 
 ### Builder feedback pass — project prompt, style concepts, export reframe
 - **Stage 1 (project-first):** the Sitemap prompt is now **"Describe your project"** — a brief + target audience + page count that generates a full **multi-page sitemap** (each page broken into sections). Replaces the old single-page "Describe a page"; "Add a page from library" stays for manual pages.
