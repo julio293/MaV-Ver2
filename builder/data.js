@@ -68,11 +68,14 @@ const CATALOG = {
     `<div class="bld-amount"><span class="bld-amount-cur">${esc(p.cur || '$')}</span><span class="bld-amount-val mav-num">${esc(p.value || '250.00')}</span></div>
      <div class="bld-amount-cap">${esc(p.caption || 'Enter amount to send')}</div>` },
 
-  paycard: { label: 'Payment Card', group: 'Finance', render: (p) =>
-    `<div class="pcard" style="background:linear-gradient(135deg,#2b2f6b,#0b0b12)"><div class="pcard-scrim"></div><div class="pcard-sheen"></div>
+  paycard: { label: 'Payment Card', group: 'Finance', render: (p) => {
+    const skin = p.skin === undefined ? 'skin-1' : p.skin;   // one of the 16 Figma card faces, or '' for the plain gradient
+    const grad = skin ? '' : ' style="background:linear-gradient(135deg,#2b2f6b,#0b0b12)"';
+    const skinLayer = skin ? `<div class="pcard-skins"><img class="on" src="../app/assets/cards/skins/${esc(skin)}.png" alt="" loading="lazy"></div>` : '';
+    return `<div class="pcard"${grad}>${skinLayer}<div class="pcard-scrim"></div><div class="pcard-sheen"></div>
       <div class="pcard-data"><div class="pcard-number">${esc(p.number || '4539 1488 0343 6467')}</div>
         <div class="pcard-row"><div><div class="pcard-label">Card holder</div><div class="pcard-holder">${esc(p.holder || 'JULIO SANTOS')}</div></div>
-        <div class="pcard-exp"><span class="lbl">Exp</span><span>${esc(p.exp || '09/27')}</span></div></div></div></div>` },
+        <div class="pcard-exp"><span class="lbl">Exp</span><span>${esc(p.exp || '09/27')}</span></div></div></div></div>`; } },
 
   textfield: { label: 'Text Field', group: 'Inputs', render: (p) => {
     const st = p.state === 'focus' ? ' is-focus' : p.state === 'error' ? ' is-error' : '';
@@ -472,6 +475,7 @@ const VARIANTS = {
     { key: 'caption', label: 'Caption', def: 'Enter amount to send', ctrl: 'text' },
   ],
   paycard: [
+    { key: 'skin', label: 'Card design', def: 'skin-1', opts: [['Gradient', '']].concat([1, 2, 3, 4, 5, 6, 7, 8, 11, 13, 14, 15, 16, 17, 25, 27].map((n, i) => ['Design ' + (i + 1), 'skin-' + n])) },
     { key: 'number', label: 'Card number', def: '4539 1488 0343 6467', ctrl: 'text' },
     { key: 'holder', label: 'Card holder', def: 'JULIO SANTOS', ctrl: 'text' },
     { key: 'exp', label: 'Expiry', def: '09/27', ctrl: 'text' },

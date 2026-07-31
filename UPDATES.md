@@ -9,6 +9,10 @@ Live site: https://mav-ver2.pages.dev · Builder: https://mav-ver2.pages.dev/bui
 
 ## 2026-07-31
 
+### Payment Card design/skin variants
+- The Payment Card now exposes a **Card design** dropdown in the inspector — the 16 real Figma card faces (`app/assets/cards/skins/skin-*.png`) plus a plain Gradient — with the number/holder/expiry data layer riding over a legibility scrim, exactly like the design system.
+- Commit `d7e8745` · v34
+
 ### Floating prev / next stage control
 - Added a bottom-centre floating pill inside the builder — **‹ Prev · N/4 · Stage · Next ›** — to move through Sitemap → Wireframe → Style Guide → Visual.
 - Mirrors and stays in sync with the top stepper (both now route through `gotoStage`, which also plays the reveal transition); Prev disabled on the first stage, Next on the last.
