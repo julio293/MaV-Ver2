@@ -15,7 +15,7 @@ Live site: https://mav-ver2.pages.dev · Builder: https://mav-ver2.pages.dev/bui
 - **Stage 3 (style guide):** added **6 one-click design concepts** (accent + radius + typography, incl. Midnight = dark), a **✨ Generate** button that produces a fresh harmonious palette, and **typography pairings** (5 heading·body pairs; new `--font-head` applied to headings/amounts; extra Google fonts loaded).
 - **Stage 4 (export):** reframed to **Prototype** (interactive HTML — experience the app) + **React Native**. Figma export deferred per decision.
 - Verified end-to-end: brief → 7-page sitemap matching features; concepts/generate/pairings apply globally; export shows the two cards.
-- Commit `a160c32` · v28
+- Commit `9f09d54` · Deploy `65e90668` · v28
 
 ---
 
