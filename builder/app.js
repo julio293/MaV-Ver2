@@ -314,9 +314,9 @@
   }
 
   /* build the whole sitemap from a project brief (replaces current screens) */
-  function generateProject(desc, audience, count) {
+  /* commit a set of pages ({name, dark, comps:[{type,props}]}) as the project */
+  function setProject(desc, audience, pages) {
     S.brief = (desc || '').trim(); S.audience = (audience || '').trim();
-    const pages = projectFromPrompt(desc, audience, count);
     S.screens = {}; S.order = []; S.smPanel = null;
     pages.forEach((g) => {
       const id = nid('s');
@@ -327,9 +327,45 @@
     S.stage = 'sitemap';
     render();
   }
+  /* rule-based generator (instant, offline, always available) */
+  function generateProject(desc, audience, count) { setProject(desc, audience, projectFromPrompt(desc, audience, count)); }
 
-  /* ══ "Building your app" loader → transition into the builder ═════════ */
-  function runBuild(desc, audience, count) {
+  /* LLM path — ask the serverless function; validate strictly against the real
+     catalog. Returns pages[] or null (→ caller falls back to the rule engine). */
+  async function llmProject(desc, audience, count) {
+    const catalog = Object.keys(CATALOG).map((type) => ({
+      type, label: CATALOG[type].label, desc: DESC[type] || '',
+      props: (VARIANTS[type] || []).map((v) => (v.opts ? { key: v.key, options: v.opts.map((o) => String(o[0])) } : { key: v.key })),
+    }));
+    let res;
+    try {
+      res = await fetch('/api/generate', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ brief: desc, audience, count, catalog }) });
+    } catch (e) { return null; }
+    if (!res.ok) return null;
+    const data = await res.json().catch(() => null);
+    if (!data || !Array.isArray(data.pages)) return null;
+    const dark = /\bdark( ?mode| theme)?\b/i.test(desc || '');
+    const pages = data.pages.slice(0, count).map((p) => ({
+      name: String((p && p.name) || 'Screen').slice(0, 42),
+      dark,
+      // keep only real components; drop props that aren't valid strings/numbers/bools
+      comps: (p && Array.isArray(p.sections) ? p.sections : []).filter((s) => s && CATALOG[s.type]).map((s) => {
+        const props = {};
+        if (s.props && typeof s.props === 'object') for (const k in s.props) { const val = s.props[k]; if (['string', 'number', 'boolean'].includes(typeof val)) props[k] = val; }
+        return { type: s.type, props };
+      }),
+    })).filter((p) => p.comps.length);
+    return pages.length ? pages : null;
+  }
+  /* try the LLM, fall back to the rule engine */
+  async function composeProject(desc, audience, count) {
+    let pages = null;
+    try { pages = await llmProject(desc, audience, count); } catch (e) { pages = null; }
+    return (pages && pages.length) ? pages : projectFromPrompt(desc, audience, count);
+  }
+
+  /* ══ "Building your app" loader → compose (LLM/rules) → transition in ══ */
+  async function runBuild(desc, audience, count) {
     document.querySelectorAll('.build-back').forEach((n) => n.remove());
     const steps = ['Reading your brief', 'Mapping out the pages', 'Composing each section', 'Applying MaV components', 'Finishing touches'];
     const back = el('<div class="build-back"></div>');
@@ -344,15 +380,21 @@
     const stepEls = b.querySelectorAll('.build-step'), fill = b.querySelector('.build-fill');
     requestAnimationFrame(() => { fill.style.width = '100%'; });
     const per = 460;
-    stepEls.forEach((se, i) => { setTimeout(() => { if (i > 0) stepEls[i - 1].classList.add('done'); se.classList.add('active'); }, i * per + 150); });
-    const total = steps.length * per + 400;
-    setTimeout(() => { stepEls[stepEls.length - 1].classList.add('done'); }, total - 150);
-    setTimeout(() => {
-      generateProject(desc, audience, count);
-      const cv = $('#canvas'); if (cv) { cv.classList.remove('reveal'); void cv.offsetWidth; cv.classList.add('reveal'); }
-      back.classList.add('out');
-      setTimeout(() => back.remove(), 540);
-    }, total + 140);
+    // activate steps sequentially; leave the LAST one spinning until compose resolves
+    stepEls.forEach((se, i) => { if (i < stepEls.length) setTimeout(() => { if (i > 0) stepEls[i - 1].classList.add('done'); se.classList.add('active'); }, i * per + 150); });
+    const minWait = new Promise((r) => setTimeout(r, stepEls.length * per + 300));
+
+    let pages = null;
+    try { pages = await composeProject(desc, audience, count); } catch (e) { pages = null; }
+    await minWait;
+    if (!pages || !pages.length) pages = projectFromPrompt(desc, audience, count);
+
+    stepEls[stepEls.length - 1].classList.add('done');
+    setProject(desc, audience, pages);
+    const cv = $('#canvas'); if (cv) { cv.classList.remove('reveal'); void cv.offsetWidth; cv.classList.add('reveal'); }
+    await new Promise((r) => setTimeout(r, 170));
+    back.classList.add('out');
+    setTimeout(() => back.remove(), 540);
   }
 
   function renderPageLibrary(panel) {

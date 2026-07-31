@@ -9,6 +9,14 @@ Live site: https://mav-ver2.pages.dev · Builder: https://mav-ver2.pages.dev/bui
 
 ## 2026-07-31
 
+### LLM sitemap generation (with rule-based fallback)
+- New Cloudflare **Pages Function** `functions/api/generate.js` calls the Anthropic API (key stays server-side) to compose the sitemap from the brief + audience, constrained to the real component catalog via a tool schema.
+- Client (`llmProject`/`composeProject`) sends the live catalog vocabulary, **validates the reply against `CATALOG`/`VARIANTS`** (drops unknown types/props), and **falls back to the rule engine** if the function is missing, unconfigured, or errors — so the builder always works.
+- `runBuild` now runs the compose in parallel with the loader animation (last step keeps spinning until the model returns), then commits + reveals.
+- **Enable:** `npx wrangler pages secret put ANTHROPIC_API_KEY --project-name mav-ver2` (optional `LLM_MODEL`, default claude-sonnet-4-6). Until set, endpoint returns 503 and the client uses rules.
+- Verified: graceful fallback with no function (6 pages, exact brief in root).
+- Commit `60cdb63` · v32
+
 ### Dark hero + build animation + exact-brief reflection
 - **Dark hero:** flipped the standalone landing to a dark variant (same animated gradient-border bar) to match the builder chrome.
 - **Building animation:** Generate now shows a "Building your app…" loader — the user's exact brief quoted, an animated step checklist (read → map → compose → apply → finish) and a gradient progress bar — then fades out and the sitemap reveals with a transition.
