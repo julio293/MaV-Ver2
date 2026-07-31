@@ -11,6 +11,23 @@
   ];
   const RADII = [{ n: 'Sharp', v: 0 }, { n: 'Subtle', v: 4 }, { n: 'Default', v: 8 }, { n: 'Soft', v: 12 }, { n: 'Round', v: 18 }];
   const FONTS = [{ n: 'Plus Jakarta', v: "'Plus Jakarta Sans',sans-serif" }, { n: 'Inter', v: "'Inter',sans-serif" }];
+  /* typography pairings — heading + body */
+  const TYPE_PAIRS = [
+    { n: 'Jakarta · Inter', head: "'Plus Jakarta Sans',sans-serif", body: "'Inter',sans-serif" },
+    { n: 'Sora · Inter', head: "'Sora',sans-serif", body: "'Inter',sans-serif" },
+    { n: 'Grotesk · DM Sans', head: "'Space Grotesk',sans-serif", body: "'DM Sans',sans-serif" },
+    { n: 'Fraunces · Manrope', head: "'Fraunces',serif", body: "'Manrope',sans-serif" },
+    { n: 'Manrope', head: "'Manrope',sans-serif", body: "'Manrope',sans-serif" },
+  ];
+  /* one-click design concepts (accent + radius + typography [+ dark]) */
+  const STYLE_CONCEPTS = [
+    { n: 'Indigo', accent: '#352eff', radius: 8, head: TYPE_PAIRS[0].head, body: TYPE_PAIRS[0].body },
+    { n: 'Ocean', accent: '#0053ff', radius: 12, head: TYPE_PAIRS[1].head, body: TYPE_PAIRS[1].body },
+    { n: 'Emerald', accent: '#1f9d55', radius: 10, head: TYPE_PAIRS[4].head, body: TYPE_PAIRS[4].body },
+    { n: 'Grape', accent: '#7c3aed', radius: 14, head: TYPE_PAIRS[2].head, body: TYPE_PAIRS[2].body },
+    { n: 'Sunset', accent: '#ff6a3d', radius: 16, head: TYPE_PAIRS[3].head, body: TYPE_PAIRS[3].body },
+    { n: 'Midnight', accent: '#a1ff5b', radius: 12, head: TYPE_PAIRS[1].head, body: TYPE_PAIRS[1].body, dark: true },
+  ];
   const GAPS = [{ n: 'Compact', v: 8 }, { n: 'Normal', v: 14 }, { n: 'Roomy', v: 20 }, { n: 'Spacious', v: 28 }];
   const PADS = [{ n: 'None', v: 0 }, { n: 'Tight', v: 12 }, { n: 'Default', v: 16 }, { n: 'Wide', v: 24 }];
   const MARGINS = [{ n: 'None', v: 0 }, { n: 'S', v: 12 }, { n: 'M', v: 24 }, { n: 'L', v: 40 }];
@@ -36,9 +53,9 @@
     stage: 'sitemap',
     screens: {}, order: [], edges: [],
     selScreen: null, selComp: null,
-    style: { accent: '#352eff', radius: 8, font: FONTS[0].v, space: 14, pad: 16 },
+    style: { accent: '#352eff', radius: 8, font: FONTS[0].v, fontHead: FONTS[0].v, space: 14, pad: 16 },
     device: 'iphone16',
-    pv: null, smPanel: null,
+    pv: null, smPanel: null, genPalette: null,
   };
 
   /* ── seed the default e-banking flow ─────────────────────────────────── */
@@ -66,7 +83,7 @@
     node.style.setProperty('--border/border-radius/sm', r);
     node.style.setProperty('--border/border-radius/md', r);
     node.style.setProperty('--bld-radius', r);
-    if (opts.font !== false) node.style.setProperty('--font-active', style.font);
+    if (opts.font !== false) { node.style.setProperty('--font-active', style.font); node.style.setProperty('--font-head', style.fontHead || style.font); }
     if (opts.space) { node.style.setProperty('--bld-space', style.space + 'px'); node.style.setProperty('--bld-pad', (style.pad ?? 16) + 'px'); }
   }
 
@@ -196,39 +213,48 @@
   }
 
   function renderSitemapTools(panel) {
-    panel.innerHTML = '<div class="panel-h">Plan · pages & sections</div>';
+    panel.innerHTML = '<div class="panel-h">Plan · project & sitemap</div>';
     const ps = el('<div class="panel-scroll"></div>');
-    const gp = el('<button class="hbtn primary" style="width:100%;justify-content:center;margin-bottom:10px">✨ Describe a page</button>');
+    const gp = el('<button class="hbtn primary" style="width:100%;justify-content:center;margin-bottom:10px">✨ Describe your project</button>');
     gp.onclick = openGenModal;
     ps.appendChild(gp);
-    const addp = el('<button class="hbtn" style="width:100%;justify-content:center;margin-bottom:10px">+ Add from library</button>');
+    const addp = el('<button class="hbtn" style="width:100%;justify-content:center;margin-bottom:10px">+ Add a page from library</button>');
     addp.onclick = () => { S.smPanel = { type: 'pages' }; render(); };
     ps.appendChild(addp);
     const gen = el('<button class="hbtn" style="width:100%;justify-content:center;margin-bottom:14px">↺ Reset to sample flow</button>');
     gen.onclick = () => { seed(); render(); };
     ps.appendChild(gen);
-    ps.appendChild(el('<p class="empty-hint" style="text-align:left;margin:6px 0">Describe a page in plain words — the builder composes it from MaV components. Each block is a section: drag to reorder, ✕ to remove, or open a page in Wireframe to lay it out.</p>'));
+    ps.appendChild(el('<p class="empty-hint" style="text-align:left;margin:6px 0">Describe your whole project — the builder maps out the pages and breaks each into logical sections built from MaV components. Then edit, reorder (drag), remove (✕), or add pages/sections before moving to Wireframe.</p>'));
     panel.appendChild(ps);
   }
 
-  /* ══ Prompt → screen generator (modal) ═══════════════════════════════ */
+  /* ══ Project prompt → full sitemap (modal) ═══════════════════════════ */
   function openGenModal() {
     document.querySelectorAll('.genmodal-back').forEach((n) => n.remove());
     const back = el('<div class="genmodal-back"></div>');
     const m = el('<div class="genmodal"></div>');
     m.innerHTML =
-      '<div class="gm-title">✨ Generate a screen from a prompt</div>' +
-      '<div class="gm-sub">Describe the page and the sections it needs — the builder assembles it from your MaV design-system components.</div>' +
-      '<textarea class="gm-ta" rows="3" placeholder="e.g. a sign-up screen with a phone number field, an OTP code, and a terms checkbox"></textarea>' +
+      '<div class="gm-title">✨ Describe your project</div>' +
+      '<div class="gm-sub">Tell the builder what you\'re making. It generates a structured sitemap — the key pages and the sections each one needs — from your MaV components.</div>' +
+      '<textarea class="gm-ta" rows="3" placeholder="e.g. An e-banking app with standard features plus debit &amp; credit card management"></textarea>' +
       '<div class="gm-eglabel">Try one of these</div><div class="gm-chips"></div>' +
-      '<div class="gm-actions"><button class="hbtn gm-cancel">Cancel</button><button class="hbtn primary gm-go">Generate page →</button></div>';
-    const chips = ['Login with biometric', 'Dashboard with balance & transactions', 'KYC steps with phone number & OTP',
-      'Transfer with amount & recipients', 'Payment card with settings toggles', 'Success confirmation with receipt'];
+      '<div class="gm-row2">' +
+        '<label class="gm-field"><span class="gm-k">Target audience</span><input class="gm-aud" placeholder="e.g. young professionals" spellcheck="false"></label>' +
+        '<label class="gm-field gm-field-sm"><span class="gm-k">Pages</span><select class="gm-count"></select></label>' +
+      '</div>' +
+      '<div class="gm-actions"><button class="hbtn gm-cancel">Cancel</button><button class="hbtn primary gm-go">Generate sitemap →</button></div>';
+    const chips = ['E-banking app with debit & credit cards', 'Digital wallet with transfers & QR pay',
+      'Neobank: onboarding, KYC & dashboard', 'Savings app with goals & statements'];
     const cw = m.querySelector('.gm-chips');
     const ta = m.querySelector('.gm-ta');
     chips.forEach((c) => { const b = el('<button class="gm-chip"></button>'); b.textContent = c; b.onclick = () => { ta.value = c; ta.focus(); }; cw.appendChild(b); });
+    const sel = m.querySelector('.gm-count');
+    [3, 4, 5, 6, 7, 8, 10].forEach((nn) => { const o = document.createElement('option'); o.value = nn; o.textContent = nn + ' pages'; if (nn === 6) o.selected = true; sel.appendChild(o); });
     const close = () => back.remove();
-    const go = () => { const v = ta.value.trim(); if (!v) { ta.focus(); return; } close(); addScreen(v); };
+    const go = () => {
+      const v = ta.value.trim(); if (!v) { ta.focus(); return; }
+      close(); generateProject(v, m.querySelector('.gm-aud').value.trim(), parseInt(sel.value, 10) || 6);
+    };
     m.querySelector('.gm-go').onclick = go;
     m.querySelector('.gm-cancel').onclick = close;
     ta.addEventListener('keydown', (e) => { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') go(); if (e.key === 'Escape') close(); });
@@ -236,6 +262,20 @@
     back.addEventListener('click', (e) => { if (e.target === back) close(); });
     document.body.appendChild(back);
     setTimeout(() => ta.focus(), 30);
+  }
+
+  /* build the whole sitemap from a project brief (replaces current screens) */
+  function generateProject(desc, audience, count) {
+    const pages = projectFromPrompt(desc, audience, count);
+    S.screens = {}; S.order = []; S.smPanel = null;
+    pages.forEach((g) => {
+      const id = nid('s');
+      S.screens[id] = { id, name: g.name, dark: g.dark, comps: g.comps.map((c) => ({ id: nid('c'), ...c })) };
+      S.order.push(id);
+    });
+    S.selScreen = S.order[0];
+    S.stage = 'sitemap';
+    render();
   }
 
   function renderPageLibrary(panel) {
@@ -447,18 +487,57 @@
   }
 
   /* ══ STYLE GUIDE ══════════════════════════════════════════════════════ */
+  /* palette helpers — generate harmonious accents on demand */
+  function hslToHex(h, s, l) {
+    s /= 100; l /= 100;
+    const k = (n) => (n + h / 30) % 12, a = s * Math.min(l, 1 - l);
+    const f = (n) => l - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1));
+    const to = (x) => Math.round(255 * x).toString(16).padStart(2, '0');
+    return '#' + to(f(0)) + to(f(8)) + to(f(4));
+  }
+  function generatePalette() {
+    const base = Math.floor(Math.random() * 360);
+    S.genPalette = [0, 1, 2, 3, 4].map((i) => hslToHex((base + i * 54) % 360, 70, 54));
+    render();
+  }
+  function applyConcept(c) {
+    S.style.accent = c.accent; S.style.radius = c.radius;
+    S.style.font = c.body; S.style.fontHead = c.head;
+    Object.keys(S.screens).forEach((id) => { S.screens[id].dark = !!c.dark; });
+    render();
+  }
+
   function renderStyle(panel, canvas) {
     panel.innerHTML = '<div class="panel-h">Style guide</div>';
     const ps = el('<div class="panel-scroll"></div>');
-    // accent
-    ps.appendChild(el('<div class="sg-block"><div class="sg-label">Primary color</div></div>'));
+    // ── design concepts (one-click visual directions) ──
+    ps.appendChild(el('<div class="sg-block"><div class="sg-label">Design concept</div><div class="sg-hint2">Pitch a visual direction — sets colour, corners &amp; type together</div></div>'));
+    const cc = el('<div class="sg-concepts"></div>');
+    STYLE_CONCEPTS.forEach((c) => {
+      const on = S.style.accent === c.accent && S.style.radius === c.radius && S.style.font === c.body;
+      const b = el(`<button class="sg-concept${on ? ' on' : ''}"><span class="sg-concept-sw" style="background:${c.accent}"></span>${c.n}</button>`);
+      b.onclick = () => applyConcept(c); cc.appendChild(b);
+    });
+    ps.lastChild.appendChild(cc);
+    // ── primary color + generate ──
+    const col = el('<div class="sg-block"><div class="sg-label" style="display:flex;justify-content:space-between;align-items:center">Primary color<button class="sg-gen">✨ Generate</button></div></div>');
+    col.querySelector('.sg-gen').onclick = generatePalette;
     const swr = el('<div class="sw-row"></div>');
     ACCENTS.forEach((a) => { const s = el(`<div class="sw${S.style.accent === a.v ? ' on' : ''}" title="${a.n}" style="background:${a.v}"></div>`); s.onclick = () => { S.style.accent = a.v; render(); }; swr.appendChild(s); });
-    ps.lastChild.appendChild(swr);
+    col.appendChild(swr);
+    if (S.genPalette && S.genPalette.length) {
+      const gp = el('<div class="sw-row" style="margin-top:9px"></div>');
+      S.genPalette.forEach((hex) => { const s = el(`<div class="sw${S.style.accent === hex ? ' on' : ''}" title="${hex}" style="background:${hex}"></div>`); s.onclick = () => { S.style.accent = hex; render(); }; gp.appendChild(s); });
+      col.appendChild(el('<div class="sg-hint2" style="margin-top:9px">Generated palette · click to apply</div>'));
+      col.appendChild(gp);
+    }
+    ps.appendChild(col);
     // radius
     ps.appendChild(sgOptions('Corner radius', RADII, S.style.radius, (v) => { S.style.radius = v; render(); }));
-    // font
-    ps.appendChild(sgOptions('Font family', FONTS.map((f) => ({ n: f.n, v: f.v })), S.style.font, (v) => { S.style.font = v; render(); }));
+    // typography pairings
+    ps.appendChild(sgOptions('Typography', TYPE_PAIRS.map((p) => ({ n: p.n, v: p.body })), S.style.font, (v) => {
+      const p = TYPE_PAIRS.find((x) => x.body === v); S.style.font = v; if (p) S.style.fontHead = p.head; render();
+    }));
     // spacing
     ps.appendChild(sgOptions('Gap (between components)', GAPS, S.style.space, (v) => { S.style.space = v; render(); }));
     ps.appendChild(sgOptions('Screen padding', PADS, S.style.pad, (v) => { S.style.pad = v; render(); }));
@@ -999,14 +1078,14 @@ function Placeholder({ name }) {
     const back = el('<div class="genmodal-back"></div>');
     const m = el('<div class="genmodal"></div>');
     let fmt = 'html';
-    const htmlIco = '<svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M9 9l-2 3 2 3M15 9l2 3-2 3"/></svg>';
+    const htmlIco = '<svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="3"/><path d="M10 18h4"/></svg>';
     const rnIco = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.2"/><ellipse cx="12" cy="12" rx="10" ry="4.3"/><ellipse cx="12" cy="12" rx="10" ry="4.3" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4.3" transform="rotate(120 12 12)"/></svg>';
     m.innerHTML =
-      '<div class="gm-title">Save &amp; export your app</div>' +
-      '<div class="gm-sub">Package all ' + S.order.length + ' screen(s) into a functional, hand-off-ready build for your frontend team. Pick a format:</div>' +
+      '<div class="gm-title">Export your project</div>' +
+      '<div class="gm-sub">Your work isn\'t trapped — take all ' + S.order.length + ' screen(s) out. Pick how you want to continue:</div>' +
       '<div class="exp-cards">' +
-        '<button class="exp-card on" data-fmt="html"><span class="tag">Recommended</span><span class="ico">' + htmlIco + '</span><span class="t">HTML + CSS</span><span class="d">One self-contained file — the real MaV markup &amp; styles, a clickable phone prototype. Opens in any browser; tap actions to move between screens.</span></button>' +
-        '<button class="exp-card" data-fmt="rn"><span class="tag">Expo</span><span class="ico">' + rnIco + '</span><span class="t">React Native</span><span class="d">A runnable <code>App.js</code> — each screen a component, your design tokens as a theme, tap-through navigation. A real RN starting point.</span></button>' +
+        '<button class="exp-card on" data-fmt="html"><span class="tag">Recommended</span><span class="ico">' + htmlIco + '</span><span class="t">Prototype</span><span class="d">Experience the app first — one self-contained HTML file with the real MaV screens. Opens in any browser; tap actions to move between screens.</span></button>' +
+        '<button class="exp-card" data-fmt="rn"><span class="tag">Expo</span><span class="ico">' + rnIco + '</span><span class="t">React Native</span><span class="d">Copy the components &amp; structure straight into a React Native canvas — a runnable <code>App.js</code> with your design tokens as a theme.</span></button>' +
       '</div>' +
       '<label class="exp-fname"><span class="k">File name</span><input id="expName" value="mav-app" spellcheck="false"></label>' +
       '<div class="exp-note"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg><span>Images &amp; fonts link to your live design system so the export renders straight away — your frontend can vendor them locally later.</span></div>' +

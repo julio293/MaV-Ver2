@@ -684,3 +684,34 @@ function screenFromPrompt(text) {
 
 /* default e-banking sitemap */
 const DEFAULT_FLOW = ['Onboarding', 'Login', 'Dashboard', 'Transfer', 'Confirmation'];
+
+/* ── Project → multi-page sitemap ──────────────────────────────────────────
+   From a plain-language brief + target audience + page count, choose a
+   sensible set of e-banking pages and compose each from MaV components. */
+function projectFromPrompt(desc, audience, count) {
+  const t = ((desc || '') + ' ' + (audience || '')).toLowerCase();
+  const dark = /\bdark( ?mode| theme)?\b/.test(t);
+  const want = [];
+  const add = (n) => { if (!want.includes(n)) want.push(n); };
+
+  // essentials every banking app opens with
+  add('Onboarding'); add('Login'); add('Dashboard');
+  // feature-driven pages, pulled in when the brief mentions them
+  const FEAT = [
+    [/\botp\b|verif|2fa|two[- ]factor|security code/, ['Verify OTP']],
+    [/card|debit|credit|visa|master/, ['Cards']],
+    [/transfer|send money|\bsend\b|\bpay\b|remit|top ?up/, ['Transfer', 'Confirmation']],
+    [/hist|transaction|statement|activity|spending/, ['Statements']],
+    [/benefic|payee|recipient|contact/, ['Beneficiaries']],
+    [/notif|alert|inbox|message/, ['Notifications']],
+    [/setting|preferenc|manage/, ['Settings']],
+    [/profile|kyc|identit|onboard/, ['Profile']],
+  ];
+  FEAT.forEach(([re, pages]) => { if (re.test(t)) pages.forEach(add); });
+  // pad toward the requested count with a sensible default order
+  ['Verify OTP', 'Cards', 'Transfer', 'Confirmation', 'Statements', 'Beneficiaries', 'Notifications', 'Settings', 'Profile'].forEach(add);
+
+  const n = Math.max(1, Math.min(12, count || 6));
+  const names = want.slice(0, n);
+  return names.map((name) => { const g = screenFromPrompt(name); return { name: g.name, dark, comps: g.comps }; });
+}

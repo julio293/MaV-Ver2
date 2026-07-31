@@ -7,6 +7,18 @@ Live site: https://mav-ver2.pages.dev · Builder: https://mav-ver2.pages.dev/bui
 
 ---
 
+## 2026-07-31
+
+### Builder feedback pass — project prompt, style concepts, export reframe
+- **Stage 1 (project-first):** the Sitemap prompt is now **"Describe your project"** — a brief + target audience + page count that generates a full **multi-page sitemap** (each page broken into sections). Replaces the old single-page "Describe a page"; "Add a page from library" stays for manual pages.
+- **Stage 2 (wireframe):** unchanged, as requested.
+- **Stage 3 (style guide):** added **6 one-click design concepts** (accent + radius + typography, incl. Midnight = dark), a **✨ Generate** button that produces a fresh harmonious palette, and **typography pairings** (5 heading·body pairs; new `--font-head` applied to headings/amounts; extra Google fonts loaded).
+- **Stage 4 (export):** reframed to **Prototype** (interactive HTML — experience the app) + **React Native**. Figma export deferred per decision.
+- Verified end-to-end: brief → 7-page sitemap matching features; concepts/generate/pairings apply globally; export shows the two cards.
+- Commit `a160c32` · v28
+
+---
+
 ## 2026-07-28
 
 ### Variant controls on every component with variants

@@ -412,6 +412,26 @@ button{font-family:inherit}
 .opt.on{background:var(--e-accent);border-color:var(--e-accent);color:#fff}
 .sg-sample{margin-top:6px;background:#fff;border-radius:16px;padding:18px;color:#171717}
 
+/* ── style-guide: concepts · generate · modal fields ─────────────────── */
+.sg-hint2{font-size:11px;font-weight:500;color:var(--e-muted);letter-spacing:0;margin:-3px 0 9px}
+.sg-concepts{display:flex;flex-wrap:wrap;gap:8px}
+.sg-concept{display:inline-flex;align-items:center;gap:7px;padding:7px 11px 7px 8px;border-radius:9px;border:1px solid var(--e-line);background:var(--e-panel2);color:var(--e-fg);font-size:12.5px;font-weight:600;cursor:pointer;transition:.14s}
+.sg-concept:hover{border-color:var(--e-accent)}
+.sg-concept.on{border-color:var(--e-accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--e-accent) 30%,transparent)}
+.sg-concept-sw{width:14px;height:14px;border-radius:5px;flex-shrink:0}
+.sg-gen{border:0;background:transparent;color:var(--e-accent);font-size:12px;font-weight:700;cursor:pointer;padding:2px 6px;border-radius:6px}
+.sg-gen:hover{background:var(--e-panel2)}
+.gm-row2{display:flex;gap:12px;margin-top:16px}
+.gm-field{flex:1;display:flex;flex-direction:column;gap:6px}
+.gm-field-sm{flex:0 0 118px}
+.gm-k{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--e-muted)}
+.gm-field input,.gm-field select{height:40px;box-sizing:border-box;background:var(--e-bg);border:1px solid var(--e-line);border-radius:10px;padding:0 12px;color:var(--e-fg);font:inherit;font-size:13.5px;outline:none}
+.gm-field input:focus,.gm-field select:focus{border-color:var(--e-accent)}
+.gm-field select{-webkit-appearance:none;appearance:none;cursor:pointer;padding-right:30px;background-repeat:no-repeat;background-position:right 11px center;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a90a0' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>")}
+
+/* heading typography — pairing head font on the prominent headings/amounts */
+.bxscreen .bld-h1,.bxscreen .ab-title,.bxscreen .bal-amount,.bxscreen .bld-amount-val,.bxscreen .bld-chart-amt,.bxscreen .bld-line-amt,.bxscreen .bld-txnd-amt,.bxscreen .bld-success-title,.bxscreen .sh-title,.bxscreen .bld-sheet-title,.bxscreen .w-amt,.bxscreen .bld-dn-center .v,.bxscreen .bld-slider-val{font-family:var(--font-head,var(--font-active,'Plus Jakarta Sans',sans-serif))}
+
 /* ── POSITION / ALIGNMENT panel (Figma-style) ─────────────────────────── */
 .pos-sec{margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--e-line)}
 .pos-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
