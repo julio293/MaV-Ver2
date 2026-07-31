@@ -660,6 +660,23 @@ input.vc-text:focus{border-color:var(--e-accent)}
 .pal-prev .bxscreen.pal-prev-scr.pal-bleed{padding:0}
 .pal-prev .pal-prev-scr .bxcomp{position:relative}
 
+/* ── floating stage nav (prev / next, mirrors the stepper) ────────────── */
+.stage-nav{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:80;display:flex;align-items:center;gap:6px;
+  background:color-mix(in srgb,var(--e-panel) 92%,#000);border:1px solid var(--e-line);border-radius:999px;padding:6px;
+  box-shadow:0 18px 46px -18px rgba(0,0,0,.7);backdrop-filter:blur(10px);animation:stnavIn .3s cubic-bezier(.32,1.2,.4,1)}
+@keyframes stnavIn{from{opacity:0;transform:translate(-50%,14px)}to{opacity:1;transform:translate(-50%,0)}}
+.stnav-btn{display:inline-flex;align-items:center;gap:7px;border:0;cursor:pointer;background:var(--e-panel2);color:var(--e-fg);
+  font:inherit;font-size:13px;font-weight:700;padding:10px 16px;border-radius:999px;transition:.14s}
+.stnav-btn:hover:not([disabled]){background:var(--e-accent);color:#fff}
+.stnav-btn[disabled]{opacity:.34;cursor:not-allowed}
+.stnav-btn.next{background:var(--e-accent);color:#fff}
+.stnav-btn.next:hover:not([disabled]){filter:brightness(1.12)}
+.stnav-btn svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.stnav-mid{display:flex;flex-direction:column;align-items:center;line-height:1.1;padding:0 12px;min-width:88px}
+.stnav-count{font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--e-muted)}
+.stnav-name{font-size:12.5px;font-weight:700;color:var(--e-fg);margin-top:1px}
+@media (max-width:720px){ .stnav-btn span{display:none} .stnav-btn{padding:11px} }
+
 /* floating context menu */
 .pop{position:fixed;z-index:200;background:var(--e-panel);border:1px solid var(--e-line);border-radius:10px;padding:5px;box-shadow:0 12px 32px rgba(0,0,0,.55);min-width:158px}
 .pop button{display:block;width:100%;text-align:left;padding:8px 10px;border:0;background:transparent;color:var(--e-fg);font-size:12.5px;border-radius:7px;cursor:pointer}

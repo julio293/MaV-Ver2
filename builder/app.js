@@ -193,9 +193,27 @@
     STAGES.forEach((s, i) => {
       if (i) wrap.appendChild(el('<div class="step-sep"></div>'));
       const b = el(`<button class="step${i === cur ? ' on' : ''}${i < cur ? ' done' : ''}"><span class="n">${i < cur ? '✓' : i + 1}</span>${s[1]}</button>`);
-      b.onclick = () => { S.stage = s[0]; S.selComp = null; S.smPanel = null; render(); };
+      b.onclick = () => gotoStage(s[0]);
       wrap.appendChild(b);
     });
+  }
+  function gotoStage(stage) {
+    if (!STAGES.some((s) => s[0] === stage)) return;
+    S.stage = stage; S.selComp = null; S.smPanel = null; render();
+    const cv = $('#canvas'); if (cv) { cv.classList.remove('reveal'); void cv.offsetWidth; cv.classList.add('reveal'); }
+  }
+  /* floating prev / next control — mirrors the stepper */
+  function renderStageNav() {
+    const host = $('#stageNav'); if (!host) return;
+    const cur = STAGES.findIndex((s) => s[0] === S.stage);
+    const prev = STAGES[cur - 1], next = STAGES[cur + 1];
+    host.innerHTML =
+      '<button class="stnav-btn prev"' + (prev ? '' : ' disabled') + ' title="' + (prev ? 'Back to ' + prev[1] : 'Start') + '"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg><span>' + (prev ? prev[1] : 'Back') + '</span></button>' +
+      '<div class="stnav-mid"><span class="stnav-count">' + (cur + 1) + ' / ' + STAGES.length + '</span><span class="stnav-name">' + STAGES[cur][1] + '</span></div>' +
+      '<button class="stnav-btn next"' + (next ? '' : ' disabled') + ' title="' + (next ? 'Continue to ' + next[1] : 'Last step') + '"><span>' + (next ? next[1] : 'Done') + '</span><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>';
+    const pb = host.querySelector('.prev'), nb = host.querySelector('.next');
+    if (prev) pb.onclick = () => gotoStage(prev[0]);
+    if (next) nb.onclick = () => gotoStage(next[0]);
   }
 
   /* ══ SITEMAP — hierarchical page/section tree (Relume-style) ══════════ */
@@ -1342,6 +1360,7 @@ function Placeholder({ name }) {
   /* ══ MAIN RENDER ══════════════════════════════════════════════════════ */
   function render() {
     renderStepper();
+    renderStageNav();
     renderDeviceCtl();
     const panel = $('#leftPanel'), canvas = $('#canvas'), rp = $('#rightPanel');
     panel.innerHTML = ''; canvas.innerHTML = ''; rp.style.display = 'none';
