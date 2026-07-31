@@ -55,7 +55,7 @@
     selScreen: null, selComp: null,
     style: { accent: '#352eff', radius: 8, font: FONTS[0].v, fontHead: FONTS[0].v, space: 14, pad: 16 },
     device: 'iphone16',
-    pv: null, smPanel: null, genPalette: null,
+    pv: null, smPanel: null, genPalette: null, brief: '', audience: '',
   };
 
   /* ── seed the default e-banking flow ─────────────────────────────────── */
@@ -205,7 +205,9 @@
     else renderSitemapTools(panel);
 
     const board = el('<div class="sm-board"></div>');
-    board.appendChild(el('<div class="sm-root"><span class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span>Project · e-banking app</div>'));
+    const rootLabel = S.brief ? S.brief : 'e-banking app';
+    const rootTitle = S.brief ? (' title="' + esc(S.brief) + (S.audience ? ' · for ' + esc(S.audience) : '') + '"') : '';
+    board.appendChild(el('<div class="sm-root"' + rootTitle + '><span class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span><span class="sm-root-txt">' + esc(rootLabel) + '</span></div>'));
     board.appendChild(el('<div class="sm-spine"></div>'));
     const col = el('<div class="sm-col"></div>');
     S.order.forEach((id) => col.appendChild(screenCard(S.screens[id])));
@@ -261,7 +263,7 @@
     const go = () => {
       const v = inp.value.trim(); if (!v) { inp.focus(); return; }
       if (!isFintech(v)) { err.classList.add('on'); wrap.classList.add('shake'); setTimeout(() => wrap.classList.remove('shake'), 450); inp.focus(); return; }
-      close(); generateProject(v, h.querySelector('.gm-aud').value.trim(), parseInt(sel.value, 10) || 6);
+      close(); runBuild(v, h.querySelector('.gm-aud').value.trim(), parseInt(sel.value, 10) || 6);
     };
     h.querySelector('.hero-go').onclick = go;
     h.querySelector('.hero-example').onclick = () => { inp.value = example; inp.focus(); err.classList.remove('on'); };
@@ -299,7 +301,7 @@
     const go = () => {
       const v = ta.value.trim(); if (!v) { ta.focus(); return; }
       if (!isFintech(v)) { err.classList.add('on'); m.classList.add('shake'); setTimeout(() => m.classList.remove('shake'), 450); ta.focus(); return; }
-      close(); generateProject(v, m.querySelector('.gm-aud').value.trim(), parseInt(sel.value, 10) || 6);
+      close(); runBuild(v, m.querySelector('.gm-aud').value.trim(), parseInt(sel.value, 10) || 6);
     };
     ta.addEventListener('input', () => err.classList.remove('on'));
     m.querySelector('.gm-go').onclick = go;
@@ -313,6 +315,7 @@
 
   /* build the whole sitemap from a project brief (replaces current screens) */
   function generateProject(desc, audience, count) {
+    S.brief = (desc || '').trim(); S.audience = (audience || '').trim();
     const pages = projectFromPrompt(desc, audience, count);
     S.screens = {}; S.order = []; S.smPanel = null;
     pages.forEach((g) => {
@@ -323,6 +326,33 @@
     S.selScreen = S.order[0];
     S.stage = 'sitemap';
     render();
+  }
+
+  /* ══ "Building your app" loader → transition into the builder ═════════ */
+  function runBuild(desc, audience, count) {
+    document.querySelectorAll('.build-back').forEach((n) => n.remove());
+    const steps = ['Reading your brief', 'Mapping out the pages', 'Composing each section', 'Applying MaV components', 'Finishing touches'];
+    const back = el('<div class="build-back"></div>');
+    const b = el('<div class="build"></div>');
+    b.innerHTML =
+      '<div class="build-mark">' + MARK + '</div>' +
+      '<div class="build-title">Building your app…</div>' +
+      '<div class="build-brief">“' + esc(desc) + '”</div>' +
+      '<div class="build-steps">' + steps.map((s, i) => '<div class="build-step" data-i="' + i + '"><span class="build-dot"></span><span class="build-lbl">' + s + '</span></div>').join('') + '</div>' +
+      '<div class="build-bar"><span class="build-fill"></span></div>';
+    back.appendChild(b); document.body.appendChild(back);
+    const stepEls = b.querySelectorAll('.build-step'), fill = b.querySelector('.build-fill');
+    requestAnimationFrame(() => { fill.style.width = '100%'; });
+    const per = 460;
+    stepEls.forEach((se, i) => { setTimeout(() => { if (i > 0) stepEls[i - 1].classList.add('done'); se.classList.add('active'); }, i * per + 150); });
+    const total = steps.length * per + 400;
+    setTimeout(() => { stepEls[stepEls.length - 1].classList.add('done'); }, total - 150);
+    setTimeout(() => {
+      generateProject(desc, audience, count);
+      const cv = $('#canvas'); if (cv) { cv.classList.remove('reveal'); void cv.offsetWidth; cv.classList.add('reveal'); }
+      back.classList.add('out');
+      setTimeout(() => back.remove(), 540);
+    }, total + 140);
   }
 
   function renderPageLibrary(panel) {
