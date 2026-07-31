@@ -15,7 +15,7 @@ Live site: https://mav-ver2.pages.dev · Builder: https://mav-ver2.pages.dev/bui
 - `runBuild` now runs the compose in parallel with the loader animation (last step keeps spinning until the model returns), then commits + reveals.
 - **Enable:** `npx wrangler pages secret put ANTHROPIC_API_KEY --project-name mav-ver2` (optional `LLM_MODEL`, default claude-sonnet-4-6). Until set, endpoint returns 503 and the client uses rules.
 - Verified: graceful fallback with no function (6 pages, exact brief in root).
-- Commit `60cdb63` · v32
+- Commit `e97b908` · Deploy `ab90c297` · v32
 
 ### Dark hero + build animation + exact-brief reflection
 - **Dark hero:** flipped the standalone landing to a dark variant (same animated gradient-border bar) to match the builder chrome.
