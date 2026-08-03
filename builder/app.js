@@ -339,7 +339,10 @@
         (figma
           ? '<label class="ob-field"><span>Figma file link</span><input class="ob-in ob-figma" placeholder="https://www.figma.com/design/…" spellcheck="false"></label>'
           : '<label class="ob-field"><span>App name</span><input class="ob-in ob-appname" placeholder="e.g. your app, or a reference like Wise" spellcheck="false"></label>' +
-            '<label class="ob-field"><span>Screenshots (optional)</span><input class="ob-shots" type="file" accept="image/*" multiple></label>') +
+            '<div class="ob-field"><span>Screenshots — add as many screens as you like</span>' +
+              '<div class="ob-drop" tabindex="0"><input class="ob-shots" type="file" accept="image/*" multiple hidden>' +
+                '<div class="ob-drop-cta"></div></div>' +
+              '<div class="ob-thumbs"></div></div>') +
         '<label class="ob-field"><span>One line about the app</span><input class="ob-in ob-desc" placeholder="e.g. a wallet with transfers, cards and bill payments" spellcheck="false"></label>' +
         '<div class="ob-note"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg><span>Full ' + (figma ? 'Figma' : 'screenshot') + ' import is coming — for now we generate a starting sitemap from what you provide, ready to refine.</span></div>' +
         '<div class="ob-actions"><button class="hero-go">' + SPARK + (figma ? 'Import &amp; rebuild' : 'Rebuild app') + '</button></div>';
@@ -352,6 +355,36 @@
       };
       h.querySelector('.hero-go').onclick = go;
       h.querySelectorAll('.ob-in').forEach((i) => i.addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); }));
+      // multi-screenshot uploader (app door) — accumulate across picks, drag & drop, remove
+      if (!figma) {
+        const drop = h.querySelector('.ob-drop'), fileInput = h.querySelector('.ob-shots'), thumbs = h.querySelector('.ob-thumbs'), cta = h.querySelector('.ob-drop-cta');
+        const DEFAULT_CTA = '<svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg><span><b>Click to upload</b> or drag &amp; drop — PNG or JPG, add multiple</span>';
+        let shots = [];
+        const keyOf = (f) => f.name + '|' + f.size;
+        const paint = () => {
+          thumbs.innerHTML = '';
+          shots.forEach((s, i) => {
+            const t = el('<div class="ob-thumb"></div>');
+            t.innerHTML = '<img src="' + s.url + '" alt=""><span class="ob-thumb-x" title="Remove">✕</span><span class="ob-thumb-n">' + esc(s.file.name) + '</span>';
+            t.querySelector('.ob-thumb-x').onclick = (e) => { e.stopPropagation(); URL.revokeObjectURL(s.url); shots.splice(i, 1); paint(); };
+            thumbs.appendChild(t);
+          });
+          cta.innerHTML = shots.length
+            ? '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span><b>' + shots.length + ' screenshot' + (shots.length > 1 ? 's' : '') + '</b> added — click to add more</span>'
+            : DEFAULT_CTA;
+        };
+        const addFiles = (list) => {
+          [].forEach.call(list || [], (f) => { if (f.type.indexOf('image') === 0 && !shots.some((s) => keyOf(s.file) === keyOf(f))) shots.push({ file: f, url: URL.createObjectURL(f) }); });
+          paint();
+        };
+        paint();
+        drop.onclick = () => fileInput.click();
+        drop.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); } };
+        fileInput.onchange = () => { addFiles(fileInput.files); fileInput.value = ''; };
+        drop.addEventListener('dragover', (e) => { e.preventDefault(); drop.classList.add('drag'); });
+        drop.addEventListener('dragleave', () => drop.classList.remove('drag'));
+        drop.addEventListener('drop', (e) => { e.preventDefault(); drop.classList.remove('drag'); addFiles(e.dataTransfer && e.dataTransfer.files); });
+      }
       setTimeout(() => { const f = h.querySelector('.ob-in'); if (f) f.focus(); }, 40);
       return h;
     }
