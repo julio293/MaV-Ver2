@@ -35,7 +35,7 @@ Live site: https://mav-ver2.pages.dev · Builder: https://mav-ver2.pages.dev/bui
 - Rewrote the Pages Function to be **provider-agnostic**: Anthropic, OpenAI, **Google Gemini (free tier + vision)**, or OpenRouter — chosen via `LLM_PROVIDER` + the matching key env, swappable any time. Health GET reports the active provider/model.
 - The **Rebuild-from-app** door now downscales the uploaded screenshots and sends them to the vision model; the reply rebuilds the screens in MaV components and returns a **brand palette** that's applied as the accent. Strict catalog validation + rule-based fallback preserved.
 - Verified: graceful fallback (image scaling runs, generates from text when no provider). Enable a free provider with a Gemini key + `LLM_PROVIDER=gemini`; switch to Anthropic later by changing the env.
-- Commit `dd26fe6` · v38
+- Commit `cca4027` · Deploy `545b474d` · v38
 
 ### LLM sitemap generation (with rule-based fallback)
 - New Cloudflare **Pages Function** `functions/api/generate.js` calls the Anthropic API (key stays server-side) to compose the sitemap from the brief + audience, constrained to the real component catalog via a tool schema.
