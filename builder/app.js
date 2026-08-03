@@ -73,6 +73,24 @@
   /* ── helpers ─────────────────────────────────────────────────────────── */
   const el = (html) => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild; };
   const $ = (s, r = document) => r.querySelector(s);
+  /* downscale an image File to a base64 JPEG (keeps vision payload/tokens small) */
+  function fileToScaledDataURL(file, max = 1200, q = 0.82) {
+    return new Promise((resolve, reject) => {
+      const img = new Image(); const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        let w = img.width, hgt = img.height; const scale = Math.min(1, max / Math.max(w, hgt));
+        w = Math.max(1, Math.round(w * scale)); hgt = Math.max(1, Math.round(hgt * scale));
+        const cv = document.createElement('canvas'); cv.width = w; cv.height = hgt;
+        cv.getContext('2d').drawImage(img, 0, 0, w, hgt);
+        const dataUrl = cv.toDataURL('image/jpeg', q);
+        resolve({ mime: 'image/jpeg', data: dataUrl.slice(dataUrl.indexOf(',') + 1) });
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('image decode failed')); };
+      img.src = url;
+    });
+  }
+
   /* the builder is fintech-only — accept a prompt only if it reads like a finance product */
   function isFintech(t) {
     return /\b(fintech|bank|banking|e-?bank|neobank|wallet|pay|payment|payments|card|cards|debit|credit|transfer|transfers|remit|money|finance|financial|loan|loans|lend|lending|invest|investing|trading|stock|stocks|crypto|bitcoin|saving|savings|budget|insurance|account|accounts|transaction|transactions|billing|invoice|expense|expenses|cashflow|currency|forex|mortgage|pension|payroll|checkout|p2p|kyc|atm|deposit|withdraw|ledger|super ?app)\b/i.test(t || '');
@@ -344,14 +362,22 @@
                 '<div class="ob-drop-cta"></div></div>' +
               '<div class="ob-thumbs"></div></div>') +
         '<label class="ob-field"><span>One line about the app</span><input class="ob-in ob-desc" placeholder="e.g. a wallet with transfers, cards and bill payments" spellcheck="false"></label>' +
-        '<div class="ob-note"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg><span>Full ' + (figma ? 'Figma' : 'screenshot') + ' import is coming — for now we generate a starting sitemap from what you provide, ready to refine.</span></div>' +
+        '<div class="ob-note"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg><span>' + (figma
+          ? 'Full Figma import is coming — for now we generate a starting sitemap from what you provide, ready to refine.'
+          : 'With an AI provider connected, we read your screenshots and rebuild the screens in MaV — colours included. Without one, we generate from your description.') + '</span></div>' +
         '<div class="ob-actions"><button class="hero-go">' + SPARK + (figma ? 'Import &amp; rebuild' : 'Rebuild app') + '</button></div>';
       h.querySelector('.ob-back').onclick = () => mount(chooseView());
-      const go = () => {
+      const shots = [];   // {file, url} — populated by the uploader below (app door)
+      const go = async () => {
         const desc = (h.querySelector('.ob-desc').value || '').trim();
         const name = figma ? '' : (h.querySelector('.ob-appname').value || '').trim();
         const brief = desc || (name ? name + ' — a fintech app' : (figma ? 'a fintech app recreated from a Figma design' : 'an existing fintech app'));
-        close(); runBuild(brief, '', 6);
+        let images = null;
+        if (!figma && shots.length) {
+          const btn = h.querySelector('.hero-go'); btn.disabled = true; btn.textContent = 'Reading screenshots…';
+          try { images = await Promise.all(shots.slice(0, 8).map((s) => fileToScaledDataURL(s.file))); } catch (e) { images = null; }
+        }
+        close(); runBuild(brief, '', 6, images);
       };
       h.querySelector('.hero-go').onclick = go;
       h.querySelectorAll('.ob-in').forEach((i) => i.addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); }));
@@ -359,7 +385,6 @@
       if (!figma) {
         const drop = h.querySelector('.ob-drop'), fileInput = h.querySelector('.ob-shots'), thumbs = h.querySelector('.ob-thumbs'), cta = h.querySelector('.ob-drop-cta');
         const DEFAULT_CTA = '<svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg><span><b>Click to upload</b> or drag &amp; drop — PNG or JPG, add multiple</span>';
-        let shots = [];
         const keyOf = (f) => f.name + '|' + f.size;
         const paint = () => {
           thumbs.innerHTML = '';
@@ -449,16 +474,19 @@
   /* rule-based generator (instant, offline, always available) */
   function generateProject(desc, audience, count) { setProject(desc, audience, projectFromPrompt(desc, audience, count)); }
 
-  /* LLM path — ask the serverless function; validate strictly against the real
-     catalog. Returns pages[] or null (→ caller falls back to the rule engine). */
-  async function llmProject(desc, audience, count) {
+  /* LLM path — ask the serverless function (any provider). Optionally send
+     screenshots (images) for the "rebuild from app" vision path. Validates the
+     reply strictly against the real catalog. Returns {pages, palette} or null. */
+  async function llmProject(desc, audience, count, images) {
     const catalog = Object.keys(CATALOG).map((type) => ({
       type, label: CATALOG[type].label, desc: DESC[type] || '',
       props: (VARIANTS[type] || []).map((v) => (v.opts ? { key: v.key, options: v.opts.map((o) => String(o[0])) } : { key: v.key })),
     }));
+    const payload = { brief: desc, audience, count, catalog };
+    if (images && images.length) payload.images = images;
     let res;
     try {
-      res = await fetch('/api/generate', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ brief: desc, audience, count, catalog }) });
+      res = await fetch('/api/generate', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
     } catch (e) { return null; }
     if (!res.ok) return null;
     const data = await res.json().catch(() => null);
@@ -474,17 +502,27 @@
         return { type: s.type, props };
       }),
     })).filter((p) => p.comps.length);
-    return pages.length ? pages : null;
+    if (!pages.length) return null;
+    const palette = Array.isArray(data.palette) ? data.palette.filter((c) => typeof c === 'string') : null;
+    return { pages, palette };
   }
-  /* try the LLM, fall back to the rule engine */
-  async function composeProject(desc, audience, count) {
-    let pages = null;
-    try { pages = await llmProject(desc, audience, count); } catch (e) { pages = null; }
-    return (pages && pages.length) ? pages : projectFromPrompt(desc, audience, count);
+  /* try the LLM, fall back to the rule engine. Returns {pages, palette}. */
+  async function composeProject(desc, audience, count, images) {
+    let r = null;
+    try { r = await llmProject(desc, audience, count, images); } catch (e) { r = null; }
+    if (r && r.pages && r.pages.length) return r;
+    return { pages: projectFromPrompt(desc, audience, count), palette: null };
+  }
+  /* apply the first valid hex from an extracted palette as the accent */
+  function applyPalette(palette) {
+    if (!palette || !palette.length) return;
+    let hex = String(palette[0] || '').trim(); if (!hex) return;
+    if (hex[0] !== '#') hex = '#' + hex;
+    if (/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(hex)) S.style.accent = hex;
   }
 
   /* ══ "Building your app" loader → compose (LLM/rules) → transition in ══ */
-  async function runBuild(desc, audience, count) {
+  async function runBuild(desc, audience, count, images) {
     document.querySelectorAll('.build-back').forEach((n) => n.remove());
     const steps = ['Reading your brief', 'Mapping out the pages', 'Composing each section', 'Applying MaV components', 'Finishing touches'];
     const back = el('<div class="build-back"></div>');
@@ -503,12 +541,14 @@
     stepEls.forEach((se, i) => { if (i < stepEls.length) setTimeout(() => { if (i > 0) stepEls[i - 1].classList.add('done'); se.classList.add('active'); }, i * per + 150); });
     const minWait = new Promise((r) => setTimeout(r, stepEls.length * per + 300));
 
-    let pages = null;
-    try { pages = await composeProject(desc, audience, count); } catch (e) { pages = null; }
+    let r = null;
+    try { r = await composeProject(desc, audience, count, images); } catch (e) { r = null; }
     await minWait;
+    let pages = r && r.pages;
     if (!pages || !pages.length) pages = projectFromPrompt(desc, audience, count);
 
     stepEls[stepEls.length - 1].classList.add('done');
+    applyPalette(r && r.palette);          // if a vision provider returned brand colours, use them
     setProject(desc, audience, pages);
     const cv = $('#canvas'); if (cv) { cv.classList.remove('reveal'); void cv.offsetWidth; cv.classList.add('reveal'); }
     await new Promise((r) => setTimeout(r, 170));
