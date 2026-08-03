@@ -11,7 +11,7 @@ Live site: https://mav-ver2.pages.dev · Builder: https://mav-ver2.pages.dev/bui
 
 ### Multi-screenshot upload (Rebuild-from-app door)
 - Replaced the single native file input with a proper **multi-file dropzone**: click or drag & drop, **accumulate across picks**, dedupe, a live count ("N screenshots added"), a **thumbnail grid**, and per-file remove. Users can now add as many app screens as they like.
-- Commit `6837a7c` · v37
+- Commit `22c7cd4` · Deploy `a216dc8c` · v37
 
 ### 3-door onboarding entry (from the journey diagram)
 - Opening the builder now shows **"How do you want to start?"** with the three doors from the onboarding-journey diagram: **Describe it** (Ready — full prompt flow), **I have a Figma** (Preview), **I have an existing app** (Preview).
