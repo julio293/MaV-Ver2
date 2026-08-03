@@ -254,41 +254,109 @@
 
   /* ══ Standalone hero landing — describe your fintech app, then generate ═ */
   const SPARK = '<svg viewBox="0 0 24 24"><path d="M12 2.5l1.9 5.4L19 9.8l-5.1 1.9L12 17l-1.9-5.3L5 9.8l5.1-1.9z"/><path d="M18.5 14.5l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/></svg>';
+  const OB_ICON = {
+    figma: '<svg viewBox="0 0 24 24"><path d="M9 15l6-6"/><path d="M11 6l1-1a4 4 0 0 1 6 6l-1 1"/><path d="M13 18l-1 1a4 4 0 0 1-6-6l1-1"/></svg>',
+    app: '<svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M10 18h4"/></svg>',
+    eyebrow: null,
+  };
   function openWelcome() {
     document.querySelectorAll('.hero-back, .wc-back').forEach((n) => n.remove());
-    const recos = ['Mobile bank with cards & instant transfers', 'Digital wallet with QR payments', 'Neobank onboarding with KYC', 'Savings app with goals & insights', 'Credit & debit card management', 'Peer-to-peer payments & split bills'];
-    const example = 'A mobile banking app for young professionals — debit & credit cards, instant transfers, spending insights and bill payments.';
     const back = el('<div class="hero-back"></div>');
-    const h = el('<div class="hero"></div>');
-    h.innerHTML =
-      '<div class="hero-eyebrow"><span class="hero-mark">' + MARK + '</span> MaV App Builder · Fintech</div>' +
-      '<h1 class="hero-title">Describe your fintech app<br>and watch it take shape</h1>' +
-      '<p class="hero-sub">One sentence is enough — the builder maps out the pages and the sections each one needs, from your MaV design-system components.</p>' +
-      '<div class="hero-bar-wrap"><div class="hero-bar"><input class="hero-input" placeholder="Describe your fintech app in a sentence or two…" spellcheck="false"><button class="hero-go">' + SPARK + 'Generate</button></div></div>' +
-      '<div class="hero-belowbar"><span class="hero-err">The builder specialises in <strong>fintech &amp; e-banking</strong> apps — try a banking, payments, wallet, cards, savings or investing product.</span>' +
-        '<button class="hero-example">Take it for a spin with an <b>example</b></button></div>' +
-      '<div class="hero-reco-label">Or start from a recommendation</div><div class="hero-recos"></div>' +
-      '<div class="hero-opts"><label class="hero-opt"><span>Audience</span><input class="gm-aud" placeholder="e.g. young professionals" spellcheck="false"></label>' +
-        '<label class="hero-opt"><span>Pages</span><select class="gm-count"></select></label>' +
-        '<button class="hero-skip">Skip — use a sample</button></div>';
-    back.appendChild(h); document.body.appendChild(back);
-    const inp = h.querySelector('.hero-input'), err = h.querySelector('.hero-err'), wrap = h.querySelector('.hero-bar-wrap');
-    const rw = h.querySelector('.hero-recos');
-    recos.forEach((r) => { const b = el('<button class="hero-reco"></button>'); b.textContent = r; b.onclick = () => { inp.value = r; inp.focus(); err.classList.remove('on'); }; rw.appendChild(b); });
-    const sel = h.querySelector('.gm-count');
-    [3, 4, 5, 6, 7, 8, 10].forEach((nn) => { const o = document.createElement('option'); o.value = nn; o.textContent = nn + ' pages'; if (nn === 6) o.selected = true; sel.appendChild(o); });
+    document.body.appendChild(back);
     const close = () => back.remove();
-    const go = () => {
-      const v = inp.value.trim(); if (!v) { inp.focus(); return; }
-      if (!isFintech(v)) { err.classList.add('on'); wrap.classList.add('shake'); setTimeout(() => wrap.classList.remove('shake'), 450); inp.focus(); return; }
-      close(); runBuild(v, h.querySelector('.gm-aud').value.trim(), parseInt(sel.value, 10) || 6);
-    };
-    h.querySelector('.hero-go').onclick = go;
-    h.querySelector('.hero-example').onclick = () => { inp.value = example; inp.focus(); err.classList.remove('on'); };
-    h.querySelector('.hero-skip').onclick = close;
-    inp.addEventListener('input', () => err.classList.remove('on'));
-    inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); });
-    setTimeout(() => inp.focus(), 40);
+    const mount = (node) => { back.innerHTML = ''; back.appendChild(node); back.scrollTop = 0; };
+    const EYEBROW = '<div class="hero-eyebrow"><span class="hero-mark">' + MARK + '</span> MaV App Builder · Fintech</div>';
+
+    /* ── door chooser (matches the onboarding-journey diagram) ── */
+    function chooseView() {
+      const h = el('<div class="hero hero-narrow"></div>');
+      h.innerHTML = EYEBROW +
+        '<h1 class="hero-title">How do you want to start?</h1>' +
+        '<p class="hero-sub">Bring what you have — a fresh idea, a Figma file, or an app already in the wild. Every path lands in the same builder, built from your MaV components.</p>' +
+        '<div class="ob-doors"></div>' +
+        '<div class="hero-opts" style="margin-top:24px"><button class="hero-skip">Skip — use a sample</button></div>';
+      const doors = [
+        ['describe', SPARK, 'Describe it', 'Fresh idea — no app or Figma yet. Generate the whole thing from a prompt.', 'Ready'],
+        ['figma', OB_ICON.figma, 'I have a Figma', 'Paste a Figma file — we rebuild it with your MaV components & brand.', 'Preview'],
+        ['app', OB_ICON.app, 'I have an existing app', 'Recreate your live app from screenshots, in the MaV design system.', 'Preview'],
+      ];
+      const dw = h.querySelector('.ob-doors');
+      doors.forEach(([key, icon, title, desc, tag]) => {
+        const c = el('<button class="ob-door"></button>');
+        c.innerHTML = '<span class="ob-door-tag ob-' + (tag === 'Ready' ? 'ready' : 'preview') + '">' + tag + '</span>' +
+          '<span class="ob-door-ic">' + icon + '</span><span class="ob-door-t">' + title + '</span><span class="ob-door-d">' + desc + '</span>';
+        c.onclick = () => mount(key === 'describe' ? describeView() : importView(key));
+        dw.appendChild(c);
+      });
+      h.querySelector('.hero-skip').onclick = close;
+      return h;
+    }
+
+    /* ── Case 3 — describe a fresh fintech app ── */
+    function describeView() {
+      const recos = ['Mobile bank with cards & instant transfers', 'Digital wallet with QR payments', 'Neobank onboarding with KYC', 'Savings app with goals & insights', 'Credit & debit card management', 'Peer-to-peer payments & split bills'];
+      const example = 'A mobile banking app for young professionals — debit & credit cards, instant transfers, spending insights and bill payments.';
+      const h = el('<div class="hero"></div>');
+      h.innerHTML =
+        '<button class="ob-back">‹ Back to options</button>' + EYEBROW +
+        '<h1 class="hero-title">Describe your fintech app<br>and watch it take shape</h1>' +
+        '<p class="hero-sub">One sentence is enough — the builder maps out the pages and the sections each one needs, from your MaV design-system components.</p>' +
+        '<div class="hero-bar-wrap"><div class="hero-bar"><input class="hero-input" placeholder="Describe your fintech app in a sentence or two…" spellcheck="false"><button class="hero-go">' + SPARK + 'Generate</button></div></div>' +
+        '<div class="hero-belowbar"><span class="hero-err">The builder specialises in <strong>fintech &amp; e-banking</strong> apps — try a banking, payments, wallet, cards, savings or investing product.</span>' +
+          '<button class="hero-example">Take it for a spin with an <b>example</b></button></div>' +
+        '<div class="hero-reco-label">Or start from a recommendation</div><div class="hero-recos"></div>' +
+        '<div class="hero-opts"><label class="hero-opt"><span>Audience</span><input class="gm-aud" placeholder="e.g. young professionals" spellcheck="false"></label>' +
+          '<label class="hero-opt"><span>Pages</span><select class="gm-count"></select></label></div>';
+      const inp = h.querySelector('.hero-input'), err = h.querySelector('.hero-err'), wrap = h.querySelector('.hero-bar-wrap');
+      const rw = h.querySelector('.hero-recos');
+      recos.forEach((r) => { const b = el('<button class="hero-reco"></button>'); b.textContent = r; b.onclick = () => { inp.value = r; inp.focus(); err.classList.remove('on'); }; rw.appendChild(b); });
+      const sel = h.querySelector('.gm-count');
+      [3, 4, 5, 6, 7, 8, 10].forEach((nn) => { const o = document.createElement('option'); o.value = nn; o.textContent = nn + ' pages'; if (nn === 6) o.selected = true; sel.appendChild(o); });
+      const go = () => {
+        const v = inp.value.trim(); if (!v) { inp.focus(); return; }
+        if (!isFintech(v)) { err.classList.add('on'); wrap.classList.add('shake'); setTimeout(() => wrap.classList.remove('shake'), 450); inp.focus(); return; }
+        close(); runBuild(v, h.querySelector('.gm-aud').value.trim(), parseInt(sel.value, 10) || 6);
+      };
+      h.querySelector('.hero-go').onclick = go;
+      h.querySelector('.hero-example').onclick = () => { inp.value = example; inp.focus(); err.classList.remove('on'); };
+      h.querySelector('.ob-back').onclick = () => mount(chooseView());
+      inp.addEventListener('input', () => err.classList.remove('on'));
+      inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); });
+      setTimeout(() => inp.focus(), 40);
+      return h;
+    }
+
+    /* ── Case 1 & 2 — import from Figma / existing app (intake; ingestion WIP) ── */
+    function importView(kind) {
+      const figma = kind === 'figma';
+      const h = el('<div class="hero hero-narrow"></div>');
+      h.innerHTML =
+        '<button class="ob-back">‹ Back to options</button>' + EYEBROW +
+        '<h1 class="hero-title">' + (figma ? 'Import from Figma' : 'Rebuild from your app') + ' <span class="ob-inline-tag">Preview</span></h1>' +
+        '<p class="hero-sub">' + (figma
+          ? 'Paste your Figma file link — we fetch the design and recreate it with MaV components and your brand tokens.'
+          : 'Give your app name and a few screenshots — we detect the components and colours and rebuild it in the MaV design system.') + '</p>' +
+        (figma
+          ? '<label class="ob-field"><span>Figma file link</span><input class="ob-in ob-figma" placeholder="https://www.figma.com/design/…" spellcheck="false"></label>'
+          : '<label class="ob-field"><span>App name</span><input class="ob-in ob-appname" placeholder="e.g. your app, or a reference like Wise" spellcheck="false"></label>' +
+            '<label class="ob-field"><span>Screenshots (optional)</span><input class="ob-shots" type="file" accept="image/*" multiple></label>') +
+        '<label class="ob-field"><span>One line about the app</span><input class="ob-in ob-desc" placeholder="e.g. a wallet with transfers, cards and bill payments" spellcheck="false"></label>' +
+        '<div class="ob-note"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg><span>Full ' + (figma ? 'Figma' : 'screenshot') + ' import is coming — for now we generate a starting sitemap from what you provide, ready to refine.</span></div>' +
+        '<div class="ob-actions"><button class="hero-go">' + SPARK + (figma ? 'Import &amp; rebuild' : 'Rebuild app') + '</button></div>';
+      h.querySelector('.ob-back').onclick = () => mount(chooseView());
+      const go = () => {
+        const desc = (h.querySelector('.ob-desc').value || '').trim();
+        const name = figma ? '' : (h.querySelector('.ob-appname').value || '').trim();
+        const brief = desc || (name ? name + ' — a fintech app' : (figma ? 'a fintech app recreated from a Figma design' : 'an existing fintech app'));
+        close(); runBuild(brief, '', 6);
+      };
+      h.querySelector('.hero-go').onclick = go;
+      h.querySelectorAll('.ob-in').forEach((i) => i.addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); }));
+      setTimeout(() => { const f = h.querySelector('.ob-in'); if (f) f.focus(); }, 40);
+      return h;
+    }
+
+    mount(chooseView());
   }
 
   /* ══ Project prompt → full sitemap (modal) ═══════════════════════════ */
