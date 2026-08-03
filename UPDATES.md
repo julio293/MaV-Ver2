@@ -12,7 +12,7 @@ Live site: https://mav-ver2.pages.dev · Builder: https://mav-ver2.pages.dev/bui
 ### 3-door onboarding entry (from the journey diagram)
 - Opening the builder now shows **"How do you want to start?"** with the three doors from the onboarding-journey diagram: **Describe it** (Ready — full prompt flow), **I have a Figma** (Preview), **I have an existing app** (Preview).
 - Describe = the existing hero prompt. Figma/App doors present their intake (Figma link · app name + screenshot upload · one-line description) with an honest "import coming — generates a starting sitemap for now" note, then run the build. Back-navigation between chooser and sub-views; sample-skip retained.
-- Commit `9eea045` · v36
+- Commit `2eed676` · Deploy `9590f853` · v36
 
 ### Homepage embed shows the prompt
 - The App Builder embedded on the design-system homepage now shows the **hero prompt** ("Describe your fintech app") instead of the live builder UI — users can't build from the preview, so it presents the prompt; "Open full screen" opens the real builder. (Removed the earlier iframe-silence gate.)
