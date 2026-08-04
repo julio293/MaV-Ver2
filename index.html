@@ -22,6 +22,39 @@ body { margin: 0; background: var(--mav-bg); color: var(--mav-fg); font-family: 
 [data-theme="dark"] .brand-mark svg { fill: #171717; }
 .top-spacer { flex: 1; }
 .theme-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; padding: 8px 12px; border-radius: 9px; border: 1px solid var(--mav-border); background: var(--mav-bg); color: var(--mav-fg); cursor: pointer; }
+.fs-btn { margin-right: 8px; }
+.fs-btn.busy { opacity: .7; pointer-events: none; }
+
+/* Figma sync slide-over */
+.fs-back { position: fixed; inset: 0; z-index: 60; background: rgba(10,12,16,.45); backdrop-filter: blur(3px); opacity: 0; visibility: hidden; transition: opacity .2s; }
+.fs-back.on { opacity: 1; visibility: visible; }
+.fs-panel { position: fixed; top: 0; right: 0; height: 100%; width: 440px; max-width: 100%; z-index: 61; background: var(--mav-bg); border-left: 1px solid var(--mav-border); box-shadow: -20px 0 60px -20px rgba(0,0,0,.3); transform: translateX(100%); transition: transform .28s cubic-bezier(.32,.72,0,1); display: flex; flex-direction: column; }
+.fs-panel.on { transform: none; }
+.fs-head { display: flex; align-items: center; gap: 10px; padding: 18px 20px; border-bottom: 1px solid var(--mav-border); }
+.fs-head b { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; }
+.fs-x { margin-left: auto; border: 0; background: transparent; font-size: 20px; color: var(--mav-muted); cursor: pointer; line-height: 1; }
+.fs-body { flex: 1; overflow: auto; padding: 18px 20px 28px; }
+.fs-meta { font-size: 12.5px; color: var(--mav-muted); margin-bottom: 18px; line-height: 1.5; }
+.fs-sec-h { display: flex; align-items: center; justify-content: space-between; margin: 22px 0 10px; }
+.fs-sec-h h3 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--mav-muted); margin: 0; }
+.fs-apply { border: 0; background: var(--mav-primary); color: var(--mav-on-primary,#fff); font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 8px; cursor: pointer; }
+[data-theme="dark"] .fs-apply { color: #171717; }
+.fs-apply.ghost { background: transparent; border: 1px solid var(--mav-border); color: var(--mav-fg); }
+.fs-row { display: flex; align-items: center; gap: 11px; padding: 9px 0; border-bottom: 1px solid var(--mav-border); font-size: 13px; }
+.fs-sw { width: 26px; height: 26px; border-radius: 7px; border: 1px solid var(--mav-border); flex-shrink: 0; }
+.fs-nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: ui-monospace, monospace; font-size: 12px; }
+.fs-hex { font-family: ui-monospace, monospace; font-size: 11.5px; color: var(--mav-muted); }
+.fs-badge { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; padding: 2px 7px; border-radius: 999px; flex-shrink: 0; }
+.fs-new { background: #dff5e6; color: #1f7a44; } [data-theme="dark"] .fs-new { background: #143a25; color: #7ee2a8; }
+.fs-changed { background: #fff0d6; color: #a8720f; } [data-theme="dark"] .fs-changed { background: #3a2e14; color: #f5c45a; }
+.fs-same { background: var(--mav-border); color: var(--mav-muted); }
+.fs-empty { font-size: 13px; color: var(--mav-muted); padding: 14px 0; }
+.fs-note { font-size: 12px; color: var(--mav-muted); background: var(--mav-primary-soft, #352eff1a); border-radius: 10px; padding: 12px 14px; line-height: 1.55; margin-top: 6px; }
+.fs-comp { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--mav-border); font-size: 13px; }
+.fs-comp .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fs-summary { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+.fs-chip { font-size: 12px; font-weight: 600; padding: 5px 11px; border-radius: 999px; border: 1px solid var(--mav-border); color: var(--mav-muted); }
+.fs-code { font-family: ui-monospace, monospace; font-size: 11.5px; background: var(--mav-border); padding: 1px 6px; border-radius: 5px; }
 
 /* hero */
 .hero { padding: 72px 0 48px; border-bottom: 1px solid var(--mav-border); }
@@ -67,6 +100,7 @@ footer a { color: var(--mav-primary); text-decoration: none; }
         MaV Design System
       </a>
       <span class="top-spacer"></span>
+      <button class="theme-btn fs-btn" id="figmaSyncBtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-8-4.9"/><path d="M3 12a9 9 0 0 1 9-9 9 9 0 0 1 8 4.9"/><path d="M21 3v6h-6"/><path d="M3 21v-6h6"/></svg> <span>Sync with Figma</span></button>
       <button class="theme-btn" data-theme-toggle><span data-theme-icon>☾</span> <span data-theme-label>Dark mode</span></button>
     </div>
   </div>
@@ -166,6 +200,122 @@ footer a { color: var(--mav-primary); text-decoration: none; }
     html += '</div></section>';
   });
   document.getElementById('sections').innerHTML = html;
+  </script>
+
+  <!-- ── Figma sync slide-over ─────────────────────────────────────────── -->
+  <div class="fs-back" id="fsBack"></div>
+  <aside class="fs-panel" id="fsPanel" aria-hidden="true">
+    <div class="fs-head">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--mav-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-8-4.9"/><path d="M3 12a9 9 0 0 1 9-9 9 9 0 0 1 8 4.9"/><path d="M21 3v6h-6"/><path d="M3 21v-6h6"/></svg>
+      <b>Sync with Figma</b>
+      <button class="fs-x" id="fsClose" aria-label="Close">✕</button>
+    </div>
+    <div class="fs-body" id="fsBody"></div>
+  </aside>
+
+  <script>
+  /* Figma sync: pull tokens + component list, diff against the live site, apply live. */
+  (function () {
+    var btn = document.getElementById('figmaSyncBtn');
+    var back = document.getElementById('fsBack'), panel = document.getElementById('fsPanel'), body = document.getElementById('fsBody'), closeBtn = document.getElementById('fsClose');
+    var LAST_KEY = 'mavFigmaSync';
+    function open() { back.classList.add('on'); panel.classList.add('on'); panel.setAttribute('aria-hidden', 'false'); }
+    function close() { back.classList.remove('on'); panel.classList.remove('on'); panel.setAttribute('aria-hidden', 'true'); }
+    back.onclick = close; closeBtn.onclick = close;
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+
+    var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]); }); };
+    var norm = function (h) { h = (h || '').trim().toLowerCase(); if (/^#([0-9a-f]{3})$/.test(h)) h = '#' + h[1] + h[1] + h[2] + h[2] + h[3] + h[3]; return h; };
+    function currentVar(name) { return norm(getComputedStyle(document.documentElement).getPropertyValue('--' + name)); }
+
+    btn.onclick = function () {
+      open();
+      body.innerHTML = '<div class="fs-empty">Contacting Figma…</div>';
+      btn.classList.add('busy');
+      fetch('/api/figma-sync').then(function (r) { return r.json(); }).catch(function () { return { ok: false, error: 'network' }; }).then(render).then(function () { btn.classList.remove('busy'); });
+    };
+
+    function render(data) {
+      if (!data || data.configured === false) { renderSetup(); return; }
+      if (!data.ok) { body.innerHTML = '<div class="fs-note">Couldn\'t reach the Figma file. ' + esc(data.error || '') + '</div>'; return; }
+      var last = null; try { last = JSON.parse(localStorage.getItem(LAST_KEY) || 'null'); } catch (e) {}
+      var lastNames = {}; if (last && last.components) last.components.forEach(function (c) { lastNames[c.key || c.name] = c.updated || 1; });
+
+      // ── colours: diff vs the live CSS variables (our tokens mirror Figma names) ──
+      var colors = (data.colors || []).map(function (c) {
+        var varName = c.name.replace(/\s+/g, '');           // "main-text/default"
+        var cur = currentVar(varName);
+        var status = !cur ? 'new' : (norm(c.hex) !== cur ? 'changed' : 'same');
+        return { name: varName, hex: c.hex, status: status };
+      });
+      var changed = colors.filter(function (c) { return c.status !== 'same'; });
+
+      var html = '';
+      var when = data.file && data.file.lastModified ? new Date(data.file.lastModified).toLocaleString() : '—';
+      html += '<div class="fs-meta"><b>' + esc(data.file && data.file.name || 'Figma file') + '</b><br>Last changed in Figma: ' + esc(when) + '</div>';
+      html += '<div class="fs-summary">' +
+        '<span class="fs-chip">' + colors.length + ' colour tokens</span>' +
+        '<span class="fs-chip">' + (data.text || []).length + ' text styles</span>' +
+        '<span class="fs-chip">' + (data.components || []).length + ' components</span></div>';
+
+      // colours
+      html += '<div class="fs-sec-h"><h3>Colour tokens</h3>' + (changed.length ? '<button class="fs-apply" data-apply="changed">Apply ' + changed.length + ' change' + (changed.length > 1 ? 's' : '') + '</button>' : '') + '</div>';
+      if (!colors.length) html += '<div class="fs-empty">No published colour styles found in the file.</div>';
+      else colors.slice(0, 200).forEach(function (c) {
+        html += '<div class="fs-row"><span class="fs-sw" style="background:' + esc(c.hex) + '"></span><span class="fs-nm">--' + esc(c.name) + '</span><span class="fs-hex">' + esc(c.hex) + '</span><span class="fs-badge fs-' + c.status + '">' + c.status + '</span></div>';
+      });
+      if (colors.length) html += '<div style="margin-top:12px;display:flex;gap:8px"><button class="fs-apply" data-apply="all">Apply all to preview</button><button class="fs-apply ghost" data-apply="reset">Reset</button></div>';
+
+      // text
+      if ((data.text || []).length) {
+        html += '<div class="fs-sec-h"><h3>Text styles</h3></div>';
+        data.text.slice(0, 60).forEach(function (t) {
+          html += '<div class="fs-row"><span class="fs-nm">' + esc(t.name) + '</span><span class="fs-hex">' + esc(t.family || '') + ' · ' + (t.size || '?') + 'px · ' + (t.weight || '') + '</span></div>';
+        });
+      }
+
+      // components (flag new/changed since last sync; code stays manual)
+      html += '<div class="fs-sec-h"><h3>Components</h3></div>';
+      if (!(data.components || []).length) html += '<div class="fs-empty">No published components in this file.</div>';
+      else {
+        var nNew = 0, nChg = 0;
+        data.components.slice(0, 300).forEach(function (c) {
+          var id = c.key || c.name; var prev = lastNames[id];
+          var st = !last ? 'same' : (prev === undefined ? 'new' : (prev !== (c.updated || 1) ? 'changed' : 'same'));
+          if (st === 'new') nNew++; if (st === 'changed') nChg++;
+          html += '<div class="fs-comp"><span class="nm">' + esc(c.name) + '</span>' + (st !== 'same' ? '<span class="fs-badge fs-' + st + '">' + st + '</span>' : '') + '</div>';
+        });
+        html += '<div class="fs-note">Component <b>code</b> can\'t be auto-rewritten from Figma — this list flags what changed so you know what to update. ' + (last ? (nNew + ' new · ' + nChg + ' changed since your last sync.') : 'First sync — future syncs will highlight changes.') + '</div>';
+      }
+      html += '<div class="fs-note">Applying updates the site <b>for preview</b> only. To persist into the repo, the <span class="fs-code">figma-sync</span> GitHub Action commits the tokens &amp; redeploys.</div>';
+
+      body.innerHTML = html;
+      // wire apply buttons
+      body.querySelectorAll('[data-apply]').forEach(function (b2) {
+        b2.onclick = function () {
+          var mode = b2.getAttribute('data-apply');
+          if (mode === 'reset') { location.reload(); return; }
+          var list = mode === 'changed' ? changed : colors;
+          list.forEach(function (c) { document.documentElement.style.setProperty('--' + c.name, c.hex); });
+          b2.textContent = 'Applied ✓'; b2.disabled = true;
+        };
+      });
+      try { localStorage.setItem(LAST_KEY, JSON.stringify({ components: data.components || [], at: Date.now() })); } catch (e) {}
+    }
+
+    function renderSetup() {
+      body.innerHTML =
+        '<div class="fs-note">Figma sync isn\'t connected yet. Add a Figma read token &amp; your file key as Cloudflare Pages secrets, then this button pulls the latest tokens and components automatically.</div>' +
+        '<div class="fs-sec-h"><h3>Connect (one-time)</h3></div>' +
+        '<div style="font-size:12.5px;line-height:1.7;color:var(--mav-muted)">' +
+        '1. Create a Figma token: <span class="fs-code">Figma → Settings → Personal access tokens</span> (File content: read).<br>' +
+        '2. Grab your file key from the URL: <span class="fs-code">figma.com/design/&lt;KEY&gt;/…</span><br>' +
+        '3. Set the secrets:<br>' +
+        '<span class="fs-code">npx wrangler pages secret put FIGMA_TOKEN --project-name mav-ver2</span><br>' +
+        '<span class="fs-code">npx wrangler pages secret put FIGMA_FILE_KEY --project-name mav-ver2</span><br>' +
+        '4. Redeploy — done. The button then diffs Figma vs the site and lets you apply changes.</div>';
+    }
+  })();
   </script>
 </body>
 </html>

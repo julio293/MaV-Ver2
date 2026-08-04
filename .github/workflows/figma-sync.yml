@@ -1,0 +1,57 @@
+name: Figma token sync
+
+# Pulls colour/text styles from Figma into the repo and commits when they change.
+# Requires repo secrets: FIGMA_TOKEN, FIGMA_FILE_KEY
+# (optional, to auto-redeploy: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID)
+
+on:
+  workflow_dispatch: {}       # run manually from the Actions tab
+  schedule:
+    - cron: '0 6 * * *'       # daily at 06:00 UTC
+
+permissions:
+  contents: write
+
+concurrency:
+  group: figma-sync
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Pull tokens from Figma
+        env:
+          FIGMA_TOKEN: ${{ secrets.FIGMA_TOKEN }}
+          FIGMA_FILE_KEY: ${{ secrets.FIGMA_FILE_KEY }}
+        run: node scripts/figma-sync.mjs
+
+      - name: Commit changes (if any)
+        id: commit
+        run: |
+          git config user.name  "figma-sync[bot]"
+          git config user.email "figma-sync@users.noreply.github.com"
+          git add app/tokens/figma-tokens.json css/figma-tokens.generated.css
+          if git diff --cached --quiet; then
+            echo "No token changes."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "chore: sync design tokens from Figma"
+            git push
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Optional: redeploy to Cloudflare Pages if creds are set and something changed
+      - name: Redeploy to Cloudflare Pages
+        if: steps.commit.outputs.changed == 'true' && env.CLOUDFLARE_API_TOKEN != ''
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CI: '1'
+        run: npx --yes wrangler pages deploy . --project-name mav-ver2 --branch main --commit-dirty=true
