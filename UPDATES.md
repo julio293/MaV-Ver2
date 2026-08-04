@@ -35,8 +35,8 @@ Live site: https://mav-ver2.pages.dev · Builder: https://mav-ver2.pages.dev/bui
 - New **Sync with Figma** button on the design-system homepage (index.html) → slide-over panel that pulls the file's colour + text styles and component list via a Cloudflare Function (`/api/figma-sync`, token as a secret).
 - **Diffs colour tokens against the live site** (our CSS vars mirror Figma names) with New/Changed badges, and **Apply to preview** updates them live. Components are listed and flagged New/Changed since last sync (code stays manual — honest note).
 - **Persistence:** `scripts/figma-sync.mjs` + `.github/workflows/figma-sync.yml` (daily + manual) commit a token snapshot + generated CSS and optionally redeploy — so it auto-updates without manual fetch/export.
-- Config-gated: shows a one-time connect guide until `FIGMA_TOKEN` + `FIGMA_FILE_KEY` are set. Verified: unconfigured + successful diff/apply.
-- Commit `c17b441`
+- Config-gated: shows a one-time connect guide until `FIGMA_TOKEN` + `FIGMA_FILE_KEY` are set. Verified: unconfigured + successful diff/apply; live endpoint returns `configured:false`.
+- Commit `3cd8df8` · Deploy `644a7786`
 
 ### Provider-agnostic LLM/vision + screenshot rebuild
 - Rewrote the Pages Function to be **provider-agnostic**: Anthropic, OpenAI, **Google Gemini (free tier + vision)**, or OpenRouter — chosen via `LLM_PROVIDER` + the matching key env, swappable any time. Health GET reports the active provider/model.
