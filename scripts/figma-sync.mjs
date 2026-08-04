@@ -27,7 +27,17 @@ const styles = ((await fig(`/v1/files/${KEY}/styles`)).meta || {}).styles || [];
 const ids = styles.map((s) => s.node_id).filter(Boolean).slice(0, 120);
 const nodes = ids.length ? (await fig(`/v1/files/${KEY}/nodes?ids=${encodeURIComponent(ids.join(','))}`)).nodes || {} : {};
 
-const colors = styles.filter((s) => s.style_type === 'FILL').map((s) => {
+// colours: prefer Variables (needs file_variables:read), else FILL styles
+let colors = [];
+try {
+  const vr = await fig(`/v1/files/${KEY}/variables/local`);
+  const vars = (vr.meta || {}).variables || {};
+  colors = Object.values(vars).filter((v) => v && v.resolvedType === 'COLOR').map((v) => {
+    const modes = v.valuesByMode || {}; const val = Object.values(modes)[0];
+    return { name: v.name, hex: (val && typeof val === 'object' && typeof val.r === 'number') ? toHex(val) : null };
+  }).filter((c) => c.hex);
+} catch (e) { /* no variables scope */ }
+if (!colors.length) colors = styles.filter((s) => s.style_type === 'FILL').map((s) => {
   const d = nodes[s.node_id] && nodes[s.node_id].document;
   const f = ((d && d.fills) || []).find((x) => x.type === 'SOLID');
   return { name: s.name, hex: f && f.color ? toHex(f.color) : null };
@@ -39,7 +49,8 @@ const text = styles.filter((s) => s.style_type === 'TEXT').map((s) => {
 }).filter(Boolean);
 
 let components = [];
-try { components = (((await fig(`/v1/files/${KEY}/components`)).meta || {}).components || []).map((c) => ({ name: c.name, key: c.key, updated: c.updated_at || null })); } catch (e) { /* none published */ }
+try { components = (((await fig(`/v1/files/${KEY}/component_sets`)).meta || {}).component_sets || []).map((c) => ({ name: c.name, key: c.key, updated: c.updated_at || null })); } catch (e) { /* none */ }
+if (!components.length) { try { components = (((await fig(`/v1/files/${KEY}/components`)).meta || {}).components || []).map((c) => ({ name: c.name, key: c.key, updated: c.updated_at || null })); } catch (e) { /* none */ } }
 
 mkdirSync('app/tokens', { recursive: true });
 writeFileSync('app/tokens/figma-tokens.json', JSON.stringify({ file: { name: meta.name, lastModified: meta.lastModified, key: KEY }, colors, text, components, syncedAt: new Date().toISOString() }, null, 2) + '\n');

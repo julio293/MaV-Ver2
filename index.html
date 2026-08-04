@@ -257,6 +257,7 @@ footer a { color: var(--mav-primary); text-decoration: none; }
         '<span class="fs-chip">' + colors.length + ' colour tokens</span>' +
         '<span class="fs-chip">' + (data.text || []).length + ' text styles</span>' +
         '<span class="fs-chip">' + (data.components || []).length + ' components</span></div>';
+      if (data.note) html += '<div class="fs-note">' + esc(data.note) + '</div>';
 
       // colours
       html += '<div class="fs-sec-h"><h3>Colour tokens</h3>' + (changed.length ? '<button class="fs-apply" data-apply="changed">Apply ' + changed.length + ' change' + (changed.length > 1 ? 's' : '') + '</button>' : '') + '</div>';

@@ -50,12 +50,26 @@ export async function onRequestGet({ request, env }) {
     let nodes = {};
     if (ids.length) { const nr = await fig(`/v1/files/${fileKey}/nodes?ids=${encodeURIComponent(ids.join(','))}`, H); nodes = nr.nodes || {}; }
 
-    const colors = fillStyles.map((s) => {
-      const doc = nodes[s.node_id] && nodes[s.node_id].document;
-      const fills = (doc && doc.fills) || [];
-      const fill = fills.find((f) => f.type === 'SOLID' && f.visible !== false) || fills[0];
-      return { name: s.name, hex: fill && fill.color ? rgbaToHex(fill.color) : null };
-    }).filter((c) => c.hex);
+    // colours: prefer Figma Variables (needs a token with file_variables:read), else FILL styles
+    let colors = [];
+    let varsError = null;
+    try {
+      const vr = await fig(`/v1/files/${fileKey}/variables/local`, H);
+      const vars = (vr.meta && vr.meta.variables) || {};
+      colors = Object.keys(vars).map((id) => vars[id]).filter((v) => v && v.resolvedType === 'COLOR').map((v) => {
+        const modes = v.valuesByMode || {}; const mk = Object.keys(modes)[0]; const val = mk ? modes[mk] : null;
+        const hex = (val && typeof val === 'object' && typeof val.r === 'number') ? rgbaToHex(val) : null;
+        return { name: v.name, hex };
+      }).filter((c) => c.hex).slice(0, 300);
+    } catch (e) { varsError = String(e && e.message || e).slice(0, 120); }
+    if (!colors.length) {
+      colors = fillStyles.map((s) => {
+        const doc = nodes[s.node_id] && nodes[s.node_id].document;
+        const fills = (doc && doc.fills) || [];
+        const fill = fills.find((f) => f.type === 'SOLID' && f.visible !== false) || fills[0];
+        return { name: s.name, hex: fill && fill.color ? rgbaToHex(fill.color) : null };
+      }).filter((c) => c.hex);
+    }
 
     const text = textStyles.map((s) => {
       const doc = nodes[s.node_id] && nodes[s.node_id].document;
@@ -63,17 +77,26 @@ export async function onRequestGet({ request, env }) {
       return st ? { name: s.name, family: st.fontFamily || null, size: st.fontSize ? Math.round(st.fontSize) : null, weight: st.fontWeight || null } : null;
     }).filter((t) => t && t.family);
 
-    // published components
+    // components: prefer component SETS (friendly names) over raw variants
     let components = [];
     try {
-      const cr = await fig(`/v1/files/${fileKey}/components`, H);
-      components = (((cr.meta && cr.meta.components) || []).map((c) => ({ name: c.name, key: c.key, nodeId: c.node_id, updated: c.updated_at || null }))).slice(0, 400);
-    } catch (e) { /* file may have no published components */ }
+      const cs = await fig(`/v1/files/${fileKey}/component_sets`, H);
+      const sets = (cs.meta && cs.meta.component_sets) || [];
+      components = sets.map((s) => ({ name: s.name, key: s.key, nodeId: s.node_id, updated: s.updated_at || null }));
+    } catch (e) { /* no published component sets */ }
+    if (!components.length) {
+      try {
+        const cr = await fig(`/v1/files/${fileKey}/components`, H);
+        components = ((cr.meta && cr.meta.components) || []).map((c) => ({ name: c.name, key: c.key, nodeId: c.node_id, updated: c.updated_at || null }));
+      } catch (e) { /* none */ }
+    }
+    components = components.slice(0, 400);
 
     return json(200, {
       ok: true, configured: true,
       file: { name: meta.name || 'Figma file', lastModified: meta.lastModified || null, key: fileKey },
       colors, text, components,
+      note: (!colors.length && varsError) ? 'No colour styles/variables readable — token may need file_variables:read scope.' : null,
     });
   } catch (e) {
     return json(502, { ok: false, configured: true, error: String(e && e.message || e).slice(0, 240) });
