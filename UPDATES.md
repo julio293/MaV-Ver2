@@ -35,7 +35,8 @@ Live site: https://mav-ver2.pages.dev · Builder: https://mav-ver2.pages.dev/bui
 - New **Sync with Figma** button on the design-system homepage (index.html) → slide-over panel that pulls the file's colour + text styles and component list via a Cloudflare Function (`/api/figma-sync`, token as a secret).
 - **Diffs colour tokens against the live site** (our CSS vars mirror Figma names) with New/Changed badges, and **Apply to preview** updates them live. Components are listed and flagged New/Changed since last sync (code stays manual — honest note).
 - **Persistence:** `scripts/figma-sync.mjs` + `.github/workflows/figma-sync.yml` (daily + manual) commit a token snapshot + generated CSS and optionally redeploy — so it auto-updates without manual fetch/export.
-- Config-gated: shows a one-time connect guide until `FIGMA_TOKEN` + `FIGMA_FILE_KEY` are set. Verified: unconfigured + successful diff/apply; live endpoint returns `configured:false`.
+- Config-gated: connect guide until `FIGMA_TOKEN` + `FIGMA_FILE_KEY` are set.
+- **Wired live to the Modular App Visualizer file (2026-08-05):** upgraded to read **Figma Variables** for colours (falls back to FILL styles) and **component_sets** for friendly component names. Live endpoint returns 42 components; colours need a token with the `file_variables:read` scope (panel surfaces the hint).
 - Commit `3cd8df8` · Deploy `644a7786`
 
 ### Provider-agnostic LLM/vision + screenshot rebuild
