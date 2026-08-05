@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Showcase — MaV Design System</title>
+<meta name="description" content="A gallery of fintech app concepts built with the MaV design system — live phone previews and interactive prototypes.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/shared.css">
+<style>
+body { margin: 0; background: var(--mav-bg); color: var(--mav-fg); font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+.top { display: flex; align-items: center; gap: 12px; height: 64px; border-bottom: 1px solid var(--mav-border); position: sticky; top: 0; background: color-mix(in srgb, var(--mav-bg) 88%, transparent); backdrop-filter: blur(8px); z-index: 10; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; text-decoration: none; color: inherit; }
+.brand-mark { width: 30px; height: 30px; border-radius: 8px; background: var(--mav-primary); display: grid; place-items: center; }
+.brand-mark svg { fill: #fff; } [data-theme="dark"] .brand-mark svg { fill: #171717; }
+.top-spacer { flex: 1; }
+.theme-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; padding: 8px 12px; border-radius: 9px; border: 1px solid var(--mav-border); background: var(--mav-bg); color: var(--mav-fg); cursor: pointer; text-decoration: none; }
+.hero { padding: 48px 0 30px; }
+.hero .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: var(--mav-primary); background: var(--mav-primary-soft, #352eff1a); padding: 6px 12px; border-radius: 999px; margin-bottom: 16px; }
+.hero h1 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: clamp(30px, 5vw, 44px); font-weight: 800; letter-spacing: -.02em; margin: 0 0 12px; }
+.hero p { font-size: 16px; line-height: 1.6; color: var(--mav-muted); max-width: 62ch; margin: 0; }
+.hero .cta { margin-top: 20px; display: inline-flex; gap: 10px; }
+.btn { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; padding: 11px 18px; border-radius: 10px; text-decoration: none; }
+.btn-primary { background: var(--mav-primary); color: var(--mav-on-primary, #fff); } [data-theme="dark"] .btn-primary { color: #171717; }
+.btn-ghost { border: 1px solid var(--mav-border); color: var(--mav-fg); }
+
+.sc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(248px, 1fr)); gap: 24px; padding: 8px 0 72px; }
+.sc-card { text-align: left; border: 0; background: transparent; cursor: pointer; padding: 0; font: inherit; color: inherit; }
+.sc-frame { position: relative; height: 420px; border-radius: 20px; overflow: hidden; background: linear-gradient(160deg, #eef1f7, #e4e8f2); border: 1px solid var(--mav-border); transition: transform .18s, box-shadow .18s; }
+[data-theme="dark"] .sc-frame { background: linear-gradient(160deg, #1a1d24, #111318); }
+.sc-card:hover .sc-frame { transform: translateY(-4px); box-shadow: 0 20px 48px -20px rgba(0,0,0,.35); }
+.sc-frame iframe { width: 100%; height: 100%; border: 0; pointer-events: none; }
+.sc-frame .sc-play { position: absolute; inset: 0; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 16px; opacity: 0; transition: opacity .18s; background: linear-gradient(to top, rgba(10,12,18,.5), transparent 45%); }
+.sc-card:hover .sc-play { opacity: 1; }
+.sc-play span { background: #fff; color: #171717; font-size: 12.5px; font-weight: 700; padding: 8px 15px; border-radius: 999px; box-shadow: 0 6px 18px rgba(0,0,0,.25); }
+.sc-skel { position: absolute; inset: 0; display: grid; place-items: center; color: var(--mav-muted); font-size: 12px; }
+.sc-meta { padding: 12px 4px 0; }
+.sc-name { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; font-weight: 700; display: block; }
+.sc-brief { font-size: 12.5px; color: var(--mav-muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: 3px; line-height: 1.4; }
+.sc-tags { display: flex; gap: 6px; margin-top: 9px; flex-wrap: wrap; }
+.sc-tag { font-size: 10.5px; font-weight: 600; color: var(--mav-muted); border: 1px solid var(--mav-border); border-radius: 999px; padding: 3px 9px; }
+.sc-tag.seed { color: var(--mav-primary); border-color: var(--mav-primary); }
+
+/* prototype modal */
+.sc-back { position: fixed; inset: 0; z-index: 60; background: rgba(8,10,15,.66); backdrop-filter: blur(6px); opacity: 0; visibility: hidden; transition: opacity .2s; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.sc-back.on { opacity: 1; visibility: visible; }
+.sc-modal { width: 460px; max-width: 100%; background: var(--mav-bg); border: 1px solid var(--mav-border); border-radius: 22px; overflow: hidden; box-shadow: 0 40px 100px -30px rgba(0,0,0,.6); display: flex; flex-direction: column; max-height: 92vh; transform: scale(.98); transition: transform .24s cubic-bezier(.32,1.2,.4,1); }
+.sc-back.on .sc-modal { transform: none; }
+.sc-mbar { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--mav-border); }
+.sc-mbar .t { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 15px; }
+.sc-mbar .s { font-size: 12px; color: var(--mav-muted); }
+.sc-mbar .sp { flex: 1; }
+.sc-mbar a, .sc-mbar button { border: 1px solid var(--mav-border); background: var(--mav-bg); color: var(--mav-fg); border-radius: 8px; padding: 7px 11px; font-size: 12.5px; font-weight: 600; cursor: pointer; text-decoration: none; }
+.sc-stage { flex: 1; min-height: 620px; background: #0e1016; }
+.sc-stage iframe { width: 100%; height: 100%; min-height: 620px; border: 0; display: block; }
+.sc-empty { padding: 60px 0; text-align: center; color: var(--mav-muted); }
+</style>
+</head>
+<body>
+  <div class="top">
+    <div class="wrap" style="display:flex;align-items:center;width:100%">
+      <a class="brand" href="index.html"><span class="brand-mark"><svg width="20" height="20" viewBox="0 0 1024 1024"><path d="M857.946 258.305L831.569 412.58H226.896L253.468 258.305H857.946Z"/><path d="M680.165 765.692H517.289L570.089 456.822H733.08L680.165 765.692Z"/><path d="M492.872 611.911L217.705 611.202L351.506 633.936L328.929 765.695H166.053L219.277 456.824L519.444 456.493L492.872 611.911Z"/></svg></span>MaV Design System</a>
+      <span class="top-spacer"></span>
+      <a class="theme-btn" href="builder/">✦ Open App Builder</a>
+      <button class="theme-btn" data-theme-toggle><span data-theme-icon>☾</span> <span data-theme-label>Dark mode</span></button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="hero">
+      <span class="eyebrow">◆ Showcase</span>
+      <h1>Concepts built with MaV</h1>
+      <p>Fintech app prototypes designed in the App Builder — live phone previews and tap-through prototypes you can share with clients. Build one in the builder and hit <b>Publish to Showcase</b> to add it here.</p>
+      <div class="cta"><a class="btn btn-primary" href="builder/">Build a concept →</a><a class="btn btn-ghost" href="index.html">Design system</a></div>
+    </div>
+    <div class="sc-grid" id="grid"><div class="sc-empty">Loading concepts…</div></div>
+  </div>
+
+  <div class="sc-back" id="scBack">
+    <div class="sc-modal">
+      <div class="sc-mbar"><span class="t" id="scT"></span><span class="s" id="scS"></span><span class="sp"></span><a id="scOpen" target="_blank" rel="noopener">Open ↗</a><button id="scClose">✕</button></div>
+      <div class="sc-stage" id="scStage"></div>
+    </div>
+  </div>
+
+  <script src="js/theme.js"></script>
+  <script>
+  (function () {
+    var grid = document.getElementById('grid');
+    var back = document.getElementById('scBack'), stage = document.getElementById('scStage');
+    var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]); }); };
+
+    var SEEDS = [
+      { name: 'Neo — mobile bank', brief: 'A mobile bank with cards, instant transfers and spending insights', device: 'iphone16', accent: '#0053ff', radius: 12, screen: 'dashboard|home' },
+      { name: 'Zap Wallet', brief: 'A digital wallet with QR payments and split bills', device: 'androidc', accent: '#7c3aed', radius: 16, screen: 'transfer|amount' },
+      { name: 'Onboard — KYC flow', brief: 'A neobank onboarding with KYC and biometric login', device: 'iphone16', accent: '#1f9d55', radius: 10, screen: 'verify|otp' },
+      { name: 'Goalr — savings', brief: 'A savings app with goals, budgets and statements', device: 'iphone16', accent: '#ff6a3d', radius: 20, screen: 'statement' },
+      { name: 'Cardhaus', brief: 'A debit and credit card management app with a card gallery', device: 'iphone16', accent: '#a1ff5b', radius: 12, dark: true, screen: 'cards' },
+      { name: 'Splitr — P2P', brief: 'Peer-to-peer payments with a QR scan-to-pay and activity feed', device: 'iphone17', accent: '#ff2d7e', radius: 14, screen: 'confirm|success' },
+    ];
+    var DEV = { iphone16: 'iPhone 16', iphone17: 'iPhone 17', androidc: 'Android', ipadmini: 'iPad mini' };
+
+    function base(it) {
+      if (it.kind !== 'demo') return 'builder/?view=' + encodeURIComponent(it.id);
+      var u = 'builder/?demo=' + encodeURIComponent(it.demo);
+      if (it.accent) u += '&accent=' + it.accent.replace(/^#/, '');
+      if (it.radius != null) u += '&radius=' + it.radius;
+      if (it.device) u += '&device=' + it.device;
+      if (it.dark) u += '&dark=1';
+      if (it.screen) u += '&screen=' + encodeURIComponent(it.screen);
+      return u;
+    }
+
+    function card(it) {
+      var b = base(it);
+      var c = document.createElement('button'); c.className = 'sc-card';
+      c.innerHTML =
+        '<div class="sc-frame"><div class="sc-skel">Loading…</div>' +
+        '<iframe scrolling="no" data-src="' + b + '&card=1" title="' + esc(it.name) + '"></iframe>' +
+        '<div class="sc-play"><span>▶ Open prototype</span></div></div>' +
+        '<div class="sc-meta"><span class="sc-name">' + esc(it.name) + '</span>' +
+        '<span class="sc-brief">' + esc(it.brief || '') + '</span>' +
+        '<div class="sc-tags"><span class="sc-tag">' + esc(DEV[it.device] || 'Phone') + '</span>' +
+        '<span class="sc-tag' + (it.kind === 'demo' ? ' seed' : '') + '">' + (it.kind === 'demo' ? 'Sample' : ((it.screens || '?') + ' screens')) + '</span></div></div>';
+      var frame = c.querySelector('iframe'), skel = c.querySelector('.sc-skel');
+      frame.addEventListener('load', function () { if (skel) skel.style.display = 'none'; });
+      c.onclick = function () { openModal(it, b); };
+      return c;
+    }
+
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) { var f = e.target.querySelector('iframe[data-src]'); if (f) { f.src = f.getAttribute('data-src'); f.removeAttribute('data-src'); } io.unobserve(e.target); } });
+    }, { rootMargin: '300px' });
+
+    function openModal(it, b) {
+      document.getElementById('scT').textContent = it.name;
+      document.getElementById('scS').textContent = it.brief ? ('· ' + it.brief) : '';
+      document.getElementById('scOpen').href = b;
+      stage.innerHTML = '<iframe src="' + b + '" title="' + esc(it.name) + ' prototype"></iframe>';
+      back.classList.add('on');
+    }
+    function closeModal() { back.classList.remove('on'); stage.innerHTML = ''; }
+    document.getElementById('scClose').onclick = closeModal;
+    back.addEventListener('click', function (e) { if (e.target === back) closeModal(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
+
+    function render(items) {
+      grid.innerHTML = '';
+      if (!items.length) { grid.innerHTML = '<div class="sc-empty">No concepts yet — build one in the App Builder and Publish it.</div>'; return; }
+      items.forEach(function (it) { var c = card(it); grid.appendChild(c); io.observe(c); });
+    }
+
+    async function load() {
+      var items = [];
+      try { var r = await fetch('/api/showcase'); if (r.ok) { var d = await r.json(); if (d && d.items) items = d.items.map(function (x) { return { id: x.id, name: x.name, brief: x.brief, device: x.device, screens: x.screens, kind: 'view' }; }); } } catch (e) {}
+      try { (JSON.parse(localStorage.getItem('mavShowcase') || '[]')).forEach(function (x) { if (!items.some(function (i) { return i.id === x.id; })) items.unshift({ id: x.id, name: x.name, brief: x.brief, device: x.device, screens: (x.order || []).length, kind: 'view' }); }); } catch (e) {}
+      if (!items.length) items = SEEDS.map(function (s, i) { return { id: 'seed' + i, name: s.name, brief: s.brief, device: s.device, accent: s.accent, radius: s.radius, dark: s.dark, screen: s.screen, kind: 'demo', demo: s.brief }; });
+      render(items);
+    }
+    load();
+  })();
+  </script>
+</body>
+</html>

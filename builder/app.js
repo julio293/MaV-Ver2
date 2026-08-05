@@ -846,7 +846,10 @@
     const pv = el('<button class="hbtn primary" style="width:100%;justify-content:center">▶  Play interactive preview</button>');
     pv.onclick = () => openPreview(S.selScreen || S.order[0]);
     ps.appendChild(pv);
-    ps.appendChild(el('<p class="empty-hint" style="text-align:left;margin:14px 0">Pick a device frame from the top bar. Tap the primary action on a screen to move to the next screen; use the app-bar back arrow to go back.</p>'));
+    const pub = el('<button class="hbtn" style="width:100%;justify-content:center;margin-top:10px">✦ Publish to Showcase</button>');
+    pub.onclick = () => publishProject(pub);
+    ps.appendChild(pub);
+    ps.appendChild(el('<p class="empty-hint" style="text-align:left;margin:14px 0">Tap the primary action on a screen to move to the next; the app-bar back arrow goes back. <b>Publish to Showcase</b> saves this concept to the gallery to share with clients.</p>'));
     panel.appendChild(ps);
 
     S.order.forEach((id) => {
@@ -1514,11 +1517,104 @@ function Placeholder({ name }) {
   }
 
   /* ── boot ────────────────────────────────────────────────────────────── */
+  /* ══ SHOWCASE: publish current project + viewer mode ══════════════════ */
+  function projectPayload() {
+    const screens = {};
+    S.order.forEach((id) => { const s = S.screens[id]; screens[id] = { name: s.name, dark: s.dark, comps: s.comps.map((c) => ({ type: c.type, props: c.props || {}, override: c.override || null })) }; });
+    return { name: (S.brief || 'Untitled concept').slice(0, 80), brief: S.brief || '', audience: S.audience || '', device: S.device, style: S.style, order: S.order.slice(), screens };
+  }
+  function loadProject(p) {
+    if (!p || !p.screens) return false;
+    if (p.style) S.style = Object.assign({ accent: '#352eff', radius: 8, font: FONTS[0].v, fontHead: FONTS[0].v, space: 14, pad: 16 }, p.style);
+    if (p.device && DEVICES[p.device]) S.device = p.device;
+    S.brief = p.brief || ''; S.audience = p.audience || '';
+    S.screens = {}; S.order = [];
+    const order = Array.isArray(p.order) && p.order.length ? p.order : Object.keys(p.screens);
+    order.forEach((oid) => {
+      const s = p.screens[oid]; if (!s) return;
+      const id = nid('s');
+      S.screens[id] = { id, name: s.name, dark: s.dark, comps: (s.comps || []).map((c) => ({ id: nid('c'), type: c.type, props: c.props || {}, override: c.override || undefined })) };
+      S.order.push(id);
+    });
+    S.selScreen = S.order[0]; S.stage = 'visual';
+    return S.order.length > 0;
+  }
+  function toast(msg, href) {
+    document.querySelectorAll('.bld-toast').forEach((n) => n.remove());
+    const t = el('<div class="bld-toast"><span>' + esc(msg) + '</span>' + (href ? '<a href="' + href + '" target="_blank" rel="noopener">View showcase →</a>' : '') + '</div>');
+    document.body.appendChild(t); requestAnimationFrame(() => t.classList.add('on'));
+    setTimeout(() => { t.classList.remove('on'); setTimeout(() => t.remove(), 400); }, 5200);
+  }
+  async function publishProject(btn) {
+    const payload = projectPayload();
+    if (btn) { btn.disabled = true; btn.textContent = 'Publishing…'; }
+    let id = null, stored = false;
+    try {
+      const r = await fetch('/api/showcase', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
+      if (r.ok) { const d = await r.json(); if (d && d.stored && d.id) { id = d.id; stored = true; } }
+    } catch (e) {}
+    if (!id) {
+      id = 'loc-' + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36);
+      try { const arr = JSON.parse(localStorage.getItem('mavShowcase') || '[]'); arr.unshift(Object.assign({ id, createdAt: Date.now() }, payload)); localStorage.setItem('mavShowcase', JSON.stringify(arr.slice(0, 40))); } catch (e) {}
+    }
+    toast(stored ? 'Published to the showcase ✓' : 'Saved to this browser’s showcase ✓', '../showcase.html');
+    if (btn) { btn.disabled = false; btn.textContent = '✦ Publish to Showcase'; }
+  }
+
+  async function enterViewer(opts) {
+    document.body.classList.add('viewer'); if (opts.card) document.body.classList.add('viewer-card');
+    $('#pvClose').onclick = closePreview;
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && S.pv) closePreview(); });
+    // per-concept style overrides (so showcase cards look distinct)
+    if (opts.accent) S.style.accent = opts.accent;
+    if (opts.radius != null && !isNaN(opts.radius)) S.style.radius = opts.radius;
+    if (opts.device && DEVICES[opts.device]) S.device = opts.device;
+    const applyDark = () => { if (opts.dark) S.order.forEach((id) => { S.screens[id].dark = true; }); };
+    if (opts.demo) {
+      const brief = opts.demo;
+      const pages = projectFromPrompt(brief, '', 7);   // full set so the thumbnail can pick a distinctive screen
+      S.brief = brief; S.screens = {}; S.order = [];
+      pages.forEach((g) => { const id = nid('s'); S.screens[id] = { id, name: g.name, dark: g.dark, comps: g.comps.map((c) => ({ id: nid('c'), ...c })) }; S.order.push(id); });
+      S.selScreen = S.order[0]; S.stage = 'visual'; applyDark(); render();
+    } else if (opts.view) {
+      let payload = null;
+      try { const r = await fetch('/api/showcase?id=' + encodeURIComponent(opts.view)); if (r.ok) { const d = await r.json(); if (d && d.item) payload = d.item; } } catch (e) {}
+      if (!payload) { try { payload = (JSON.parse(localStorage.getItem('mavShowcase') || '[]')).find((x) => x.id === opts.view) || null; } catch (e) {} }
+      if (payload && loadProject(payload)) { applyDark(); render(); }
+      else { document.body.classList.remove('viewer', 'viewer-card'); seed(); render(); return; }
+    }
+    if (!opts.card) {
+      const play = el('<button class="viewer-play">▶  Play prototype</button>');
+      play.onclick = () => openPreview(S.order[0]);
+      document.body.appendChild(play);
+    } else {
+      // thumbnail shows a distinctive screen (prefer cards/transfer/statements over the shared dashboard/onboarding)
+      const pick = (re) => S.order.find((id) => re.test(S.screens[id].name || ''));
+      let rep = null;
+      if (opts.screen) { try { rep = pick(new RegExp(opts.screen, 'i')); } catch (e) {} }
+      if (!rep) rep = pick(/cards|statement|transfer|activity|wallet|beneficiar|confirm|amount/i) || pick(/dashboard|home|overview|account/i);
+      if (rep && rep !== S.order[0]) { S.order = [rep].concat(S.order.filter((x) => x !== rep)); S.selScreen = rep; render(); }
+    }
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
-    seed(); render();
     $('#pvClose').onclick = closePreview;
     const sb = $('#saveBtn'); if (sb) sb.onclick = openExportModal;
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { if (S.pv) closePreview(); document.querySelectorAll('.genmodal-back').forEach((n) => n.remove()); } });
+    const params = new URLSearchParams(location.search);
+    const view = params.get('view'), demo = params.get('demo'), card = params.get('card') === '1';
+    if (view || demo) {
+      seed();
+      const acc = params.get('accent'); const rad = params.get('radius');
+      enterViewer({ view, demo, card,
+        accent: acc ? ('#' + acc.replace(/^#/, '')) : null,
+        radius: rad != null && rad !== '' ? parseInt(rad, 10) : null,
+        dark: params.get('dark') === '1',
+        device: params.get('device'),
+        screen: params.get('screen') });
+      return;   // showcase viewer / thumbnail mode
+    }
+    seed(); render();
     // Always greet with the prompt — both when opened full-screen AND when embedded
     // as the homepage preview (users can't build from the embed, so it shows the prompt).
     openWelcome();

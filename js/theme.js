@@ -62,6 +62,7 @@
     { group: 'Getting Started' },
     { href: 'index.html',                    label: 'Overview',          ic: 'home' },
     { href: 'builder/index.html',            label: '✦ App Builder',     ic: 'sparkles' },
+    { href: 'showcase.html',                 label: '◆ Showcase',        ic: 'grid' },
 
     { group: 'Organisms' },
     { href: 'components/auth.html',          label: 'Sign In / Sign Up', ic: 'login' },
