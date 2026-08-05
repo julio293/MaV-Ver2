@@ -58,6 +58,23 @@ body { margin: 0; background: var(--mav-bg); color: var(--mav-fg); font-family: 
 .sc-stage { flex: 1; min-height: 620px; background: #0e1016; }
 .sc-stage iframe { width: 100%; height: 100%; min-height: 620px; border: 0; display: block; }
 .sc-empty { padding: 60px 0; text-align: center; color: var(--mav-muted); }
+
+/* edit mode */
+.sc-tools { margin-top: 18px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.sc-card.editing { cursor: default; }
+.sc-card.editing .sc-frame { height: 300px; }
+.sc-card.editing .sc-frame iframe { pointer-events: none; }
+.e-name { width: 100%; box-sizing: border-box; font-weight: 700; font-size: 14px; font-family: 'Plus Jakarta Sans', sans-serif; border: 1px solid var(--mav-border); border-radius: 8px; padding: 7px 9px; background: var(--mav-bg); color: var(--mav-fg); margin-top: 10px; }
+.e-brief { width: 100%; box-sizing: border-box; font-size: 12.5px; border: 1px solid var(--mav-border); border-radius: 8px; padding: 7px 9px; background: var(--mav-bg); color: var(--mav-muted); margin-top: 6px; resize: vertical; min-height: 40px; font-family: inherit; }
+.e-row { display: flex; gap: 8px; align-items: center; margin-top: 8px; flex-wrap: wrap; }
+.e-row label { font-size: 11px; color: var(--mav-muted); display: inline-flex; align-items: center; gap: 5px; }
+.e-row input[type=color] { width: 32px; height: 26px; border: 1px solid var(--mav-border); border-radius: 6px; padding: 0; background: none; cursor: pointer; }
+.e-row select { font-size: 12px; border: 1px solid var(--mav-border); border-radius: 7px; padding: 5px 7px; background: var(--mav-bg); color: var(--mav-fg); }
+.e-btn { border: 1px solid var(--mav-border); background: var(--mav-bg); color: var(--mav-fg); border-radius: 7px; padding: 5px 10px; font-size: 12px; font-weight: 600; cursor: pointer; }
+.e-btn:hover { border-color: var(--mav-primary); }
+.e-btn.rm:hover { border-color: #e5484d; color: #e5484d; }
+.sc-toast { position: fixed; left: 50%; bottom: 26px; transform: translate(-50%, 14px); z-index: 80; background: var(--mav-fg); color: var(--mav-bg); font-size: 13.5px; font-weight: 700; padding: 12px 20px; border-radius: 12px; box-shadow: 0 18px 44px -16px rgba(0,0,0,.5); opacity: 0; transition: opacity .25s, transform .25s; }
+.sc-toast.on { opacity: 1; transform: translate(-50%, 0); }
 </style>
 </head>
 <body>
@@ -76,6 +93,16 @@ body { margin: 0; background: var(--mav-bg); color: var(--mav-fg); font-family: 
       <h1>Concepts built with MaV</h1>
       <p>Fintech app prototypes designed in the App Builder — live phone previews and tap-through prototypes you can share with clients. Build one in the builder and hit <b>Publish to Showcase</b> to add it here.</p>
       <div class="cta"><a class="btn btn-primary" href="builder/">Build a concept →</a><a class="btn btn-ghost" href="index.html">Design system</a></div>
+      <div class="sc-tools">
+        <button class="btn btn-ghost" id="editBtn">✎ Edit gallery</button>
+        <span class="sc-editing" id="editTools" hidden>
+          <button class="btn btn-primary" id="saveBtn">Save changes</button>
+          <button class="btn btn-ghost" id="addBtn">＋ Add concept</button>
+          <button class="btn btn-ghost" id="cancelBtn">Cancel</button>
+          <button class="btn btn-ghost" id="resetBtn">Reset to default</button>
+          <button class="btn btn-ghost" id="exportBtn">Export JSON</button>
+        </span>
+      </div>
     </div>
     <div class="sc-grid" id="grid"><div class="sc-empty">Loading concepts…</div></div>
   </div>
@@ -103,6 +130,10 @@ body { margin: 0; background: var(--mav-bg); color: var(--mav-fg); font-family: 
       { name: 'Splitr — P2P', brief: 'Peer-to-peer payments with a QR scan-to-pay and activity feed', device: 'iphone17', accent: '#ff2d7e', radius: 14, screen: 'confirm|success' },
     ];
     var DEV = { iphone16: 'iPhone 16', iphone17: 'iPhone 17', androidc: 'Android', ipadmini: 'iPad mini' };
+    var DEVKEYS = ['iphone16', 'iphone17', 'androidc', 'ipadmini'];
+    var SCREENS = ['dashboard', 'transfer', 'cards', 'statement', 'verify', 'confirm', 'login', 'amount', 'profile', 'settings', 'splash'];
+    var STORE = 'mavShowcaseGallery';
+    var GALLERY = [], editing = false;
 
     function base(it) {
       if (it.kind !== 'demo') return 'builder/?view=' + encodeURIComponent(it.id);
@@ -148,18 +179,64 @@ body { margin: 0; background: var(--mav-bg); color: var(--mav-fg); font-family: 
     back.addEventListener('click', function (e) { if (e.target === back) closeModal(); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
 
-    function render(items) {
+    function renderView() {
       grid.innerHTML = '';
-      if (!items.length) { grid.innerHTML = '<div class="sc-empty">No concepts yet — build one in the App Builder and Publish it.</div>'; return; }
-      items.forEach(function (it) { var c = card(it); grid.appendChild(c); io.observe(c); });
+      if (!GALLERY.length) { grid.innerHTML = '<div class="sc-empty">No concepts yet — build one in the App Builder and Publish it, or click “Edit gallery → Add concept”.</div>'; return; }
+      GALLERY.forEach(function (it) { var c = card(it); grid.appendChild(c); io.observe(c); });
     }
 
-    async function load() {
+    /* ── edit mode ── */
+    function editCard(it, i) {
+      var demo = it.kind === 'demo';
+      var c = document.createElement('div'); c.className = 'sc-card editing';
+      c.innerHTML =
+        '<div class="sc-frame"><iframe scrolling="no" src="' + base(it) + '&card=1" title=""></iframe></div>' +
+        '<input class="e-name" value="' + esc(it.name) + '">' +
+        '<textarea class="e-brief" rows="2">' + esc(it.brief || '') + '</textarea>' +
+        '<div class="e-row">' + (demo
+          ? '<label>Colour <input type="color" class="e-accent" value="' + (it.accent || '#352eff') + '"></label>' +
+            '<label>Device <select class="e-device"></select></label>' +
+            '<label>Screen <select class="e-screen"></select></label>' +
+            '<label><input type="checkbox" class="e-dark"' + (it.dark ? ' checked' : '') + '> Dark</label>'
+          : '<span style="font-size:11px;color:var(--mav-muted)">Published project — style is fixed</span>') + '</div>' +
+        '<div class="e-row"><button class="e-btn mv" data-d="-1" title="Move left">◀</button><button class="e-btn mv" data-d="1" title="Move right">▶</button><span style="flex:1"></span><button class="e-btn rm">Remove</button></div>';
+      var iframe = c.querySelector('iframe');
+      var refresh = function () { iframe.src = base(it) + '&card=1&_=' + Date.now(); };
+      c.querySelector('.e-name').oninput = function (e) { it.name = e.target.value; };
+      c.querySelector('.e-brief').oninput = function (e) { it.brief = e.target.value; if (demo) it.demo = e.target.value; };
+      if (demo) {
+        var dv = c.querySelector('.e-device'); DEVKEYS.forEach(function (k) { var o = document.createElement('option'); o.value = k; o.textContent = DEV[k]; if (k === it.device) o.selected = true; dv.appendChild(o); }); dv.onchange = function () { it.device = dv.value; refresh(); };
+        var sc = c.querySelector('.e-screen'); [''].concat(SCREENS).forEach(function (k) { var o = document.createElement('option'); o.value = k; o.textContent = k || '(auto)'; if (k === (it.screen || '')) o.selected = true; sc.appendChild(o); }); sc.onchange = function () { it.screen = sc.value; refresh(); };
+        var ac = c.querySelector('.e-accent'); ac.oninput = function () { it.accent = ac.value; }; ac.onchange = refresh;
+        c.querySelector('.e-dark').onchange = function (e) { it.dark = e.target.checked; refresh(); };
+      }
+      c.querySelectorAll('.mv').forEach(function (bn) { bn.onclick = function () { var j = i + (+bn.getAttribute('data-d')); if (j < 0 || j >= GALLERY.length) return; var t = GALLERY[i]; GALLERY[i] = GALLERY[j]; GALLERY[j] = t; renderEdit(); }; });
+      c.querySelector('.rm').onclick = function () { GALLERY.splice(i, 1); renderEdit(); };
+      return c;
+    }
+    function renderEdit() { grid.innerHTML = ''; GALLERY.forEach(function (it, i) { grid.appendChild(editCard(it, i)); }); }
+
+    function toast(m) { var t = document.createElement('div'); t.className = 'sc-toast'; t.textContent = m; document.body.appendChild(t); requestAnimationFrame(function () { t.classList.add('on'); }); setTimeout(function () { t.classList.remove('on'); setTimeout(function () { t.remove(); }, 300); }, 2600); }
+    function setEditing(on) { editing = on; document.getElementById('editTools').hidden = !on; document.getElementById('editBtn').hidden = on; }
+
+    document.getElementById('editBtn').onclick = function () { setEditing(true); renderEdit(); };
+    document.getElementById('saveBtn').onclick = function () { try { localStorage.setItem(STORE, JSON.stringify(GALLERY)); } catch (e) {} setEditing(false); renderView(); toast('Saved — showcase updated ✓'); };
+    document.getElementById('cancelBtn').onclick = function () { setEditing(false); load(); };
+    document.getElementById('resetBtn').onclick = async function () { localStorage.removeItem(STORE); GALLERY = await defaults(); renderEdit(); toast('Reset to default'); };
+    document.getElementById('addBtn').onclick = function () { var b = prompt('Describe the concept in one line:'); if (!b) return; GALLERY.unshift({ id: 'demo' + Date.now(), name: b.slice(0, 40), brief: b, device: 'iphone16', accent: '#352eff', radius: 12, kind: 'demo', demo: b }); renderEdit(); };
+    document.getElementById('exportBtn').onclick = function () { var blob = new Blob([JSON.stringify(GALLERY, null, 2)], { type: 'application/json' }); var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'showcase-gallery.json'; a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 500); };
+
+    async function defaults() {
       var items = [];
       try { var r = await fetch('/api/showcase'); if (r.ok) { var d = await r.json(); if (d && d.items) items = d.items.map(function (x) { return { id: x.id, name: x.name, brief: x.brief, device: x.device, screens: x.screens, kind: 'view' }; }); } } catch (e) {}
       try { (JSON.parse(localStorage.getItem('mavShowcase') || '[]')).forEach(function (x) { if (!items.some(function (i) { return i.id === x.id; })) items.unshift({ id: x.id, name: x.name, brief: x.brief, device: x.device, screens: (x.order || []).length, kind: 'view' }); }); } catch (e) {}
       if (!items.length) items = SEEDS.map(function (s, i) { return { id: 'seed' + i, name: s.name, brief: s.brief, device: s.device, accent: s.accent, radius: s.radius, dark: s.dark, screen: s.screen, kind: 'demo', demo: s.brief }; });
-      render(items);
+      return items;
+    }
+    async function load() {
+      var curated = null; try { curated = JSON.parse(localStorage.getItem(STORE) || 'null'); } catch (e) {}
+      GALLERY = (curated && curated.length) ? curated : await defaults();
+      renderView();
     }
     load();
   })();
