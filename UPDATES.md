@@ -7,6 +7,20 @@ Live site: https://mav-ver2.pages.dev · Builder: https://mav-ver2.pages.dev/bui
 
 ---
 
+## 2026-08-05
+
+### Showcase gallery (Mobbin-style)
+- New **`showcase.html`** — a gallery of fintech concepts with **live phone previews** (lazy iframes of the builder in a chrome-less *viewer mode*) and a **click-through interactive prototype** modal. Linked from the homepage top bar + sidebar.
+- **Publish to Showcase** button in the builder's Visual stage saves the current project (`POST /api/showcase`, KV) with a **localStorage fallback** + toast.
+- **Viewer mode**: `builder/?view=ID` or `?demo=BRIEF`, with `&card=1` (thumbnail) and `&accent/&radius/&dark/&device/&screen` overrides so every concept looks **distinct** (colour, frame, representative screen) — seeded with 6 varied demos (Dashboard / Send / Verify / Statements / Cards / Confirmation).
+- `functions/api/showcase.js`: KV-backed store, graceful when unbound. **Enable shared storage:** create a KV namespace + bind it as `SHOWCASE`, then redeploy.
+- Commit `7a1fecc` · Deploy `0cf8cee6`
+
+### Figma design-token sync — wired live (2026-08-05)
+- Set `FIGMA_TOKEN` + `FIGMA_FILE_KEY` for the *Modular App Visualizer* file; live `/api/figma-sync` returns 42 components (friendly `component_sets` names). Colours need a token with the `file_variables:read` scope (panel shows the hint). Recovered from a disk-full incident (a bad ad-hoc deploy command rsynced `/`).
+
+---
+
 ## 2026-07-31
 
 ### Multi-screenshot upload (Rebuild-from-app door)
