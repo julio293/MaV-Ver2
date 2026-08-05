@@ -9,6 +9,12 @@ Live site: https://mav-ver2.pages.dev · Builder: https://mav-ver2.pages.dev/bui
 
 ## 2026-08-05
 
+### Showcase — editable gallery + Save
+- The showcase now has an **✎ Edit gallery** mode: inline-edit each concept's **name** and **brief**, and for demo concepts also the **accent colour, device, screen, and dark mode** — with the phone preview refreshing live as you change styling. Plus **reorder** (◀ ▶), **remove**, and **＋ Add concept**.
+- **Save changes** persists the whole gallery to the browser (`localStorage: mavShowcaseGallery`) so your edits reflect on `showcase.html` on reload. Also **Reset to default** and **Export JSON** (download the curated gallery to commit as the shared default). Load precedence: curated (saved) → API/published → seeds.
+- Note: saved edits are **per-browser** (localStorage). To make an edited gallery the shared default for all clients, use **Export JSON** and commit it, or bind the `SHOWCASE` KV namespace.
+- Commit `468f76d` · Deploy `a0e3a0aa`
+
 ### Showcase gallery (Mobbin-style)
 - New **`showcase.html`** — a gallery of fintech concepts with **live phone previews** (lazy iframes of the builder in a chrome-less *viewer mode*) and a **click-through interactive prototype** modal. Linked from the homepage top bar + sidebar.
 - **Publish to Showcase** button in the builder's Visual stage saves the current project (`POST /api/showcase`, KV) with a **localStorage fallback** + toast.
