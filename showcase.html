@@ -131,7 +131,8 @@ body { margin: 0; background: var(--mav-bg); color: var(--mav-fg); font-family: 
     ];
     var DEV = { iphone16: 'iPhone 16', iphone17: 'iPhone 17', androidc: 'Android', ipadmini: 'iPad mini' };
     var DEVKEYS = ['iphone16', 'iphone17', 'androidc', 'ipadmini'];
-    var SCREENS = ['dashboard', 'transfer', 'cards', 'statement', 'verify', 'confirm', 'login', 'amount', 'profile', 'settings', 'splash'];
+    // Keys map to real builder screen names (see projectFromPrompt in builder/data.js) — no phantom "splash"/"amount".
+    var SCREENS = ['onboarding', 'login', 'dashboard', 'cards', 'transfer', 'confirm', 'statement', 'verify', 'beneficiaries', 'notifications', 'profile', 'settings'];
     var STORE = 'mavShowcaseGallery';
     var GALLERY = [], editing = false;
 

@@ -1592,7 +1592,10 @@ function Placeholder({ name }) {
       const pick = (re) => S.order.find((id) => re.test(S.screens[id].name || ''));
       let rep = null;
       if (opts.screen) { try { rep = pick(new RegExp(opts.screen, 'i')); } catch (e) {} }
-      if (!rep) rep = pick(/cards|statement|transfer|activity|wallet|beneficiar|confirm|amount/i) || pick(/dashboard|home|overview|account/i);
+      // Only apply the "distinctive screen" heuristic in auto mode. If an explicit screen
+      // was requested but not found, keep the first screen (onboarding/intro) rather than
+      // silently masquerading as a card page.
+      else rep = pick(/cards|statement|transfer|activity|wallet|beneficiar|confirm|amount/i) || pick(/dashboard|home|overview|account/i);
       if (rep && rep !== S.order[0]) { S.order = [rep].concat(S.order.filter((x) => x !== rep)); S.selScreen = rep; render(); }
     }
   }
