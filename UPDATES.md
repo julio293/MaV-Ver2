@@ -9,6 +9,11 @@ Live site: https://mav-ver2.pages.dev · Builder: https://mav-ver2.pages.dev/bui
 
 ## 2026-08-05
 
+### Showcase — fix phantom "splash" screen (showed a card page)
+- The screen picker in edit mode offered **`splash`** and **`amount`**, which the builder has no screen for — so `pick()` matched nothing and silently fell through to the *cards* heuristic, making "splash" render as the **My Cards** page.
+- The dropdown now lists only **real** screens (`onboarding, login, dashboard, cards, transfer, confirm, statement, verify, beneficiaries, notifications, profile, settings`) — **onboarding** is the true intro/splash surface. And an explicit-but-unmatched screen now keeps the **first (onboarding) screen** instead of masquerading as cards. Builder cache-bust → v40.
+- Commit `df42983` · Deploy `a50e7787`
+
 ### Showcase — editable gallery + Save
 - The showcase now has an **✎ Edit gallery** mode: inline-edit each concept's **name** and **brief**, and for demo concepts also the **accent colour, device, screen, and dark mode** — with the phone preview refreshing live as you change styling. Plus **reorder** (◀ ▶), **remove**, and **＋ Add concept**.
 - **Save changes** persists the whole gallery to the browser (`localStorage: mavShowcaseGallery`) so your edits reflect on `showcase.html` on reload. Also **Reset to default** and **Export JSON** (download the curated gallery to commit as the shared default). Load precedence: curated (saved) → API/published → seeds.
