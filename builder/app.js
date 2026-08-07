@@ -52,7 +52,7 @@
   const S = {
     stage: 'sitemap',
     screens: {}, order: [], edges: [],
-    selScreen: null, selComp: null,
+    selScreen: null, selComp: null, selHot: null,
     style: { accent: '#352eff', radius: 8, font: FONTS[0].v, fontHead: FONTS[0].v, space: 14, pad: 16 },
     device: 'iphone16',
     pv: null, smPanel: null, genPalette: null, brief: '', audience: '',
@@ -109,6 +109,34 @@
     if (opts.space) { node.style.setProperty('--bld-space', style.space + 'px'); node.style.setProperty('--bld-pad', (style.pad ?? 16) + 'px'); }
   }
 
+  /* Hotspots — the individually-linkable buttons / icons / rows inside a component.
+     Enumerated in DOM order and addressed by index (comp.hotlinks[i]). */
+  const HOT_SELECTOR = 'button, .txn-item, .acct-row, .li, .chip';
+  function hotspotsIn(root) {
+    return [...root.querySelectorAll(HOT_SELECTOR)]
+      .filter((e) => !e.closest('.bxcomptools') && !e.classList.contains('bld-key') && !e.classList.contains('bld-dp-nav'));
+  }
+  function hotLabel(elm, i) {
+    if (elm.classList.contains('ab-ico')) return elm.closest('.ab-side.after') ? 'Action icon' : 'Back icon';
+    let t = (elm.textContent || '').replace(/\s+/g, ' ').trim();
+    if (t.length > 26) t = t.slice(0, 26) + '…';
+    return t || ('Item ' + (i + 1));
+  }
+  // the default (unlinked) behaviour of a hotspot element, mirroring the classic prototype flow
+  function hotDefault(elm) {
+    if (elm.classList.contains('ab-ico')) return elm.closest('.ab-side.after') ? 'none' : 'back';
+    if (elm.classList.contains('bnav-item')) return '__next__';
+    if (elm.matches('[data-cta]')) return '__next__';
+    return 'none';
+  }
+  // resolve a hotspot's effective target: explicit link → component default (single-hotspot / primary CTA) → element default
+  function resolveHot(comp, elm, i, hotCount) {
+    const ex = comp.hotlinks && comp.hotlinks[i];
+    if (ex != null && ex !== '') return ex;
+    if (comp.link && (hotCount === 1 || elm.matches('[data-cta]'))) return comp.link;
+    return hotDefault(elm);
+  }
+
   /* build a screen DOM. mode: 'view' | 'edit'.
      App bar pins to the top, bottom nav pins to the bottom; the rest scrolls. */
   function buildScreen(screen, mode, styled) {
@@ -123,6 +151,9 @@
       const wrap = el(`<div class="bxcomp${cat.bleed ? ' bxbleed' : ''}"></div>`);
       wrap.dataset.cid = c.id;
       wrap.innerHTML = cat.render(c.props || {});
+      // tag interactive sub-elements so each button/icon/row is individually linkable
+      const hotEls = hotspotsIn(wrap);
+      hotEls.forEach((h, hi) => { h.dataset.hot = String(hi); });
       const isPinned = c.type === 'appbar' || c.type === 'bottomnav';
       if (c.override) {
         applyVars(wrap, { accent: c.override.accent || S.style.accent, radius: c.override.radius ?? S.style.radius, font: S.style.font }, { font: false });
@@ -135,14 +166,26 @@
         tools.innerHTML = '<button data-a="up">↑</button><button data-a="down">↓</button><button data-a="del">✕</button>';
         tools.querySelector('[data-a=up]').onclick = (e) => { e.stopPropagation(); moveComp(screen, i, -1); };
         tools.querySelector('[data-a=down]').onclick = (e) => { e.stopPropagation(); moveComp(screen, i, 1); };
-        tools.querySelector('[data-a=del]').onclick = (e) => { e.stopPropagation(); screen.comps.splice(i, 1); if (S.selComp === c.id) S.selComp = null; render(); };
+        tools.querySelector('[data-a=del]').onclick = (e) => { e.stopPropagation(); screen.comps.splice(i, 1); if (S.selComp === c.id) { S.selComp = null; S.selHot = null; } render(); };
         wrap.appendChild(tools);
-        // flow-link badge — shows where this element navigates in the prototype
+        // component-level flow-link badge — shows where a whole-component tap navigates
         if (!isPinned && c.link && c.link !== '' && c.link !== 'none') {
           const tname = c.link === 'back' ? 'Back' : (S.screens[c.link] ? S.screens[c.link].name : '');
           if (tname) wrap.appendChild(el('<div class="bxlink-badge">→ ' + esc(tname) + '</div>'));
         }
-        wrap.addEventListener('click', (e) => { if (e.target.closest('.bxcomptools')) return; S.selComp = (S.selComp === c.id ? null : c.id); render(); });
+        // per-hotspot markers: highlight the selected one + flag any with an explicit link
+        const hl = c.hotlinks || {};
+        hotEls.forEach((h, hi) => {
+          if (hl[hi] && hl[hi] !== '' && hl[hi] !== 'none') h.classList.add('hot-linked');
+          if (S.selComp === c.id && S.selHot === hi) h.classList.add('hot-sel');
+        });
+        wrap.addEventListener('click', (e) => {
+          if (e.target.closest('.bxcomptools')) return;
+          S.selScreen = screen.id;
+          const hot = e.target.closest('[data-hot]');
+          if (hot && wrap.contains(hot)) { e.stopPropagation(); S.selComp = c.id; S.selHot = parseInt(hot.dataset.hot, 10); render(); return; }
+          S.selComp = (S.selComp === c.id ? null : c.id); S.selHot = null; render();
+        });
       }
       if (c.type === 'appbar') { wrap.classList.add('bxpin'); scr.appendChild(wrap); }        // pinned top
       else if (c.type === 'bottomnav') { wrap.classList.add('bxpin'); bottomWrap = wrap; }      // pinned bottom
@@ -222,7 +265,7 @@
   }
   function gotoStage(stage) {
     if (!STAGES.some((s) => s[0] === stage)) return;
-    S.stage = stage; S.selComp = null; S.smPanel = null; render();
+    S.stage = stage; S.selComp = null; S.selHot = null; S.smPanel = null; render();
     const cv = $('#canvas'); if (cv) { cv.classList.remove('reveal'); void cv.offsetWidth; cv.classList.add('reveal'); }
   }
   /* floating prev / next control — mirrors the stepper */
@@ -763,7 +806,7 @@
       const s = S.screens[id];
       const p = phone(s, { wf: true, cap: true });
       if (id === S.selScreen) { p.style.outline = '3px solid var(--e-accent)'; p.style.outlineOffset = '6px'; }
-      p.addEventListener('pointerdown', () => { if (S.selScreen !== id) { S.selScreen = id; S.selComp = null; render(); } }, true);
+      p.addEventListener('pointerdown', () => { if (S.selScreen !== id) { S.selScreen = id; S.selComp = null; S.selHot = null; render(); } }, true);
       canvas.appendChild(p);
     });
     renderInspector();
@@ -981,24 +1024,46 @@
     return row;
   }
 
-  /* Interaction / flow linking — let any element declare an on-tap target screen,
-     so the prototype follows the user's intended flow (e.g. "I already have an
-     account" → Login) instead of the default linear next-screen. */
-  function interactionPanel(comp) {
-    const wrap = el('<div class="sg-block insp-inter"><div class="sg-label">On tap → go to</div><div class="sg-hint2">Wire this element into the flow — the prototype will follow it</div></div>');
+  /* Interaction / flow linking — let each button/icon/row (and the component as a
+     whole) declare an on-tap target screen, so the prototype follows the user's
+     intended flow (e.g. "I already have an account" → Login). */
+  function linkSelect(getVal, setVal, defaultLabel) {
     const sel = el('<select class="e-linksel"></select>');
-    [['', 'Next screen (default)'], ['none', '— Do nothing —'], ['back', '← Go back']].forEach(([v, label]) => {
-      const o = document.createElement('option'); o.value = v; o.textContent = label; if ((comp.link || '') === v) o.selected = true; sel.appendChild(o);
+    [['', defaultLabel], ['none', '— Do nothing —'], ['back', '← Go back']].forEach(([v, label]) => {
+      const o = document.createElement('option'); o.value = v; o.textContent = label; if ((getVal() || '') === v) o.selected = true; sel.appendChild(o);
     });
     const og = document.createElement('optgroup'); og.label = 'Screens';
     S.order.forEach((id) => {
       const o = document.createElement('option'); o.value = id;
       o.textContent = (S.screens[id].name || 'Screen') + (id === S.selScreen ? ' (this screen)' : '');
-      if (comp.link === id) o.selected = true; og.appendChild(o);
+      if (getVal() === id) o.selected = true; og.appendChild(o);
     });
     sel.appendChild(og);
-    sel.onchange = () => { const v = sel.value; if (!v) delete comp.link; else comp.link = v; render(); };
-    wrap.appendChild(sel);
+    sel.onchange = () => { setVal(sel.value); render(); };
+    return sel;
+  }
+  function interactionPanel(comp, isPinned) {
+    const wrap = el('<div class="sg-block insp-inter"><div class="sg-label">Flow &amp; interaction</div></div>');
+    // enumerate the component's hotspots from the live wireframe DOM (already tagged with data-hot)
+    const mount = document.querySelector('.canvas .bxcomp[data-cid="' + comp.id + '"]') || document.querySelector('.bxcomp[data-cid="' + comp.id + '"]');
+    const hotEls = mount ? [...mount.querySelectorAll('[data-hot]')].sort((a, b) => a.dataset.hot - b.dataset.hot) : [];
+    comp.hotlinks = comp.hotlinks || {};
+    if (hotEls.length) {
+      wrap.appendChild(el('<div class="sg-hint2">Tap targets — set where each button / icon / row goes</div>'));
+      hotEls.forEach((h, i) => {
+        const row = el('<div class="hot-row"></div>');
+        const focused = S.selHot === i;
+        const chip = el('<button class="hot-chip' + (focused ? ' on' : '') + '">' + esc(hotLabel(h, i)) + '</button>');
+        chip.onclick = () => { S.selHot = (S.selHot === i ? null : i); render(); };
+        row.appendChild(chip);
+        row.appendChild(linkSelect(() => comp.hotlinks[i], (v) => { if (!v) delete comp.hotlinks[i]; else comp.hotlinks[i] = v; }, 'Default'));
+        wrap.appendChild(row);
+      });
+    }
+    if (!isPinned) {
+      wrap.appendChild(el('<div class="sg-hint2" style="margin-top:12px">Whole component — tap anywhere else on it</div>'));
+      wrap.appendChild(linkSelect(() => comp.link, (v) => { if (!v) delete comp.link; else comp.link = v; }, hotEls.length ? '— Do nothing —' : 'Next screen (default)'));
+    }
     return wrap;
   }
 
@@ -1011,7 +1076,7 @@
     comp.override = comp.override || {};
     comp.props = comp.props || {};
     const isPinned = comp.type === 'appbar' || comp.type === 'bottomnav';
-    if (!isPinned) ps.appendChild(interactionPanel(comp));
+    ps.appendChild(interactionPanel(comp, isPinned));
     ps.appendChild(positionPanel(comp, isPinned));
     // ── component variants — Figma-style controls (dropdown / toggle / text) ──
     const vs = VARIANTS[comp.type] || [];
@@ -1050,28 +1115,29 @@
     const p = phone(s, { styled: true, cap: false });
     p.classList.add('pv-stage');
     const holder = p.querySelector('.bxholder'); holder.classList.add('pv-screen-anim'); if (dir === 'back') holder.classList.add('back');
-    // hotspots — explicit per-element links first (any component the user wired into the flow)
+    // navigation: apply a resolved target
+    const go = (tgt) => {
+      if (!tgt || tgt === 'none') return;
+      if (tgt === 'back') { const prev = S.pv.hist.pop(); setTimeout(() => navPreview(prev, 'back'), 90); }
+      else if (tgt === '__next__') { const nx = nextOf(S.pv.id); if (nx) setTimeout(() => navPreview(nx, 'in'), 90); }
+      else if (S.screens[tgt]) setTimeout(() => navPreview(tgt, 'in'), 90);
+    };
+    // per-hotspot links (buttons / icons / rows) — explicit link → component default → element default
     p.querySelectorAll('.bxcomp[data-cid]').forEach((w) => {
-      const comp = s.comps.find((c) => c.id === w.dataset.cid);
-      if (!comp || comp.type === 'appbar' || comp.type === 'bottomnav') return;
-      const lk = comp.link; if (!lk) return;                       // no explicit link → default handling below
-      w.style.cursor = 'pointer'; w.classList.add('pv-linked');
-      w.addEventListener('click', (e) => {
-        if (e.target.closest('.bxcomptools')) return;
-        ripple(e, w);
-        if (lk === 'none') return;
-        if (lk === 'back') { const prev = S.pv.hist.pop(); setTimeout(() => navPreview(prev, 'back'), 90); }
-        else if (S.screens[lk]) setTimeout(() => navPreview(lk, 'in'), 90);
+      const comp = s.comps.find((c) => c.id === w.dataset.cid); if (!comp) return;
+      const hots = [...w.querySelectorAll('[data-hot]')];
+      hots.forEach((h) => {
+        const tgt = resolveHot(comp, h, h.dataset.hot, hots.length);
+        if (!tgt || tgt === 'none') return;
+        h.style.cursor = 'pointer'; h.classList.add('pv-linked');
+        h.addEventListener('click', (e) => { e.stopPropagation(); ripple(e, h); go(tgt); });
       });
+      // whole-component tap (comp.link) — only when the area isn't already a single covering hotspot
+      if (comp.link && comp.link !== 'none' && hots.length !== 1) {
+        w.style.cursor = 'pointer';
+        w.addEventListener('click', (e) => { if (e.target.closest('[data-hot]') || e.target.closest('.bxcomptools')) return; ripple(e, w); go(comp.link); });
+      }
     });
-    // default hotspots — primary buttons/docks with no explicit link fall back to the linear next screen
-    p.querySelectorAll('[data-cta]').forEach((btn) => {
-      const w = btn.closest('.bxcomp[data-cid]'); const comp = w && s.comps.find((c) => c.id === w.dataset.cid);
-      if (comp && comp.link) return;                                // explicit link (incl "none") already handled
-      btn.style.cursor = 'pointer'; btn.addEventListener('click', (e) => { ripple(e, btn); setTimeout(() => navPreview(nextOf(S.pv.id), 'in'), 90); });
-    });
-    const back = p.querySelector('.ab-ico'); if (back) { back.style.cursor = 'pointer'; back.onclick = () => { const prev = S.pv.hist.pop(); navPreview(prev, 'back'); }; }
-    p.querySelectorAll('.bnav-item').forEach((b, i) => { b.style.cursor = 'pointer'; b.onclick = (e) => { ripple(e, b); const nx = nextOf(S.pv.id); if (nx) setTimeout(() => navPreview(nx, 'in'), 90); }; });
     stage.appendChild(p);
     $('#pvName').textContent = s.name + (nextOf(S.pv.id) ? '  →  tap the action to continue' : '  ·  end of flow');
   }
@@ -1565,7 +1631,7 @@ function Placeholder({ name }) {
   /* ══ SHOWCASE: publish current project + viewer mode ══════════════════ */
   function projectPayload() {
     const screens = {};
-    S.order.forEach((id) => { const s = S.screens[id]; screens[id] = { name: s.name, dark: s.dark, comps: s.comps.map((c) => ({ type: c.type, props: c.props || {}, override: c.override || null, link: c.link || null })) }; });
+    S.order.forEach((id) => { const s = S.screens[id]; screens[id] = { name: s.name, dark: s.dark, comps: s.comps.map((c) => ({ type: c.type, props: c.props || {}, override: c.override || null, link: c.link || null, hotlinks: (c.hotlinks && Object.keys(c.hotlinks).length) ? c.hotlinks : null })) }; });
     return { name: (S.brief || 'Untitled concept').slice(0, 80), brief: S.brief || '', audience: S.audience || '', device: S.device, style: S.style, order: S.order.slice(), screens };
   }
   function loadProject(p) {
@@ -1579,13 +1645,14 @@ function Placeholder({ name }) {
     order.forEach((oid) => {
       const s = p.screens[oid]; if (!s) return;
       const id = nid('s'); idMap[oid] = id;
-      S.screens[id] = { id, name: s.name, dark: s.dark, comps: (s.comps || []).map((c) => ({ id: nid('c'), type: c.type, props: c.props || {}, override: c.override || undefined, link: c.link || undefined })) };
+      S.screens[id] = { id, name: s.name, dark: s.dark, comps: (s.comps || []).map((c) => ({ id: nid('c'), type: c.type, props: c.props || {}, override: c.override || undefined, link: c.link || undefined, hotlinks: c.hotlinks ? Object.assign({}, c.hotlinks) : undefined })) };
       S.order.push(id);
     });
-    // remap flow links from stored screen ids → freshly-minted session ids
+    // remap flow links (component-level + per-hotspot) from stored screen ids → freshly-minted session ids
+    const remap = (v) => (!v || v === 'back' || v === 'none') ? v : (idMap[v] || null);
     S.order.forEach((id) => S.screens[id].comps.forEach((c) => {
-      if (!c.link || c.link === 'back' || c.link === 'none') return;
-      if (idMap[c.link]) c.link = idMap[c.link]; else delete c.link;
+      if (c.link) { const r = remap(c.link); if (r) c.link = r; else delete c.link; }
+      if (c.hotlinks) { Object.keys(c.hotlinks).forEach((k) => { const r = remap(c.hotlinks[k]); if (r) c.hotlinks[k] = r; else delete c.hotlinks[k]; }); if (!Object.keys(c.hotlinks).length) delete c.hotlinks; }
     }));
     S.selScreen = S.order[0]; S.stage = 'visual';
     return S.order.length > 0;
