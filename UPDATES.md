@@ -7,6 +7,17 @@ Live site: https://mav-ver2.pages.dev · Builder: https://mav-ver2.pages.dev/bui
 
 ---
 
+## 2026-08-07
+
+### Builder — wire the user flow (per-element screen links)
+- In the **Wireframe** stage, selecting any element now shows an **"On tap → go to"** control in the inspector. Pick a **target screen** (e.g. wire *"I already have an account"* → **Login**), or **Next screen (default)** / **← Go back** / **Do nothing**.
+- Linked elements get a **`→ ScreenName` badge** on the wireframe so the whole flow is visible at a glance, and they become **real hotspots in the prototype** — the click-through follows the flow you defined instead of the fixed linear next-screen. (Secondary buttons, list rows, etc. are now linkable too, not just the primary CTA.)
+- Links are saved with the project (published/showcase) and re-mapped to fresh screen ids on load. Cache-bust → **v41**.
+- Verified end-to-end on production with a headless browser: select button → link to a screen → badge appears → prototype navigates to the linked screen (0 console errors).
+- Commit `598fba1` · Deploy `cc30f606`
+
+---
+
 ## 2026-08-05
 
 ### Showcase — fix phantom "splash" screen (showed a card page)
