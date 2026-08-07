@@ -137,6 +137,11 @@
         tools.querySelector('[data-a=down]').onclick = (e) => { e.stopPropagation(); moveComp(screen, i, 1); };
         tools.querySelector('[data-a=del]').onclick = (e) => { e.stopPropagation(); screen.comps.splice(i, 1); if (S.selComp === c.id) S.selComp = null; render(); };
         wrap.appendChild(tools);
+        // flow-link badge — shows where this element navigates in the prototype
+        if (!isPinned && c.link && c.link !== '' && c.link !== 'none') {
+          const tname = c.link === 'back' ? 'Back' : (S.screens[c.link] ? S.screens[c.link].name : '');
+          if (tname) wrap.appendChild(el('<div class="bxlink-badge">→ ' + esc(tname) + '</div>'));
+        }
         wrap.addEventListener('click', (e) => { if (e.target.closest('.bxcomptools')) return; S.selComp = (S.selComp === c.id ? null : c.id); render(); });
       }
       if (c.type === 'appbar') { wrap.classList.add('bxpin'); scr.appendChild(wrap); }        // pinned top
@@ -976,6 +981,27 @@
     return row;
   }
 
+  /* Interaction / flow linking — let any element declare an on-tap target screen,
+     so the prototype follows the user's intended flow (e.g. "I already have an
+     account" → Login) instead of the default linear next-screen. */
+  function interactionPanel(comp) {
+    const wrap = el('<div class="sg-block insp-inter"><div class="sg-label">On tap → go to</div><div class="sg-hint2">Wire this element into the flow — the prototype will follow it</div></div>');
+    const sel = el('<select class="e-linksel"></select>');
+    [['', 'Next screen (default)'], ['none', '— Do nothing —'], ['back', '← Go back']].forEach(([v, label]) => {
+      const o = document.createElement('option'); o.value = v; o.textContent = label; if ((comp.link || '') === v) o.selected = true; sel.appendChild(o);
+    });
+    const og = document.createElement('optgroup'); og.label = 'Screens';
+    S.order.forEach((id) => {
+      const o = document.createElement('option'); o.value = id;
+      o.textContent = (S.screens[id].name || 'Screen') + (id === S.selScreen ? ' (this screen)' : '');
+      if (comp.link === id) o.selected = true; og.appendChild(o);
+    });
+    sel.appendChild(og);
+    sel.onchange = () => { const v = sel.value; if (!v) delete comp.link; else comp.link = v; render(); };
+    wrap.appendChild(sel);
+    return wrap;
+  }
+
   function renderInspector() {
     const rp = $('#rightPanel');
     const comp = S.selComp && S.screens[S.selScreen] && S.screens[S.selScreen].comps.find((c) => c.id === S.selComp);
@@ -985,6 +1011,7 @@
     comp.override = comp.override || {};
     comp.props = comp.props || {};
     const isPinned = comp.type === 'appbar' || comp.type === 'bottomnav';
+    if (!isPinned) ps.appendChild(interactionPanel(comp));
     ps.appendChild(positionPanel(comp, isPinned));
     // ── component variants — Figma-style controls (dropdown / toggle / text) ──
     const vs = VARIANTS[comp.type] || [];
@@ -1023,8 +1050,26 @@
     const p = phone(s, { styled: true, cap: false });
     p.classList.add('pv-stage');
     const holder = p.querySelector('.bxholder'); holder.classList.add('pv-screen-anim'); if (dir === 'back') holder.classList.add('back');
-    // hotspots
-    p.querySelectorAll('[data-cta]').forEach((btn) => { btn.style.cursor = 'pointer'; btn.addEventListener('click', (e) => { ripple(e, btn); setTimeout(() => navPreview(nextOf(S.pv.id), 'in'), 90); }); });
+    // hotspots — explicit per-element links first (any component the user wired into the flow)
+    p.querySelectorAll('.bxcomp[data-cid]').forEach((w) => {
+      const comp = s.comps.find((c) => c.id === w.dataset.cid);
+      if (!comp || comp.type === 'appbar' || comp.type === 'bottomnav') return;
+      const lk = comp.link; if (!lk) return;                       // no explicit link → default handling below
+      w.style.cursor = 'pointer'; w.classList.add('pv-linked');
+      w.addEventListener('click', (e) => {
+        if (e.target.closest('.bxcomptools')) return;
+        ripple(e, w);
+        if (lk === 'none') return;
+        if (lk === 'back') { const prev = S.pv.hist.pop(); setTimeout(() => navPreview(prev, 'back'), 90); }
+        else if (S.screens[lk]) setTimeout(() => navPreview(lk, 'in'), 90);
+      });
+    });
+    // default hotspots — primary buttons/docks with no explicit link fall back to the linear next screen
+    p.querySelectorAll('[data-cta]').forEach((btn) => {
+      const w = btn.closest('.bxcomp[data-cid]'); const comp = w && s.comps.find((c) => c.id === w.dataset.cid);
+      if (comp && comp.link) return;                                // explicit link (incl "none") already handled
+      btn.style.cursor = 'pointer'; btn.addEventListener('click', (e) => { ripple(e, btn); setTimeout(() => navPreview(nextOf(S.pv.id), 'in'), 90); });
+    });
     const back = p.querySelector('.ab-ico'); if (back) { back.style.cursor = 'pointer'; back.onclick = () => { const prev = S.pv.hist.pop(); navPreview(prev, 'back'); }; }
     p.querySelectorAll('.bnav-item').forEach((b, i) => { b.style.cursor = 'pointer'; b.onclick = (e) => { ripple(e, b); const nx = nextOf(S.pv.id); if (nx) setTimeout(() => navPreview(nx, 'in'), 90); }; });
     stage.appendChild(p);
@@ -1520,7 +1565,7 @@ function Placeholder({ name }) {
   /* ══ SHOWCASE: publish current project + viewer mode ══════════════════ */
   function projectPayload() {
     const screens = {};
-    S.order.forEach((id) => { const s = S.screens[id]; screens[id] = { name: s.name, dark: s.dark, comps: s.comps.map((c) => ({ type: c.type, props: c.props || {}, override: c.override || null })) }; });
+    S.order.forEach((id) => { const s = S.screens[id]; screens[id] = { name: s.name, dark: s.dark, comps: s.comps.map((c) => ({ type: c.type, props: c.props || {}, override: c.override || null, link: c.link || null })) }; });
     return { name: (S.brief || 'Untitled concept').slice(0, 80), brief: S.brief || '', audience: S.audience || '', device: S.device, style: S.style, order: S.order.slice(), screens };
   }
   function loadProject(p) {
@@ -1530,12 +1575,18 @@ function Placeholder({ name }) {
     S.brief = p.brief || ''; S.audience = p.audience || '';
     S.screens = {}; S.order = [];
     const order = Array.isArray(p.order) && p.order.length ? p.order : Object.keys(p.screens);
+    const idMap = {};
     order.forEach((oid) => {
       const s = p.screens[oid]; if (!s) return;
-      const id = nid('s');
-      S.screens[id] = { id, name: s.name, dark: s.dark, comps: (s.comps || []).map((c) => ({ id: nid('c'), type: c.type, props: c.props || {}, override: c.override || undefined })) };
+      const id = nid('s'); idMap[oid] = id;
+      S.screens[id] = { id, name: s.name, dark: s.dark, comps: (s.comps || []).map((c) => ({ id: nid('c'), type: c.type, props: c.props || {}, override: c.override || undefined, link: c.link || undefined })) };
       S.order.push(id);
     });
+    // remap flow links from stored screen ids → freshly-minted session ids
+    S.order.forEach((id) => S.screens[id].comps.forEach((c) => {
+      if (!c.link || c.link === 'back' || c.link === 'none') return;
+      if (idMap[c.link]) c.link = idMap[c.link]; else delete c.link;
+    }));
     S.selScreen = S.order[0]; S.stage = 'visual';
     return S.order.length > 0;
   }
