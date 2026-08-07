@@ -9,6 +9,13 @@ Live site: https://mav-ver2.pages.dev · Builder: https://mav-ver2.pages.dev/bui
 
 ## 2026-08-07
 
+### Builder — link individual buttons / icons / rows (per-hotspot flow)
+- Flow linking now goes **below the component level**. Every interactive sub-element — app-bar **back / action icons**, **bottom-nav tabs**, **list rows**, quick-actions, **See all**, dock buttons — is a **hotspot** you can wire to its own target screen.
+- **Click a button or icon** in the wireframe to select it (it highlights); the inspector lists **every hotspot** in that component ("Back icon", "Action icon", "Home", "Cards"…) each with its own **On tap → go to** picker. The **whole-component** link stays as a fallback for taps elsewhere.
+- Prototype resolves each hotspot: explicit hotspot link → component-level link → sensible default (back icon = go back, nav tab / primary CTA = next screen). Linked hotspots show a small **→** marker on the wireframe. Component + per-hotspot links are saved and re-mapped on load. Cache-bust → **v42**.
+- Verified end-to-end headlessly on production: app-bar **Action icon → Confirmation** navigates in the prototype; component-level linking still works (0 console errors).
+- Commit `c26bfec` · Deploy `7ef507a9`
+
 ### Builder — wire the user flow (per-element screen links)
 - In the **Wireframe** stage, selecting any element now shows an **"On tap → go to"** control in the inspector. Pick a **target screen** (e.g. wire *"I already have an account"* → **Login**), or **Next screen (default)** / **← Go back** / **Do nothing**.
 - Linked elements get a **`→ ScreenName` badge** on the wireframe so the whole flow is visible at a glance, and they become **real hotspots in the prototype** — the click-through follows the flow you defined instead of the fixed linear next-screen. (Secondary buttons, list rows, etc. are now linkable too, not just the primary CTA.)
